@@ -1,5 +1,5 @@
 # CS3219 Project (PeerPrep) - AY2526S1
-## Group: Gxx
+## Group: G37
 
 ### Note: 
 - You are required to develop individual microservices within separate folders within this repository.
