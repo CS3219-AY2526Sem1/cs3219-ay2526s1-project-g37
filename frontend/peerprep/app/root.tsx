@@ -7,6 +7,9 @@ import {
   ScrollRestoration,
 } from "react-router";
 
+import '@mantine/core/styles.css';
+import { createTheme, MantineProvider } from '@mantine/core';
+
 import type { Route } from "./+types/root";
 import "./app.css";
 
@@ -22,6 +25,10 @@ export const links: Route.LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
 ];
+
+const theme = createTheme({
+  /** mantine theme overrides */
+});
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -42,7 +49,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <MantineProvider theme={theme}>
+      {<Outlet />}
+    </MantineProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
