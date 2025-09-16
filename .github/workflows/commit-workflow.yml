@@ -5,6 +5,9 @@ on: [push, pull_request]
 jobs:
   linux-setup-and-tests:
     runs-on: ubuntu-latest
+    default:
+      run:
+        working-directory: ./frontend/peerprep
     strategy:
       matrix:
         node-version: [20.x]
@@ -20,6 +23,9 @@ jobs:
 
   macos-setup-and-tests:
     runs-on: macos-latest
+    default:
+      run:
+        working-directory: ./frontend/peerprep
     strategy:
       matrix:
         node-version: [20.x]
@@ -35,6 +41,9 @@ jobs:
 
   windows-setup-and-tests:
     runs-on: windows-latest
+    default:
+      run:
+        working-directory: ./frontend/peerprep
     strategy:
       matrix:
         node-version: [20.x]
