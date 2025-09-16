@@ -7,8 +7,14 @@ import {
   ScrollRestoration,
 } from "react-router";
 
-import '@mantine/core/styles.css';
-import { createTheme, MantineProvider } from '@mantine/core';
+import "@mantine/core/styles.css";
+import {
+  createTheme,
+  MantineProvider,
+  Container,
+  Button,
+  Input,
+} from "@mantine/core";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -28,6 +34,55 @@ export const links: Route.LinksFunction = () => [
 
 const theme = createTheme({
   /** mantine theme overrides */
+  colors: {
+    "brand-yellow": [
+      "#fff9df",
+      "#fff2ca",
+      "#ffe399",
+      "#ffd463",
+      "#ffc736",
+      "#ffc01e",
+      "#ffba02",
+      "#e4a300",
+      "#cb9100",
+      "#af7c00",
+    ],
+    "custom-gray": [
+      "#f5f5f4",
+      "#e7e7e7",
+      "#cdcdcd",
+      "#b2b2b2",
+      "#9a9a9a",
+      "#8b8b8b",
+      "#848484",
+      "#717171",
+      "#646464",
+      "#343231",
+    ],
+  },
+
+  components: {
+    Button: Button.extend({
+      defaultProps: {
+        variant: "filled",
+        color: "brand-yellow",
+        c: "custom-gray.9",
+      },
+    }),
+
+    Input: Input.extend({
+    }),
+
+    InputWrapper: Input.Wrapper.extend({
+      classNames: {
+        label: "text-white",
+        error: "text-red-500",
+      },
+    }),
+  },
+
+  primaryColor: "brand-yellow",
+  primaryShade: { light: 6, dark: 6 },
 });
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -50,8 +105,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <MantineProvider theme={theme}>
-      {<Outlet />}
+    <MantineProvider theme={theme} defaultColorScheme="dark">
+      <Container fluid>{<Outlet />}</Container>
     </MantineProvider>
   );
 }
