@@ -1,0 +1,26 @@
+# Frontend specific ignores
+# dependencies
+/node_modules
+
+# build output
+/build
+/dist
+
+# dotenv files
+.env
+.env.local
+
+# logs
+npm-debug.log*
+yarn-error.log*
+
+# Mac
+.DS_Store
+
+# editor and IDE files
+.vscode/
+*.swp
+
+# React Router
+/.react-router/
+/build/
