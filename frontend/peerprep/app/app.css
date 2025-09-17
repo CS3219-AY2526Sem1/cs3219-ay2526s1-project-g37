@@ -7,7 +7,6 @@
 
 html,
 body {
-  background-color: var(--mantine-color-custom-grey-9);
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;

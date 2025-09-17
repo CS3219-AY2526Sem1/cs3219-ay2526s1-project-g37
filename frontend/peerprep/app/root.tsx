@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
 
 import "@mantine/core/styles.css";
@@ -14,10 +15,12 @@ import {
   Container,
   Button,
   Input,
+  Card,
 } from "@mantine/core";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import Header from "./components/header/header";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -59,6 +62,44 @@ const theme = createTheme({
       "#646464",
       "#343231",
     ],
+    green: [
+      "#e5ffe5",
+      "#cefecf",
+      "#9ffa9f",
+      "#6bf76b",
+      "#48f548",
+      "#24f324",
+      "#0df212",
+      "#00d701",
+      "#00c000",
+      "#00a600",
+    ],
+
+    yellow: [
+      "#fff9df",
+      "#fff2ca",
+      "#ffe399",
+      "#ffd463",
+      "#ffc736",
+      "#ffc01e",
+      "#ffba02",
+      "#e4a300",
+      "#cb9100",
+      "#af7c00",
+    ],
+
+    red: [
+      "#ffe7e8",
+      "#ffcece",
+      "#ff9b9b",
+      "#ff6464",
+      "#fe3736",
+      "#fe1b19",
+      "#ff0000",
+      "#e40000",
+      "#cb0000",
+      "#b20000",
+    ],
   },
 
   components: {
@@ -70,8 +111,7 @@ const theme = createTheme({
       },
     }),
 
-    Input: Input.extend({
-    }),
+    Input: Input.extend({}),
 
     InputWrapper: Input.Wrapper.extend({
       classNames: {
@@ -104,8 +144,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const location = useLocation();
+  const linksWithHeader = ["/user"];
+
+  const isHeader = () => {
+    return linksWithHeader.includes(location.pathname);
+  };
+
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
+      {isHeader() && <Header />}
       <Container fluid>{<Outlet />}</Container>
     </MantineProvider>
   );
