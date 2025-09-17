@@ -1,16 +1,12 @@
 // With reference from official Mantine documentation
 // https://ui.mantine.dev/category/headers/
 
-import { Burger, Container, Group, Text } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { Container, Group, Text } from "@mantine/core";
 import { useNavigate } from "react-router";
 import classes from "./header.module.css";
 import logo from "../../assets/images/logo.svg";
 
-const links = [{ link: "/user", label: "Home" }];
-
 export default function Header() {
-  const [opened, { toggle }] = useDisclosure(false);
   const navigate = useNavigate();
 
   return (

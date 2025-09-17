@@ -1,20 +1,12 @@
 import {
   Grid,
-  TextInput,
   Button,
-  PasswordInput,
-  Divider,
-  Text,
-  Image,
   useMantineTheme,
-  Card,
 } from "@mantine/core";
 
-import { Link } from "react-router";
-import Header from "../components/header/header";
-import logo from "../assets/images/logo.svg";
 import StatsCard from "../components/statscard";
 import HistoryTable from "../components/table/table";
+import type {InterviewHistory} from "../components/table/table";
 
 import { useState } from "react";
 
@@ -28,7 +20,7 @@ export function meta() {
 export default function Userpage() {
   const theme = useMantineTheme();
 
-  const [data, setData] = useState<any[]>([
+  const [data, ] = useState<InterviewHistory[]>([
     {
       question: "Two Sum",
       completionDate: "2024-10-01",
