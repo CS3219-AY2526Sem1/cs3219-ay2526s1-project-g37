@@ -1,9 +1,17 @@
 import { Button, Card, Divider, Table, Text, Pagination, Group } from "@mantine/core";
 import classes from "./table.module.css";
 
-export default function HistoryTable({ data }: { data: any[] }) {
-  const rows = data.map((row, index) => (
-    <Table.Tr key={row.name}>
+export type InterviewHistory = {
+  question: string;
+  completionDate: string;
+  difficulty: string;
+  topic: string;
+  language: string;
+};
+
+export default function HistoryTable({ data }: { data: InterviewHistory[] }) {
+  const rows = data.map((row) => (
+    <Table.Tr key={row.question}>
       <Table.Td>{row.question}</Table.Td>
       <Table.Td ta="right">{row.completionDate}</Table.Td>
       <Table.Td ta="right">{row.difficulty}</Table.Td>

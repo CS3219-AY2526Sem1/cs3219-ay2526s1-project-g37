@@ -15,7 +15,6 @@ import {
   Container,
   Button,
   Input,
-  Card,
 } from "@mantine/core";
 
 import type { Route } from "./+types/root";
