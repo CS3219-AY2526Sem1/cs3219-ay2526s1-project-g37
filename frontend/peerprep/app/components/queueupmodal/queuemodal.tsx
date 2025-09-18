@@ -1,5 +1,5 @@
 import { useDisclosure } from "@mantine/hooks";
-import { Modal, Button, MultiSelect, Text, Grid, Select } from "@mantine/core";
+import { Modal, Button, MultiSelect, Grid, Select } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import classes from "./queuemodal.module.css";
 
