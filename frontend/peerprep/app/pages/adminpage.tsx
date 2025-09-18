@@ -1,11 +1,12 @@
 import {
   Grid,
   useMantineTheme,
+  Button
 } from "@mantine/core";
 
 import StatsCard from "../components/statscard";
-import HistoryTable from "../components/table/historytable";
-import type {InterviewHistory} from "../components/table/historytable";
+import QuestionsTable from "~/components/table/questionstable";
+import type {QuestionHistory} from "../components/table/questionstable";
 import QueueModal from "~/components/queueupmodal/queuemodal";
 
 import { useState } from "react";
@@ -20,13 +21,13 @@ export function meta() {
 export default function Userpage() {
   const theme = useMantineTheme();
 
-  const [data, ] = useState<InterviewHistory[]>([
+  const [data, ] = useState<QuestionHistory[]>([
     {
-      question: "Two Sum",
-      completionDate: "2024-10-01",
-      difficulty: "Easy",
-      topic: "Array",
-      language: "JavaScript",
+        question: "Two Sum",
+        dateAdded: "2024-10-01",
+        lastEdited: "2024-10-01",
+        difficulty: "Easy",
+        topic: "Array",
     },
   ]);
 
@@ -36,7 +37,7 @@ export default function Userpage() {
         <Grid gutter="md" align="center">
           <Grid.Col span={{ base: 6, md: 2 }}>
             <StatsCard
-              title="Interviews"
+              title="Total Questions"
               stat="1,234"
               color={theme.colors.gray[0]}
             />
@@ -59,12 +60,12 @@ export default function Userpage() {
             <StatsCard title="Hard" stat="1,234" color={theme.colors.red[5]} />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
-            <QueueModal />
+            <Button fullWidth onClick={() => {}}>Add Question</Button>
           </Grid.Col>
         </Grid>
       </Grid.Col>
       <Grid.Col span={12}>
-        <HistoryTable
+        <QuestionsTable
           data={data}
         />
       </Grid.Col>
