@@ -7,7 +7,6 @@ import {
 import StatsCard from "../components/statscard";
 import QuestionsTable from "~/components/table/questionstable";
 import type {QuestionHistory} from "../components/table/questionstable";
-import QueueModal from "~/components/queueupmodal/queuemodal";
 
 import { useState } from "react";
 
