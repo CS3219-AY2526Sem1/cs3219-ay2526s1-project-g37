@@ -7,5 +7,5 @@
 
 
 ### for user-service
-- go to firebase project settings > service account > generate new private key
-- rename the downloaded json file into serviceAccountKey.json and paste it the same dir as .env
+- go to firebase project settings > service account > generate new private key.
+- rename the downloaded json file into serviceAccountKey.json and paste it the same dir as .env.
