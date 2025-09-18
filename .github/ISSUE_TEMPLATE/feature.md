@@ -1,7 +1,7 @@
 ---
-name: "[Feature] <FEATURE_NAME>"
+name: Feature
 about: Suggest an idea for this project
-title: ''
+title: "[Feature] <FEATURE_NAME>"
 labels: ''
 assignees: ''
 
