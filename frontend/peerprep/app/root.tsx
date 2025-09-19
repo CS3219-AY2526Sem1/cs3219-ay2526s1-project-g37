@@ -118,6 +118,15 @@ const theme = createTheme({
         error: "text-red-500",
       },
     }),
+
+    MultiSelect: {
+      styles: {
+        pill: {
+          backgroundColor: "var(--mantine-color-brand-yellow-7)",
+          color: "var(--mantine-color-dark-filled)",
+        },
+      },
+    },
   },
 
   primaryColor: "brand-yellow",

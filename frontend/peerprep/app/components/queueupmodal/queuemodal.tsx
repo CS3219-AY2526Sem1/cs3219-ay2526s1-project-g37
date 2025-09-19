@@ -44,9 +44,6 @@ export default function QueueModal() {
                 data={topics}
                 searchable
                 {...form.getInputProps("topic")}
-                classNames={{
-                  pill: classes.pill,
-                }}
               />
             </Grid.Col>
             <Grid.Col span={12}>
@@ -56,9 +53,6 @@ export default function QueueModal() {
                 data={difficulties}
                 searchable
                 {...form.getInputProps("difficulty")}
-                classNames={{
-                  pill: classes.pill,
-                }}
               />
             </Grid.Col>
             <Grid.Col span={12}>
