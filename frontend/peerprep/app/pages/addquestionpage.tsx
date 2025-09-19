@@ -11,7 +11,7 @@ import {
 
 import { useForm } from "@mantine/form";
 import CustomRichTextEditor from "../components/richtexteditor/CustomRichTextEditor";
-import { LANGUAGES, TOPICS } from "~/constants/constants";
+import { DIFFICULTIES, TOPICS } from "~/constants/constants";
 
 export default function AddQuestionPage() {
   const form = useForm({
@@ -51,9 +51,9 @@ export default function AddQuestionPage() {
                 </Grid.Col>
                 <Grid.Col span={12}>
                   <Select
-                    label="Language"
-                    placeholder="Select language"
-                    data={LANGUAGES}
+                    label="Difficulty"
+                    placeholder="Select difficulty"
+                    data={DIFFICULTIES}
                     searchable
                     required
                   />
