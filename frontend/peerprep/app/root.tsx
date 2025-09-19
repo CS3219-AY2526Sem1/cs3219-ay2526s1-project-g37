@@ -17,6 +17,7 @@ import {
   Container,
   Button,
   Input,
+  Pill,
 } from "@mantine/core";
 
 import type { Route } from "./+types/root";
@@ -121,14 +122,14 @@ const theme = createTheme({
       },
     }),
 
-    MultiSelect: {
+    Pill: {
       styles: {
-        pill: {
+        root: {
           backgroundColor: "var(--mantine-color-brand-yellow-7)",
           color: "var(--mantine-color-dark-filled)",
         },
       },
-    },
+    }
   },
 
   primaryColor: "brand-yellow",
