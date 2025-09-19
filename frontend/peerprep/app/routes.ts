@@ -5,5 +5,6 @@ export default [
     route("login", "pages/login.tsx"),
     route("signup", "pages/signup.tsx"),
     route("user", "pages/userpage.tsx"),
-    route("admin", "pages/adminpage.tsx"),
+    route("questions", "pages/adminpage.tsx"),
+    route("questions/add", "pages/addquestionpage.tsx"),
 ] satisfies RouteConfig;
