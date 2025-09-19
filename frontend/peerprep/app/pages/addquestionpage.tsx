@@ -7,11 +7,14 @@ import {
   Select,
   TypographyStylesProvider,
   Textarea,
+  Text,
+  Pill,
+  Group,
 } from "@mantine/core";
 
 import { useForm } from "@mantine/form";
 import CustomRichTextEditor from "../components/richtexteditor/CustomRichTextEditor";
-import { DIFFICULTIES, TOPICS } from "~/constants/constants";
+import { DIFFICULTIES, TOPICS, DIFFICULTYCOLOR } from "~/constants/constants";
 
 export default function AddQuestionPage() {
   const form = useForm({
@@ -37,6 +40,7 @@ export default function AddQuestionPage() {
                   <TextInput
                     label="Question Title"
                     placeholder="Enter question title"
+                    {...form.getInputProps("title")}
                     required
                   />
                 </Grid.Col>
@@ -47,6 +51,7 @@ export default function AddQuestionPage() {
                     data={TOPICS}
                     searchable
                     required
+                    {...form.getInputProps("topic")}
                   />
                 </Grid.Col>
                 <Grid.Col span={12}>
@@ -56,6 +61,7 @@ export default function AddQuestionPage() {
                     data={DIFFICULTIES}
                     searchable
                     required
+                    {...form.getInputProps("difficulty")}
                   />
                 </Grid.Col>
                 <Grid.Col span={12}>
@@ -81,6 +87,22 @@ export default function AddQuestionPage() {
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6 }}>
             <Card style={{ height: cardHeight, overflowY: "auto" }} c={"white"}>
+              <Text size="xl" fw={700}>
+                {form.values.title}
+              </Text>
+              <Group mb="md" mt="md" gap={8}>
+                {form.values.topic.map((topic) => (
+                  <Pill key={topic}>{topic}</Pill>
+                ))}
+              </Group>
+              <Text
+                size="md"
+                fw={500}
+                c={DIFFICULTYCOLOR[form.values.difficulty]}
+                mb="md"
+              >
+                {form.values.difficulty}
+              </Text>
               {/* html from markdown is purified using DOMPurify to sanitise xss and other injections */}
               <TypographyStylesProvider>
                 <div
