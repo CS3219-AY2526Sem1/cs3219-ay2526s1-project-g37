@@ -22,7 +22,6 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import Header from "./components/header/header";
-import { RichTextEditor } from "@mantine/tiptap";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },

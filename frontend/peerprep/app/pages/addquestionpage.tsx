@@ -11,6 +11,7 @@ import {
 
 import { useForm } from "@mantine/form";
 import CustomRichTextEditor from "../components/richtexteditor/CustomRichTextEditor";
+import { LANGUAGES, TOPICS } from "~/constants/constants";
 
 export default function AddQuestionPage() {
   const form = useForm({
@@ -43,18 +44,7 @@ export default function AddQuestionPage() {
                   <MultiSelect
                     label="Topic"
                     placeholder="Select topics"
-                    data={[
-                      "Array",
-                      "String",
-                      "Dynamic Programming",
-                      "Backtracking",
-                      "Greedy",
-                      "Graph",
-                      "Tree",
-                      "Linked List",
-                      "Sorting",
-                      "Searching",
-                    ]}
+                    data={TOPICS}
                     searchable
                     required
                   />
@@ -63,12 +53,7 @@ export default function AddQuestionPage() {
                   <Select
                     label="Language"
                     placeholder="Select language"
-                    data={[
-                      { value: "javascript", label: "JavaScript" },
-                      { value: "python", label: "Python" },
-                      { value: "java", label: "Java" },
-                      { value: "cpp", label: "C++" },
-                    ]}
+                    data={LANGUAGES}
                     searchable
                     required
                   />

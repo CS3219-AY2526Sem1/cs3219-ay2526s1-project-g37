@@ -1,22 +1,7 @@
 import { useDisclosure } from "@mantine/hooks";
 import { Modal, Button, MultiSelect, Grid, Select } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import classes from "./queuemodal.module.css";
-
-const topics = [
-  "Array",
-  "String",
-  "Dynamic Programming",
-  "Backtracking",
-  "Greedy",
-  "Graph",
-  "Tree",
-  "Linked List",
-  "Sorting",
-  "Searching",
-];
-
-const difficulties = ["Easy", "Medium", "Hard"];
+import { DIFFICULTIES, LANGUAGES, TOPICS } from "~/constants/constants";
 
 export default function QueueModal() {
   const [opened, { open, close }] = useDisclosure(false);
@@ -41,7 +26,7 @@ export default function QueueModal() {
               <MultiSelect
                 label="Topic"
                 placeholder="Pick values"
-                data={topics}
+                data={TOPICS}
                 searchable
                 {...form.getInputProps("topic")}
               />
@@ -50,7 +35,7 @@ export default function QueueModal() {
               <MultiSelect
                 label="Difficulty"
                 placeholder="Pick values"
-                data={difficulties}
+                data={DIFFICULTIES}
                 searchable
                 {...form.getInputProps("difficulty")}
               />
@@ -59,7 +44,7 @@ export default function QueueModal() {
               <Select
                 label="Language"
                 placeholder="Pick one"
-                data={["C++", "Python", "Java", "JavaScript"]}
+                data={LANGUAGES}
                 searchable
                 {...form.getInputProps("language")}
               />
