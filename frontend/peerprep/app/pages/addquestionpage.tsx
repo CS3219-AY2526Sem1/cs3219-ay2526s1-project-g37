@@ -18,7 +18,7 @@ export default function AddQuestionPage() {
       title: "",
       topic: [],
       difficulty: "",
-      problem: "<ul> <li>Item 1</li> <li>Item 2</li> </ul>",
+      problem: "",
       testCases: "",
     },
   });
