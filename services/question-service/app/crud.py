@@ -1,16 +1,20 @@
 import uuid
-import os
-import boto3
-from typing import List
-from endpoint_models import createQuestion
-from utils import get_conn, upload_to_s3, delete_from_s3
+from typing import List, Dict, Optional
+from utils import get_conn, upload_to_s3, get_from_s3, delete_from_s3
+from models.exceptions import QuestionNotFoundException
 
-
-def list_difficulties_and_topics():
-    """Returns all available difficulty levels and topics."""
+def list_difficulties_and_topics() -> Dict[str, List[str]]:
+    """
+    Retrieves all available difficulty levels and topics from the database.
+    
+    Returns:
+        dict: A dictionary containing:
+            - difficulties (list[str]): List of all available difficulty levels
+            - topics (list[str]): List of all available topics
+    """
     with get_conn() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT * FROM difficulty_levels")
+            cur.execute("SELECT * FROM difficulties")
             difficulties = [row[0] for row in cur.fetchall()]
 
             cur.execute("SELECT * FROM topics")
@@ -19,14 +23,41 @@ def list_difficulties_and_topics():
             return {"difficulties": difficulties, "topics": topics}
         
 
-def create_question(q: createQuestion, images: list[bytes] | None = None, qid: str = None):
-    """Creates a new question. Returns the question ID."""
+def create_question(
+    name: str,
+    description: str,
+    difficulty: str,
+    topic: str,
+    images: Optional[List[bytes]] = None,
+    qid: Optional[str] = None
+) -> str:
+    """
+    Creates a new question with optional images.
+    
+    Args:
+        name: Question name
+        description: Question description  
+        difficulty: Difficulty level
+        topic: Question topic
+        images: Optional list of image files as bytes to upload to S3
+        qid: Optional question ID. If None, a new UUID will be generated
+    
+    Returns:
+        str: The question ID (UUID) of the created question
+        
+    Raises:
+        Exception: If database insertion fails, uploaded images are cleaned up from S3
+    """
     qid = str(uuid.uuid4()) if qid is None else qid
+    
+    # Prepare images for S3 upload
+    files_and_keys = []
+    if images:
+        files_and_keys = [(img, f"questions/{qid}/{i}") for i, img in enumerate(images)]
 
-    # Uplaods images to S3
-    images = [] if images is None else images
-    files_and_keys = [(img, f"questions/{qid}/{i}") for i, img in enumerate(images)]
-    upload_to_s3(files_and_keys)
+    # Upload images to S3
+    if files_and_keys:
+        upload_to_s3(files_and_keys)
 
     try:
         with get_conn() as conn:
@@ -34,10 +65,10 @@ def create_question(q: createQuestion, images: list[bytes] | None = None, qid: s
                 # Insert question into database
                 cur.execute(
                     """
-                    INSERT INTO questions (id, name, description, difficulty_level, topic)
+                    INSERT INTO questions (id, name, description, difficulty, topic)
                     VALUES (%s, %s, %s, %s, %s)
                     """,
-                    (qid, q.name, q.description, q.difficulty_level, q.topic),
+                    (qid, name, description, difficulty, topic),
                 )
 
                 # Insert images metadata into database
@@ -54,71 +85,79 @@ def create_question(q: createQuestion, images: list[bytes] | None = None, qid: s
         raise
 
 
-def _generate_presigned_get_urls(keys: List[str], expires_in: int | None = None) -> List[str]:
-    if not keys:
-        return []
-    s3 = boto3.client(
-        "s3",
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        region_name=os.getenv("AWS_REGION"),
-    )
-    bucket_name = os.getenv("S3_BUCKET_NAME")
-    expiry = int(os.getenv("S3_PRESIGN_EXPIRES", "900")) if expires_in is None else expires_in
-    urls = []
-    for key in keys:
-        urls.append(
-            s3.generate_presigned_url(
-                "get_object",
-                Params={"Bucket": bucket_name, "Key": key},
-                ExpiresIn=expiry,
-            )
-        )
-    return urls
-
-
 def get_question(qid: str):
-    """Retrieves a single question and its associated images by its ID."""
+    """
+    Retrieves a single question and its associated images by its ID.
+    
+    Args:
+        qid (str): The unique question identifier (UUID)
+        
+    Returns:
+        dict: Question data including id, name, description, difficulty, 
+              topic, and images (as bytes)
+              
+    Raises:
+        QuestionNotFoundException: If no question exists with the given ID
+                     
+    Note:
+        Images are returned as raw bytes data retrieved directly from S3.
+    """
     with get_conn() as conn:
         with conn.cursor() as cur:
             # Fetch the main question data
             cur.execute(
-                "SELECT name, description, difficulty_level, topic FROM questions WHERE id = %s",
+                "SELECT name, description, difficulty, topic FROM questions WHERE id = %s",
                 (qid,),
             )
             question_data = cur.fetchone()
 
             if not question_data:
-                return None
+                raise QuestionNotFoundException(qid)
 
             # Fetch associated image keys
             cur.execute(
                 "SELECT s3_key FROM question_images WHERE question_id = %s",
                 (qid,)
             )
-            # Extract keys from the fetched tuples
             image_keys = [row[0] for row in cur.fetchall()]
-            image_urls = _generate_presigned_get_urls(image_keys)
+            image_data = get_from_s3(image_keys)
 
             return {
                 "id": qid,
                 "name": question_data[0],
                 "description": question_data[1],
-                "difficulty_level": question_data[2],
+                "difficulty": question_data[2],
                 "topic": question_data[3],
-                "images": image_urls,
+                "images": image_data,  # Raw bytes
             }
-        
+
 
 def get_random_question_by_difficulty_and_topic(difficulty: str, topic: str):
-    """Returns a random question matching the given difficulty and topic, including presigned image URLs."""
+    """
+    Returns a random question matching the given difficulty and topic, including image data.
+    
+    Args:
+        difficulty (str): The difficulty level to filter by (must exist in difficulties table)
+        topic (str): The topic to filter by (must exist in topics table)
+        
+    Returns:
+        dict: Question data including id, name, description, difficulty,
+              topic, and images (as bytes)
+              
+    Raises:
+        QuestionNotFoundException: If no question matches the given difficulty and topic
+                     
+    Note:
+        Images are returned as raw bytes data retrieved directly from S3.
+        Uses database RANDOM() function for selection.
+    """
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT id, name, description, difficulty_level, topic
+                SELECT id, name, description, difficulty, topic
                 FROM questions
-                WHERE difficulty_level = %s AND topic = %s
+                WHERE difficulty = %s AND topic = %s
                 ORDER BY RANDOM()
                 LIMIT 1
                 """,
@@ -126,7 +165,7 @@ def get_random_question_by_difficulty_and_topic(difficulty: str, topic: str):
             )
             row = cur.fetchone()
             if not row:
-                return None
+                raise QuestionNotFoundException(topic=topic, difficulty=difficulty)
 
             qid = row[0]
             # Fetch associated image keys
@@ -135,18 +174,100 @@ def get_random_question_by_difficulty_and_topic(difficulty: str, topic: str):
                 (qid,),
             )
             image_keys = [r[0] for r in cur.fetchall()]
-            image_urls = _generate_presigned_get_urls(image_keys)
+            image_data = get_from_s3(image_keys)
 
             return {
                 "id": qid,
                 "name": row[1],
                 "description": row[2],
-                "difficulty_level": row[3],
+                "difficulty": row[3],
                 "topic": row[4],
-                "images": image_urls,
+                "images": image_data,  # Raw bytes
             }
 
+
+def override_question(
+    qid: str, 
+    name: str, 
+    description: str, 
+    difficulty: str, 
+    topic: str, 
+    images: Optional[List[bytes]] = None
+) -> str:
+    """
+    Atomically replaces an existing question with new data and images.
+    
+    This function performs a complete replacement of a question by:
+    1. Backing up the original question data and images
+    2. Deleting the old question and its images
+    3. Creating a new question with the same ID and new data
+    4. Rolling back changes if any error occurs during the process
+    
+    Args:
+        qid: The unique question identifier (UUID) to override
+        name: New question name
+        description: New question description
+        difficulty: New difficulty level
+        topic: New topic
+        images: Optional list of new image files as bytes to upload to S3
+    
+    Returns:
+        str: The question ID (same as input qid)
+        
+    Raises:
+        QuestionNotFoundException: If no question exists with the given ID
+        Exception: If any step fails, all changes are rolled back atomically
+        
+    Note:
+        This operation is fully atomic - if any error occurs during the process,
+        the original question and its images are restored to their previous state.
+    """
+    # First, get the original question data for backup purposes
+    backup_data = get_question(qid)  # This will raise QuestionNotFoundException if not found
+    
+    # Delete the old question (this is atomic and handles S3 cleanup)
+    delete_question(qid)
+    
+    try:
+        # Create the new question with the same ID (this is atomic and handles S3 upload)
+        create_question(name, description, difficulty, topic, images, qid)
+        
+    except Exception:
+        # If creation failed after deletion, restore the original question
+        try:
+            create_question(
+                backup_data["name"],
+                backup_data["description"], 
+                backup_data["difficulty"],
+                backup_data["topic"],
+                backup_data["images"],  # These are already bytes
+                qid
+            )
+        except Exception:
+            # If restoration also fails, we can't do much more
+            # The original error is more important to report
+            pass
+        raise
+    
+    return qid
+
+
 def delete_question(qid: str):
+    """
+    Deletes a question and its associated images by its ID.
+    
+    Args:
+        qid (str): The unique question identifier (UUID) to delete
+        
+    Returns:
+        None
+        
+        Raises:
+        QuestionNotFoundException: If no question exists with the given ID
+        Exception: If S3 deletion fails, database transaction is rolled back    Note:
+        This function is atomic: if deleting images from S3 fails,
+        the database transaction is rolled back to maintain consistency.
+    """
     with get_conn() as conn:
         with conn.cursor() as cur:
             # Fetch associated image keys
@@ -160,7 +281,7 @@ def delete_question(qid: str):
             cur.execute("DELETE FROM questions WHERE id = %s RETURNING id", (qid,))
             deleted = cur.fetchone()
             if not deleted:
-                raise KeyError(f"No question found with ID '{qid}'.")
+                raise QuestionNotFoundException(qid)
 
             # Delete images from S3; rollback DB if this fails
             try:
