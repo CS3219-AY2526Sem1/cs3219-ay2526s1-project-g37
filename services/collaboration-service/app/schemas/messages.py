@@ -4,10 +4,10 @@ from pydantic import BaseModel
 class Message(BaseModel):
     pass 
     
-class ConnectMessage(Message):
+class CollaboratorConnectMessage(Message):
     pass
 
-class DisconnectMessage(Message):
+class CollaboratorDisconnectMessage(Message):
     pass
 
 class DisplayMessage(Message):

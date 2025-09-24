@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 from app.core.connection_manager import connection_manager
 from app.core.users import UserState
-from app.schemas.messages import Message, ConnectMessage, DisconnectMessage, DisplayMessage
+from app.schemas.messages import Message, CollaboratorConnectMessage, CollaboratorDisconnectMessage, DisplayMessage
 
 from datetime import datetime
 import asyncio
@@ -36,8 +36,11 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, user_id: str = Quer
                 msg = await ws.receive_text()
                 await connection_manager.on_message(session_id, user_id, msg)
         except WebSocketDisconnect:
-            print("aandle disconnect")
-            pass ##
+            try:
+                print("handle disconnect")
+                await connection_manager.on_disconnect(session_id, user_id)
+            except ValueError as e:
+                print(f"Error handling disconnect: {e}")
 
     receiver_task = asyncio.create_task(receiver())
 
@@ -45,10 +48,10 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, user_id: str = Quer
         while True:
             msg = await in_q.get()
 
-            if isinstance(msg, ConnectMessage):
+            if isinstance(msg, CollaboratorConnectMessage):
                 user_status = UserState.AWAIT_POLLING
                 await ws.send_text(f"Connected to session {session_id} as user {user_id}. You can start collaborating!")
-            elif isinstance(msg, DisconnectMessage):
+            elif isinstance(msg, CollaboratorDisconnectMessage):
                 user_status = UserState.AWAIT_CONNECT
                 await ws.send_text(f"Collaborator disconnected, awaiting reconnection...")
             elif isinstance(msg, DisplayMessage):
@@ -58,12 +61,12 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, user_id: str = Quer
 
             await asyncio.sleep(0.1)
 
-    except WebSocketDisconnect as e:
-        try:
-            print("handle disconnect")
-            await connection_manager.on_disconnect(session_id, user_id)
-        except ValueError as e:
-            print(f"Error handling disconnect: {e}")
+    # except WebSocketDisconnect as e:
+    #     try:
+    #         print("handle disconnect")
+    #         await connection_manager.on_disconnect(session_id, user_id)
+    #     except ValueError as e:
+    #         print(f"Error handling disconnect: {e}")
     finally:
         receiver_task.cancel()
 

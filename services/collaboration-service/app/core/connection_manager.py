@@ -2,7 +2,7 @@ from typing import Dict
 from fastapi import WebSocket, WebSocketDisconnect
 import uuid 
 import asyncio
-from app.schemas.messages import ConnectMessage, DisconnectMessage, DisplayMessage
+from app.schemas.messages import CollaboratorConnectMessage, CollaboratorDisconnectMessage, DisplayMessage
 
 class ConnectionManager:
     def __init__(self):
@@ -40,7 +40,11 @@ class ConnectionManager:
         if collaborator_q is None:
             return None
         
-        await collaborator_q.put(ConnectMessage())
+        ## Notify collaborator that this user has connected
+        await collaborator_q.put(CollaboratorConnectMessage())
+        
+        ## Notify this user that the other user has already connected
+        await out_q.put(CollaboratorConnectMessage())
 
     async def on_disconnect(self, session_id: str, user_id: str):
         if session_id not in self.active_connections:
@@ -56,7 +60,7 @@ class ConnectionManager:
         if collaborator_q is None:
             return None
         
-        await collaborator_q.put(DisconnectMessage())
+        await collaborator_q.put(CollaboratorDisconnectMessage())
 
     async def on_message(self, session_id: str, user_id: str, msg: str):
         collaborator_q = self._get_collaborator_q(session_id, user_id)
