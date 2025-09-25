@@ -1,10 +1,10 @@
 from fastapi import FastAPI
-from app.routers import hello
+from app.routers import match
 
-app = FastAPI()
+app = FastAPI(title="Matching Service")
 
-app.include_router(hello.router)
+app.include_router(match.router, prefix="/match", tags=["Match"])
 
-@app.get("/")
-def root():
-    return {"message": "Matching Service is running"}
+@app.get("/health")
+async def health_check():
+    return {"status": "Healthy"}
