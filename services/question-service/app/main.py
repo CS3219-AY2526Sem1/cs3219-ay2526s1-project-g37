@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException, Query
 from dotenv import load_dotenv
-from models.endpoint_models import QuestionBase64Images
-from models.exceptions import QuestionNotFoundException
-from utils import batch_convert_base64_to_bytes, batch_convert_bytes_to_base64
-from crud import (
+from app.models.endpoint_models import QuestionBase64Images
+from app.models.exceptions import QuestionNotFoundException
+from app.utils import batch_convert_base64_to_bytes, batch_convert_bytes_to_base64
+from app.crud import (
     create_question,
     get_question,
     get_random_question_by_difficulty_and_topic,

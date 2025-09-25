@@ -1,7 +1,7 @@
 import uuid
 from typing import List, Dict, Optional
-from utils import get_conn, upload_to_s3, get_from_s3, delete_from_s3
-from models.exceptions import QuestionNotFoundException
+from app.utils import get_conn, upload_to_s3, get_from_s3, delete_from_s3
+from app.models.exceptions import QuestionNotFoundException
 
 def list_difficulties_and_topics() -> Dict[str, List[str]]:
     """
