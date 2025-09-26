@@ -7,6 +7,6 @@ app.include_router(sessions.router, prefix="/sessions")
 app.include_router(ws_sessions.router, prefix="/ws/sessions")
 
 ## API for testing connection
-@app.get("/ping")
-def ping():
-    return {"message": "Pong"}
+@app.get("/health")
+def health_check():
+    return {"status": "Healthy"}
