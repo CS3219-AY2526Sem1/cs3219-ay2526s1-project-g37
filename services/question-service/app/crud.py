@@ -21,7 +21,26 @@ def list_difficulties_and_topics() -> Dict[str, List[str]]:
             topics = [row[0] for row in cur.fetchall()]
 
             return {"difficulties": difficulties, "topics": topics}
-        
+
+def add_difficulty(difficulty: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO difficulties (name) VALUES (%s) ON CONFLICT DO NOTHING", (difficulty,))
+
+def delete_difficulty(difficulty: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM difficulties WHERE level = %s", (difficulty,))
+
+def add_topic(topic: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO topics (name) VALUES (%s) ON CONFLICT DO NOTHING", (topic,))
+
+def delete_topic(topic: str):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM topics WHERE name = %s", (topic,))
 
 def create_question(
     name: str,
