@@ -1,5 +1,5 @@
 ## To run locally:
-`uvicorn main:app --reload`
+`uvicorn app.main:app --reload`
 ## Planning
 
 ## APIs to implement:
