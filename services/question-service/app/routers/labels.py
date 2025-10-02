@@ -8,11 +8,11 @@ from app.core.crud import (
 )
 
 router = APIRouter(
-    prefix="/metadata",
-    tags=["metadata"]
+    prefix="/labels",
+    tags=["labels"]
 )
 
-@router.get("/difficulties-topics")
+@router.get("")
 def get_difficulties_topics():
     return list_difficulties_and_topics()
 
