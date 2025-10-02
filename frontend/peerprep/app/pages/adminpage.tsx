@@ -4,6 +4,8 @@ import {
   Button
 } from "@mantine/core";
 
+import { Link } from "react-router";
+
 import StatsCard from "../components/statscard";
 import QuestionsTable from "~/components/table/questionstable";
 import type {QuestionHistory} from "../components/table/questionstable";
@@ -59,7 +61,9 @@ export default function Userpage() {
             <StatsCard title="Hard" stat="1,234" color={theme.colors.red[5]} />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
-            <Button fullWidth onClick={() => {}}>Add Question</Button>
+            <Link to="/questions/add">
+              <Button fullWidth>Add Question</Button>
+            </Link>
           </Grid.Col>
         </Grid>
       </Grid.Col>

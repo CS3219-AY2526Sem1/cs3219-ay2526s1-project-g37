@@ -9,6 +9,8 @@ import {
 } from "react-router";
 
 import "@mantine/core/styles.css";
+import "@mantine/tiptap/styles.css";
+
 import {
   createTheme,
   MantineProvider,
@@ -118,6 +120,15 @@ const theme = createTheme({
         error: "text-red-500",
       },
     }),
+
+    Pill: {
+      styles: {
+        root: {
+          backgroundColor: "var(--mantine-color-brand-yellow-7)",
+          color: "var(--mantine-color-dark-filled)",
+        },
+      },
+    }
   },
 
   primaryColor: "brand-yellow",
