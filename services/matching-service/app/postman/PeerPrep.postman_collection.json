@@ -1,0 +1,309 @@
+{
+	"info": {
+		"_postman_id": "0c4aec0a-cac7-405f-9389-caef705f2f5f",
+		"name": "PeerPrep",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28290366"
+	},
+	"item": [
+		{
+			"name": "Check Health Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/health",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Request Match",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\": \"user_1\",\n    \"difficulty\": \"easy\",\n    \"topic\": \"arrays\",\n    \"language\": \"python\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/match/request",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"match",
+						"request"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "No peer yet",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"user_1\",\n    \"difficulty\": \"easy\",\n    \"topic\": \"arrays\",\n    \"language\": \"python\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/match/request",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"match",
+								"request"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "date",
+							"value": "Thu, 25 Sep 2025 06:12:23 GMT"
+						},
+						{
+							"key": "server",
+							"value": "uvicorn"
+						},
+						{
+							"key": "content-length",
+							"value": "58"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": true,\n    \"peer_id\": null,\n    \"message\": \"Added to queue\"\n}"
+				},
+				{
+					"name": "Peer found",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"user_2\",\n    \"difficulty\": \"easy\",\n    \"topic\": \"arrays\",\n    \"language\": \"python\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/match/request",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"match",
+								"request"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "date",
+							"value": "Thu, 25 Sep 2025 06:40:03 GMT"
+						},
+						{
+							"key": "server",
+							"value": "uvicorn"
+						},
+						{
+							"key": "content-length",
+							"value": "58"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": true,\n    \"peer_id\": \"user_1\",\n    \"message\": \"Peer found\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Cancel Match",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\": \"user_1\",\n    \"difficulty\": \"easy\",\n    \"topic\": \"arrays\",\n    \"language\": \"python\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/match/cancel",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"match",
+						"cancel"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "User Removed",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"user_1\",\n    \"difficulty\": \"easy\",\n    \"topic\": \"arrays\",\n    \"language\": \"python\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/match/cancel",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"match",
+								"cancel"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "date",
+							"value": "Thu, 25 Sep 2025 06:12:25 GMT"
+						},
+						{
+							"key": "server",
+							"value": "uvicorn"
+						},
+						{
+							"key": "content-length",
+							"value": "62"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": true,\n    \"peer_id\": null,\n    \"message\": \"Removed from queue\"\n}"
+				},
+				{
+					"name": "User not in queue",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"user_1\",\n    \"difficulty\": \"easy\",\n    \"topic\": \"arrays\",\n    \"language\": \"python\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/match/cancel",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"match",
+								"cancel"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "date",
+							"value": "Thu, 25 Sep 2025 06:13:27 GMT"
+						},
+						{
+							"key": "server",
+							"value": "uvicorn"
+						},
+						{
+							"key": "content-length",
+							"value": "62"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": false,\n    \"peer_id\": null,\n    \"message\": \"User not in queue\"\n}"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": ""
+		}
+	]
+}
