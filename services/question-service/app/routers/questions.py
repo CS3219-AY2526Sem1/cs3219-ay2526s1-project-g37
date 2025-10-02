@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from app.models.endpoint_models import QuestionBase64Images
 from app.models.exceptions import QuestionNotFoundException
-from app.utils import batch_convert_base64_to_bytes, batch_convert_bytes_to_base64
+from app.core.utils import batch_convert_base64_to_bytes, batch_convert_bytes_to_base64
 from app.core.crud import (
     create_question,
     get_question,
