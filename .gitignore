@@ -1,2 +1,11 @@
 **/__pycache__/
+
+# Ignore environment variables file
+.env
+
+# Ignore service account key file
+services/**/serviceAccountKey.json
+
+# Ignore node modules
+**/node_modules/
 .vscode/
