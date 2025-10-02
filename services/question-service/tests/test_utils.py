@@ -2,7 +2,7 @@ import os
 import pytest
 import boto3
 from moto import mock_aws
-from app.utils import upload_to_s3, get_from_s3, delete_from_s3
+from app.core.utils import upload_to_s3, get_from_s3, delete_from_s3
 
 @pytest.fixture(scope="function")
 def aws_credentials():

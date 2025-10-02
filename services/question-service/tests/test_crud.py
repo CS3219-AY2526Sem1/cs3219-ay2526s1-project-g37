@@ -2,7 +2,7 @@ import uuid
 from unittest.mock import MagicMock, patch
 import pytest
 
-from app import crud
+from app.core import crud
 from app.models.exceptions import QuestionNotFoundException
 
 # --- Mocks Setup ---
@@ -10,7 +10,7 @@ from app.models.exceptions import QuestionNotFoundException
 @pytest.fixture
 def mock_db_conn():
     """Fixture to mock the database connection and cursor."""
-    with patch('app.crud.get_conn') as mock_get_conn:
+    with patch('app.core.crud.get_conn') as mock_get_conn:
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_cursor.connection = mock_conn 
@@ -21,9 +21,9 @@ def mock_db_conn():
 @pytest.fixture
 def mock_s3():
     """Fixture to mock all S3 utility functions."""
-    with patch('app.crud.upload_to_s3') as mock_upload, \
-         patch('app.crud.get_from_s3') as mock_get, \
-         patch('app.crud.delete_from_s3') as mock_delete:
+    with patch('app.core.crud.upload_to_s3') as mock_upload, \
+         patch('app.core.crud.get_from_s3') as mock_get, \
+         patch('app.core.crud.delete_from_s3') as mock_delete:
         yield {
             "upload": mock_upload,
             "get": mock_get,
@@ -35,9 +35,9 @@ def mock_s3():
 @pytest.fixture
 def mock_question_funcs():
     """Mock all external question functions"""
-    with patch('app.crud.get_question') as mock_get, \
-         patch('app.crud.delete_question') as mock_delete, \
-         patch('app.crud.create_question') as mock_create:
+    with patch('app.core.crud.get_question') as mock_get, \
+         patch('app.core.crud.delete_question') as mock_delete, \
+         patch('app.core.crud.create_question') as mock_create:
         yield mock_get, mock_delete, mock_create
 
 
