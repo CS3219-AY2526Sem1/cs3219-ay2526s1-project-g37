@@ -12,35 +12,30 @@ def list_difficulties_and_topics() -> Dict[str, List[str]]:
             - difficulties (list[str]): List of all available difficulty levels
             - topics (list[str]): List of all available topics
     """
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT * FROM difficulties")
-            difficulties = [row[0] for row in cur.fetchall()]
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT * FROM difficulties")
+        difficulties = [row[0] for row in cur.fetchall()]
 
-            cur.execute("SELECT * FROM topics")
-            topics = [row[0] for row in cur.fetchall()]
+        cur.execute("SELECT * FROM topics")
+        topics = [row[0] for row in cur.fetchall()]
 
-            return {"difficulties": difficulties, "topics": topics}
+        return {"difficulties": difficulties, "topics": topics}
 
 def add_difficulty(difficulty: str):
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("INSERT INTO difficulties (name) VALUES (%s) ON CONFLICT DO NOTHING", (difficulty,))
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("INSERT INTO difficulties (name) VALUES (%s) ON CONFLICT DO NOTHING", (difficulty,))
 
 def delete_difficulty(difficulty: str):
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("DELETE FROM difficulties WHERE level = %s", (difficulty,))
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM difficulties WHERE level = %s", (difficulty,))
 
 def add_topic(topic: str):
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("INSERT INTO topics (name) VALUES (%s) ON CONFLICT DO NOTHING", (topic,))
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("INSERT INTO topics (name) VALUES (%s) ON CONFLICT DO NOTHING", (topic,))
 
 def delete_topic(topic: str):
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("DELETE FROM topics WHERE name = %s", (topic,))
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM topics WHERE name = %s", (topic,))
 
 def create_question(
     name: str,
@@ -121,34 +116,33 @@ def get_question(qid: str):
     Note:
         Images are returned as raw bytes data retrieved directly from S3.
     """
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            # Fetch the main question data
-            cur.execute(
-                "SELECT name, description, difficulty, topic FROM questions WHERE id = %s",
-                (qid,),
-            )
-            question_data = cur.fetchone()
+    with get_conn() as conn, conn.cursor() as cur:
+        # Fetch the main question data
+        cur.execute(
+            "SELECT name, description, difficulty, topic FROM questions WHERE id = %s",
+            (qid,),
+        )
+        question_data = cur.fetchone()
 
-            if not question_data:
-                raise QuestionNotFoundException(qid)
+        if not question_data:
+            raise QuestionNotFoundException(qid)
 
-            # Fetch associated image keys
-            cur.execute(
-                "SELECT s3_key FROM question_images WHERE question_id = %s",
-                (qid,)
-            )
-            image_keys = [row[0] for row in cur.fetchall()]
-            image_data = get_from_s3(image_keys)
+        # Fetch associated image keys
+        cur.execute(
+            "SELECT s3_key FROM question_images WHERE question_id = %s",
+            (qid,)
+        )
+        image_keys = [row[0] for row in cur.fetchall()]
+        image_data = get_from_s3(image_keys)
 
-            return {
-                "id": qid,
-                "name": question_data[0],
-                "description": question_data[1],
-                "difficulty": question_data[2],
-                "topic": question_data[3],
-                "images": image_data,  # Raw bytes
-            }
+        return {
+            "id": qid,
+            "name": question_data[0],
+            "description": question_data[1],
+            "difficulty": question_data[2],
+            "topic": question_data[3],
+            "images": image_data,  # Raw bytes
+        }
 
 
 def get_random_question_by_difficulty_and_topic(difficulty: str, topic: str):
@@ -170,39 +164,38 @@ def get_random_question_by_difficulty_and_topic(difficulty: str, topic: str):
         Images are returned as raw bytes data retrieved directly from S3.
         Uses database RANDOM() function for selection.
     """
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT id, name, description, difficulty, topic
-                FROM questions
-                WHERE difficulty = %s AND topic = %s
-                ORDER BY RANDOM()
-                LIMIT 1
-                """,
-                (difficulty, topic),
-            )
-            row = cur.fetchone()
-            if not row:
-                raise QuestionNotFoundException(topic=topic, difficulty=difficulty)
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT id, name, description, difficulty, topic
+            FROM questions
+            WHERE difficulty = %s AND topic = %s
+            ORDER BY RANDOM()
+            LIMIT 1
+            """,
+            (difficulty, topic),
+        )
+        row = cur.fetchone()
+        if not row:
+            raise QuestionNotFoundException(topic=topic, difficulty=difficulty)
 
-            qid = row[0]
-            # Fetch associated image keys
-            cur.execute(
-                "SELECT s3_key FROM question_images WHERE question_id = %s",
-                (qid,),
-            )
-            image_keys = [r[0] for r in cur.fetchall()]
-            image_data = get_from_s3(image_keys)
+        qid = row[0]
+        # Fetch associated image keys
+        cur.execute(
+            "SELECT s3_key FROM question_images WHERE question_id = %s",
+            (qid,),
+        )
+        image_keys = [r[0] for r in cur.fetchall()]
+        image_data = get_from_s3(image_keys)
 
-            return {
-                "id": qid,
-                "name": row[1],
-                "description": row[2],
-                "difficulty": row[3],
-                "topic": row[4],
-                "images": image_data,  # Raw bytes
-            }
+        return {
+            "id": qid,
+            "name": row[1],
+            "description": row[2],
+            "difficulty": row[3],
+            "topic": row[4],
+            "images": image_data,  # Raw bytes
+        }
 
 
 def override_question(
@@ -287,25 +280,24 @@ def delete_question(qid: str):
         This function is atomic: if deleting images from S3 fails,
         the database transaction is rolled back to maintain consistency.
     """
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            # Fetch associated image keys
-            cur.execute(
-                "SELECT s3_key FROM question_images WHERE question_id = %s",
-                (qid,)
-            )
-            image_keys = [row[0] for row in cur.fetchall()]
+    with get_conn() as conn, conn.cursor() as cur:
+        # Fetch associated image keys
+        cur.execute(
+            "SELECT s3_key FROM question_images WHERE question_id = %s",
+            (qid,)
+        )
+        image_keys = [row[0] for row in cur.fetchall()]
 
-            # Delete the question and verify it existed
-            cur.execute("DELETE FROM questions WHERE id = %s RETURNING id", (qid,))
-            deleted = cur.fetchone()
-            if not deleted:
-                raise QuestionNotFoundException(qid)
+        # Delete the question and verify it existed
+        cur.execute("DELETE FROM questions WHERE id = %s RETURNING id", (qid,))
+        deleted = cur.fetchone()
+        if not deleted:
+            raise QuestionNotFoundException(qid)
 
-            # Delete images from S3; rollback DB if this fails
-            try:
-                delete_from_s3(image_keys)
-            except Exception:
-                conn.rollback()
-                raise
+        # Delete images from S3; rollback DB if this fails
+        try:
+            delete_from_s3(image_keys)
+        except Exception:
+            conn.rollback()
+            raise
 
