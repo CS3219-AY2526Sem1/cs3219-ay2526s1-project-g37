@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from app.models.match import MatchResponse, MatchRequest
-from app.services.matching import MatchingService
-from app.services.websocket_manager import manager
+from app.core.matching import MatchingService
+from app.core.websocket_manager import manager
 
 router = APIRouter()
 

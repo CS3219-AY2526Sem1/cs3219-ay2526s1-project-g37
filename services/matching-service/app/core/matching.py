@@ -1,9 +1,9 @@
 from app.models.match import MatchRequest, MatchResponse
 import uuid
-from app.services import queue
+from app.core import queue
 import time
 import asyncio
-from app.services.websocket_manager import manager
+from app.core.websocket_manager import manager
 
 TIMEOUT_SECONDS = 60
 
