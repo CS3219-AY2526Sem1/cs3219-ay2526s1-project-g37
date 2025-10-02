@@ -58,13 +58,8 @@ export default function Userpage() {
           <Grid.Col span={{ base: 6, md: 2 }}>
             <StatsCard title="Hard" stat="1,234" color={theme.colors.red[5]} />
           </Grid.Col>
-<<<<<<< HEAD
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
             <QueueModal />
-=======
-          <Grid.Col span={{ base: 12, md: 1 }} offset={{ md: 3 }}>
-            <Button fullWidth>Queue Up</Button>
->>>>>>> dc243d0e2b1ee601dbc077ccaee9b876eac1d2d5
           </Grid.Col>
         </Grid>
       </Grid.Col>
