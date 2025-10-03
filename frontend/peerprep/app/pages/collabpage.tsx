@@ -1,7 +1,7 @@
 import { Grid, Card, Text } from "@mantine/core";
 import { COLLABCARDHEIGHT } from "~/constants/constants";
 import SessionControlBar from "../components/sessioncontrolbar/SessionControlBar";
-
+import TestCase from "../components/testcases/TestCase";
 import CodeEditor from "../components/codeeditor/CodeEditor";
 
 export default function CollabPage() {
@@ -45,7 +45,7 @@ export default function CollabPage() {
               }}
               c={"white"}
             >
-              <Text>Output / Console</Text>
+              <TestCase />
             </Card>
           </div>
         </Grid.Col>
