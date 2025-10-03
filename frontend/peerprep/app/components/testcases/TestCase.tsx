@@ -1,4 +1,4 @@
-import { Card, Text, TextInput } from "@mantine/core";
+import { Card, TextInput } from "@mantine/core";
 import TestCaseBar from "./TestCaseBar";
 
 export default function TestCase() {
