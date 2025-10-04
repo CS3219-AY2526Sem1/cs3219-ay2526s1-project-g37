@@ -13,3 +13,4 @@ services/**/serviceAccountKey.json
 # Ignore node modules
 **/node_modules/
 .vscode/
+services/collaboration-service/env/
