@@ -24,7 +24,3 @@ yarn-error.log*
 # React Router
 /.react-router/
 /build/
-
-# package files
-package-lock.json
-package.json
