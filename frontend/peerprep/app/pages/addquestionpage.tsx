@@ -15,6 +15,7 @@ import {
 import { useForm } from "@mantine/form";
 import CustomRichTextEditor from "../components/richtexteditor/CustomRichTextEditor";
 import { DIFFICULTIES, TOPICS, DIFFICULTYCOLOR } from "~/constants/constants";
+import { CARDHEIGHT } from "~/constants/constants";
 
 export default function AddQuestionPage() {
   const form = useForm({
@@ -27,14 +28,12 @@ export default function AddQuestionPage() {
     },
   });
 
-  const cardHeight = "calc(100vh - 95px)";
-
   return (
     <>
       <form onSubmit={form.onSubmit((values) => console.log(values))}>
         <Grid>
           <Grid.Col span={{ base: 12, md: 6 }} style={{ height: "100%" }}>
-            <Card style={{ height: cardHeight, overflowY: "auto" }}>
+            <Card style={{ height: CARDHEIGHT, overflowY: "auto" }}>
               <Grid gutter="sm">
                 <Grid.Col span={12}>
                   <TextInput
@@ -86,7 +85,7 @@ export default function AddQuestionPage() {
             </Card>
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6 }}>
-            <Card style={{ height: cardHeight, overflowY: "auto" }} c={"white"}>
+            <Card style={{ height: CARDHEIGHT, overflowY: "auto" }} c={"white"}>
               <Text size="xl" fw={700}>
                 {form.values.title}
               </Text>

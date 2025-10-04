@@ -155,10 +155,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const location = useLocation();
-  const linksWithHeader = ["/user"];
+  const linksWithHeader = ["/user", "/admin", "/collab"];
 
   const isHeader = () => {
-    return linksWithHeader.includes(location.pathname);
+    return linksWithHeader.some(path => location.pathname.startsWith(path));
   };
 
   return (

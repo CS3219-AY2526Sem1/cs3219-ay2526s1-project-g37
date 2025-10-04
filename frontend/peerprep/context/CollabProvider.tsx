@@ -1,0 +1,118 @@
+// CollabProvider.tsx
+import { createContext, useContext, useEffect, useState, useRef } from "react";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+import { useSearchParams } from "react-router";
+import { stringToPaletteColor } from "~/utils/utils";
+
+const CollabContext = createContext<{
+  provider: WebsocketProvider | null;
+  sessionId: string;
+  ydoc: Y.Doc | null;
+} | null>(null);
+
+interface CollabProviderProps {
+  sessionId: string;
+  children: React.ReactNode;
+}
+
+// Inject awareness cursor styles
+// Related documentation: https://github.com/yjs/y-monaco/blob/master/demo/index.html, https://github.com/yjs/y-monaco
+function injectAwarenessStyles(clientId: number, color: string) {
+  const styleId = `y-cursor-style-${clientId}`;
+  if (typeof document === "undefined" || document.getElementById(styleId))
+    return;
+
+  const style = document.createElement("style");
+  style.id = styleId;
+  style.textContent = `
+    /* Remote Selection Highlight */
+    .yRemoteSelection-${clientId} { 
+      background-color: ${color};
+      opacity: 0.3;
+    }
+
+    @keyframes remote-cursor-blink {
+      0%, 100% { 
+          opacity: 1; 
+      }
+      50% { 
+          opacity: 0; 
+      }
+    }
+
+    /* Remote Cursor Line */
+    .yRemoteSelectionHead-${clientId} { 
+      position: absolute;
+      height: 100%;
+
+      border-left-style: solid;
+      border-left-width: 2px;
+      border-color: ${color} !important;
+
+      z-index: 50;
+      pointer-events: none;
+      box-sizing: border-box;
+      animation: remote-cursor-blink 1s step-end infinite;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+export function CollabProvider({ sessionId, children }: CollabProviderProps) {
+  const [provider, setProvider] = useState<WebsocketProvider | null>(null);
+  const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
+  const [searchParams] = useSearchParams();
+
+  const USER = useRef(
+    searchParams.get("user_id") || `User-${Math.floor(Math.random() * 1000)}`
+  );
+  const USER_COLOR = useRef(stringToPaletteColor(USER.current));
+
+  useEffect(() => {
+    const ydocInstance = new Y.Doc();
+    setYdoc(ydocInstance);
+    const wsProvider = new WebsocketProvider(
+      import.meta.env.VITE_YJS_WS_URL,
+      sessionId,
+      ydocInstance
+    );
+
+    wsProvider.awareness.setLocalStateField("user", {
+      name: USER.current,
+      color: USER_COLOR.current,
+    });
+
+    const updateAwareness = () => {
+      wsProvider.awareness.getStates().forEach((state, clientId) => {
+        if (state.user) {
+          injectAwarenessStyles(clientId, state.user.color);
+        }
+      });
+    };
+    wsProvider.awareness.on("update", updateAwareness);
+    updateAwareness();
+
+    wsProvider.on("status", (event) =>
+      console.log("Y-WebSocket status:", event.status)
+    );
+    wsProvider.on("sync", () => console.log("Initial sync complete"));
+
+    setProvider(wsProvider);
+
+    return () => {
+      wsProvider.awareness.off("update", updateAwareness);
+      wsProvider.destroy();
+    };
+  }, [sessionId, USER, USER_COLOR]);
+
+  return (
+    <CollabContext.Provider value={{ provider, sessionId, ydoc }}>
+      {children}
+    </CollabContext.Provider>
+  );
+}
+
+export function useCollabProvider() {
+  return useContext(CollabContext);
+}
