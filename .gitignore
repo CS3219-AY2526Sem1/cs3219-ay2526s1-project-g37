@@ -4,12 +4,7 @@
 .pytest_cache/
 **/__pycache__/
 
-# Ignore environment variables file
+node_modules/
+dist/
+build/
 .env
-
-# Ignore service account key file
-services/**/serviceAccountKey.json
-
-# Ignore node modules
-**/node_modules/
-.vscode/
