@@ -1,0 +1,25 @@
+## start up the collaboration service in the current dir Dockerfile
+## and start up an image called texera/y-websocket-server:latest-amd64
+
+version: '3.8'
+services:
+  collaboration-service:
+    build:
+      context: ./services/collaboration-service
+      dockerfile: Dockerfile
+    container_name: collaboration-service
+    ports:
+      - "8000:8000"  # Collaboration service API
+    environment:
+      - PORT=8000
+
+
+  y-websocket-server:
+    image: alokinplc/y-websocket:latest
+    container_name: y-websocket-server
+    ports:
+      - "1234:1234"  # Yjs WebSocket server
+    environment:
+      - PORT=1234
+
+
