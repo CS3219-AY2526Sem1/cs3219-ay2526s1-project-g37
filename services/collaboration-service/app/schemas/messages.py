@@ -8,6 +8,7 @@ class CollaboratorConnectMessage(Message):
     pass
 
 class CollaboratorDisconnectMessage(Message):
+    type: str = "collaborator_disconnect"
     pass
 
 class DisplayMessage(Message):

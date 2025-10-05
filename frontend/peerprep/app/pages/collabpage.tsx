@@ -6,6 +6,7 @@ import { CodeEditor } from "../components/codeeditor/CodeEditor";
 import { useEffect, useState } from "react";
 import { createSessionId } from "../services/CollabService";
 import { CollabProvider } from "context/CollabProvider";
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 
 // TODO: Remove this hardcoded question and fetch from backend instead
 const TEST_QUESTION = {
@@ -16,20 +17,59 @@ Vivamus efficitur consequat ultricies. Sed neque sem, dictum ac nulla eget, fauc
 };
 
 export default function CollabPage() {
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [connectedWith, setConnectedWith] = useState<string | null>(null);
+  // TODO: retrieve details from matching page
+  const [sessionId, setSessionId] = useState<string | null>("9a1bcb86-8688-5fe4-b69f-c4c8e8a9dc2b");
+  const collaborator_id = import.meta.env.VITE_DUMMY_USER_ID === "user1" ? "user2" : "user1";
+  const [connectedWith, setConnectedWith] = useState<string | null>(collaborator_id);
 
+  const WS_URL = `ws://${import.meta.env.VITE_COLLAB_SERVICE_URL}/ws/sessions/${sessionId}?user_id=${import.meta.env.VITE_DUMMY_USER_ID}`;
+  const { sendMessage, lastMessage, readyState, getWebSocket } = useWebSocket(WS_URL);
+
+  // TODO: Remove for prod, this is just to simulate creation of session (which should already have been done leading up to this page)
   useEffect(() => {
     // Set required parameters
     createSessionId()
       .then((result) => {
-        setSessionId(result.sessionId);
-        setConnectedWith(result.connectedWith);
+        // setSessionId(result.sessionId);
+        // setConnectedWith(result.connectedWith);
       })
       .catch((error) => {
         console.error("Error creating session:", error);
       });
   }, []);
+
+  useEffect(() => {
+    console.log("Connection state changed:", readyState);
+    if (readyState === ReadyState.OPEN) {
+      console.log("WebSocket connection established.");
+    } else if (readyState === ReadyState.CLOSED) {
+      console.log("WebSocket connection closed.");
+    }
+  }, [readyState]);
+
+  useEffect(() => {
+    if (lastMessage !== null) {
+      console.log("Received message:", lastMessage.data);
+      const jsonData = JSON.parse(lastMessage.data);
+      if (jsonData.type === "collaborator_ended") {
+        console.log("Collaborator ended the session.");
+        handleEndSession();
+      }
+    }
+  }, [lastMessage]);
+
+  const handleEndSession = () => {
+    // send end session signal to server
+    console.log("End session signal sent.");
+
+    const socket = getWebSocket();
+    if (socket){
+      socket.close();
+    }
+
+    // TODO: redirect to next page
+    console.log("Redirecting to next page...");
+  }
 
   return (
     <>
@@ -37,7 +77,7 @@ export default function CollabPage() {
         <CollabProvider sessionId={sessionId}>
           <Grid>
             <Grid.Col span={{ base: 12 }}>
-              <SessionControlBar user={connectedWith} />
+              <SessionControlBar user={connectedWith} onEndSession={handleEndSession} />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Card

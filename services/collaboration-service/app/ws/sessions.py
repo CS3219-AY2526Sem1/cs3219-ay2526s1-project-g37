@@ -6,6 +6,7 @@ from app.schemas.messages import Message, CollaboratorConnectMessage, Collaborat
 
 from datetime import datetime
 import asyncio
+import json
 
 DEFAULT_PING_INTERVAL = 2  # seconds
 
@@ -53,7 +54,7 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, user_id: str = Quer
                 await ws.send_text(f"Connected to session {session_id} as user {user_id}. You can start collaborating!")
             elif isinstance(msg, CollaboratorDisconnectMessage):
                 user_status = UserState.AWAIT_CONNECT
-                await ws.send_text(f"Collaborator disconnected, awaiting reconnection...")
+                await ws.send_text(json.dumps(msg.dict()))
             elif isinstance(msg, DisplayMessage):
                 await ws.send_text(f"[{datetime.now().timestamp()}] {msg.msg}")
             else:

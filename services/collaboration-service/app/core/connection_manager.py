@@ -16,7 +16,8 @@ class ConnectionManager:
 
         self.active_connections[session_id] = {}
         for user_id in user_ids:
-            self.active_connections[session_id][user_id] = None
+            if self.active_connections[session_id].get(user_id) is None:
+                self.active_connections[session_id][user_id] = None
         return session_id
     
     def _get_collaborator_q(self, session_id, user_id):
