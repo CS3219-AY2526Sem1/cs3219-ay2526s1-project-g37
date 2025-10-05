@@ -5,7 +5,6 @@ export async function createSessionId(): Promise<{sessionId: string, connectedWi
   const payload = {
     user_ids: ["user1", "user2"],
   };
-    console.log("Response status:", `${collabServiceHttp}/sessions/`);
 
   const response = await fetch(`${collabServiceHttp}/sessions/`, {
     method: "POST",

@@ -39,20 +39,20 @@ export default function CollabPage() {
   }, []);
 
   useEffect(() => {
-    console.log("Connection state changed:", readyState);
+    console.log("py-collab: websocket state changed:", readyState);
     if (readyState === ReadyState.OPEN) {
-      console.log("WebSocket connection established.");
+      console.log("py-collab: WebSocket connection established.");
     } else if (readyState === ReadyState.CLOSED) {
-      console.log("WebSocket connection closed.");
+      console.log("py-collab: WebSocket connection closed.");
     }
   }, [readyState]);
 
   useEffect(() => {
     if (lastMessage !== null) {
-      console.log("Received message:", lastMessage.data);
+      console.log("py-collab: Received message:", lastMessage.data);
       const jsonData = JSON.parse(lastMessage.data);
       if (jsonData.type === "collaborator_ended") {
-        console.log("Collaborator ended the session.");
+        console.log("py-collab: Collaborator ended the session.");
         handleEndSession();
       }
     }
