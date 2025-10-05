@@ -1,6 +1,3 @@
-## start up the collaboration service in the current dir Dockerfile
-## and start up an image called texera/y-websocket-server:latest-amd64
-
 version: '3.8'
 services:
   collaboration-service:
