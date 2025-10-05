@@ -22,8 +22,11 @@ export default function CollabPage() {
   const collaborator_id = import.meta.env.VITE_DUMMY_USER_ID === "user1" ? "user2" : "user1";
   const [connectedWith, setConnectedWith] = useState<string | null>(collaborator_id);
 
+
   const WS_URL = `ws://${import.meta.env.VITE_COLLAB_SERVICE_URL}/ws/sessions/${sessionId}?user_id=${import.meta.env.VITE_DUMMY_USER_ID}`;
-  const { sendMessage, lastMessage, readyState, getWebSocket } = useWebSocket(WS_URL);
+  const { sendJsonMessage, lastMessage, readyState, getWebSocket } = useWebSocket(WS_URL,
+    { shouldReconnect: (closeEvent) => true }
+  );
 
   // TODO: Remove for prod, this is just to simulate creation of session (which should already have been done leading up to this page)
   useEffect(() => {
@@ -61,6 +64,11 @@ export default function CollabPage() {
   const handleEndSession = () => {
     // send end session signal to server
     console.log("End session signal sent.");
+
+    //send collaborator_ended message
+    if (readyState === ReadyState.OPEN) {
+      sendJsonMessage({ type: "collaborator_ended" });
+    }
 
     const socket = getWebSocket();
     if (socket){

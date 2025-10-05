@@ -1,7 +1,7 @@
 from typing import Dict
 import uuid 
 import asyncio
-from app.schemas.messages import CollaboratorConnectMessage, CollaboratorDisconnectMessage, DisplayMessage
+from app.schemas.messages import CollaboratorConnectMessage, CollaboratorDisconnectMessage, DisplayMessage, Message
 from app.core.errors import SessionNotFoundError, UserNotFoundError, InvalidUserIDsError
 
 class ConnectionManager:
@@ -63,13 +63,13 @@ class ConnectionManager:
         
         await collaborator_q.put(CollaboratorDisconnectMessage())
 
-    async def on_message(self, session_id: str, user_id: str, msg: str):
+    async def on_message(self, session_id: str, user_id: str, msg: Message):
         collaborator_q = self._get_collaborator_q(session_id, user_id)
 
         if collaborator_q is None:
             return None
 
-        await collaborator_q.put(DisplayMessage(msg=msg))
+        await collaborator_q.put(msg)
 
     def generate_uuid(self, user1: str, user2: str) -> str:
         namespace = uuid.NAMESPACE_DNS  
