@@ -41,8 +41,9 @@ COPY --from=deps /usr/local/bin /usr/local/bin
 COPY . .
 
 # Set ownership
-RUN chown -R fastapiuser:fastapiuser /app
-USER fastapiuser
+## Temporarily commented out for build speed; uncomment for production
+# RUN chown -R fastapiuser:fastapiuser /app
+# USER fastapiuser
 
 # Expose FastAPI default port
 EXPOSE 8000
