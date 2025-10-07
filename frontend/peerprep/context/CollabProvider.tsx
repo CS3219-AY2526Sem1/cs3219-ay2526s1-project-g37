@@ -96,7 +96,7 @@ export function CollabProvider({ sessionId, children }: CollabProviderProps) {
     wsProvider.on("status", (event) =>
       console.log("Y-WebSocket status:", event.status)
     );
-    wsProvider.on("sync", () => console.log("Initial sync complete"));
+    wsProvider.on("sync", () => console.log("y-websocket: init sync complete"));
 
     setProvider(wsProvider);
 

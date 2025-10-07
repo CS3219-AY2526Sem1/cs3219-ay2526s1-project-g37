@@ -6,6 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
+  useNavigate,
 } from "react-router";
 
 import "@mantine/core/styles.css";
@@ -155,6 +156,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   const linksWithHeader = ["/user", "/admin", "/collab"];
 
   const isHeader = () => {
@@ -164,7 +166,13 @@ export default function App() {
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
       {isHeader() && <Header />}
-      <Container fluid>{<Outlet />}</Container>
+
+      <Container fluid>{<Outlet />}</Container>      
+      {location.pathname === "/" && (
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 15 }}>
+          <Button onClick={() => navigate("/collab")}>Go to Collab</Button>
+        </div>
+      )}
     </MantineProvider>
   );
 }

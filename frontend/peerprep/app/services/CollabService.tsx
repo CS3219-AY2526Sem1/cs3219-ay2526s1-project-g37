@@ -1,11 +1,12 @@
 export async function createSessionId(): Promise<{sessionId: string, connectedWith: string}> {
+  const collabServiceHttp = `http://${import.meta.env.VITE_COLLAB_SERVICE_URL}`;
+
   // Create new session
   const payload = {
     user_ids: ["user1", "user2"],
   };
-    console.log("Response status:", `${import.meta.env.VITE_COLLAB_SERVICE_URL}/sessions/`);
 
-  const response = await fetch(`${import.meta.env.VITE_COLLAB_SERVICE_URL}/sessions/`, {
+  const response = await fetch(`${collabServiceHttp}/sessions/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
