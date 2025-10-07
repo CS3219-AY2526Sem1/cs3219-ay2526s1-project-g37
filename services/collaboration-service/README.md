@@ -1,5 +1,7 @@
 ## To run locally:
 `uvicorn app.main:app --reload`
+
+Ensure y-websocket server is running on port 1234 as well
 ## Planning
 
 ## APIs to implement:

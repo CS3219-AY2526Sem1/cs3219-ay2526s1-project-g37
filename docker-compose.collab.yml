@@ -1,0 +1,54 @@
+version: '3.8'
+services:
+  frontend-1:
+    build:
+      context: ./frontend/peerprep
+      dockerfile: Dockerfile
+    image: peerprep:local          # <-- build and tag this image
+    container_name: frontend-1
+    ports:
+      - "5173:5173"
+    environment:
+      - PORT=5173
+      - VITE_COLLAB_SERVICE_URL=localhost:8000
+      - VITE_YJS_WS_URL=ws://localhost:1234
+      - VITE_DUMMY_USER_ID=user1
+    depends_on:
+      - collaboration-service
+      - y-websocket-server
+    command: ["npm","run","dev","--","--host","0.0.0.0","--port","5173"]
+
+  frontend-2:
+    image: peerprep:local          # <-- reuse the built image (no build:)
+    container_name: frontend-2
+    ports:
+      - "5174:5174"
+    environment:
+      - PORT=5174
+      - VITE_COLLAB_SERVICE_URL=localhost:8000
+      - VITE_YJS_WS_URL=ws://localhost:1234
+      - VITE_DUMMY_USER_ID=user2
+    depends_on:
+      - collaboration-service
+      - y-websocket-server
+    command: ["npm","run","dev","--","--host","0.0.0.0","--port","5174"]
+
+  collaboration-service:
+    build:
+      context: ./services/collaboration-service
+      dockerfile: Dockerfile
+    container_name: collaboration-service
+    ports:
+      - "8000:8000"  # Collaboration service API
+    environment:
+      - PORT=8000
+
+  y-websocket-server:
+    image: alokinplc/y-websocket:latest
+    container_name: y-websocket-server
+    ports:
+      - "1234:1234"  # Yjs WebSocket server
+    environment:
+      - PORT=1234
+
+
