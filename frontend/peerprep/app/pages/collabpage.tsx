@@ -71,7 +71,7 @@ export default function CollabPage() {
     }
 
     const socket = getWebSocket();
-    if (socket){
+    if (socket) {
       socket.close();
     }
 
