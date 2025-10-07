@@ -2,11 +2,32 @@ from app.models.match import MatchRequest, MatchResponse
 from app.core import queue
 import asyncio
 import httpx
+from fastapi import HTTPException
 import os
 from app.core.websocket_manager import manager
-from app.config import QUESTION_SERVICE_URL
+from app.config import QUESTION_SERVICE_URL, COLLAB_SERVICE_URL
 
 TIMEOUT_SECONDS = 60
+
+async def fetch_question(difficulty: str, topic: str):
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            f"{QUESTION_SERVICE_URL}/questions/random",
+            params={"difficulty": difficulty, "topic": topic},
+            timeout=10.0
+        )
+        resp.raise_for_status()
+        return resp.json()
+    
+async def create_session(user_ids: list[str]):
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{COLLAB_SERVICE_URL}/sessions/",
+            json={"user_ids": user_ids},
+            timeout=10.0
+        )
+        resp.raise_for_status()
+        return resp.json()["session_id"]
 
 class MatchingService:
 
@@ -21,27 +42,22 @@ class MatchingService:
 
         # suitable match
         if peer_id:
-            # TODO: Initialise collaboration session and assign question
             question_data = None
+            session_id = None
+
             async with httpx.AsyncClient() as client:
                 try:
-                    resp = await client.get(
-                        f"{QUESTION_SERVICE_URL}/questions/random",
-                        params={"difficulty": difficulty, "topic": topic},
-                        timeout=10.0
-                    )
-                    resp.raise_for_status()
-                    question_data = resp.json()
-                    print(question_data)
-                except httpx.RequestError as e:
-                    print(f"Error fetching question: {e}")
-                except httpx.HTTPStatusError as e:
-                    print(f"Question service returned {e.response.status_code}")
+                    question_data = await fetch_question(difficulty, topic)
+                    session_id = await create_session([user_id, peer_id])
+                    print(f"Session {session_id} started")
+                except Exception as e:
+                    print(f"Error initialising match: {e}")
+                    raise HTTPException(status_code=500, detail="Failed to initialise match")
 
-            await manager.send_event(user_id, "match.found", {"peer_id": peer_id})
-            await manager.send_event(peer_id, "match.found", {"peer_id": user_id})
+                await manager.send_event(user_id, "match.found", {"peer_id": peer_id, "session_id": session_id, "question": question_data})
+                await manager.send_event(peer_id, "match.found", {"peer_id": user_id, "session_id": session_id, "question": question_data})
 
-            return MatchResponse(success=True, peer_id=peer_id, message="Peer found")
+                return MatchResponse(success=True, peer_id=peer_id, message="Peer found")
         else:
             # no suitable match
             queue.enqueue_user(difficulty, topic, language, user_id)
