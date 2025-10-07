@@ -18,21 +18,21 @@ Vivamus efficitur consequat ultricies. Sed neque sem, dictum ac nulla eget, fauc
 
 export default function CollabPage() {
   // TODO: retrieve details from matching page
-  const [sessionId, setSessionId] = useState<string | null>("9a1bcb86-8688-5fe4-b69f-c4c8e8a9dc2b");
+  const [sessionId] = useState<string | null>("9a1bcb86-8688-5fe4-b69f-c4c8e8a9dc2b");
   const collaborator_id = import.meta.env.VITE_DUMMY_USER_ID === "user1" ? "user2" : "user1";
-  const [connectedWith, setConnectedWith] = useState<string | null>(collaborator_id);
+  const [connectedWith] = useState<string | null>(collaborator_id);
 
 
   const WS_URL = `ws://${import.meta.env.VITE_COLLAB_SERVICE_URL}/ws/sessions/${sessionId}?user_id=${import.meta.env.VITE_DUMMY_USER_ID}`;
   const { sendJsonMessage, lastMessage, readyState, getWebSocket } = useWebSocket(WS_URL,
-    { shouldReconnect: (closeEvent) => true }
+    { shouldReconnect: () => true }
   );
 
-  // TODO: Remove for prod, this is just to simulate creation of session (which should already have been done leading up to this page)
+  // TODO: Remove once linked to matching svc, this is just to simulate creation of session (which should already have been done leading up to this page)
   useEffect(() => {
     // Set required parameters
     createSessionId()
-      .then((result) => {
+      .then(() => {
         // setSessionId(result.sessionId);
         // setConnectedWith(result.connectedWith);
       })
