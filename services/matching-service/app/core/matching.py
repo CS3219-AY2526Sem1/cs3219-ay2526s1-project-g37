@@ -47,19 +47,18 @@ class MatchingService:
             question_data = None
             session_id = None
 
-            async with httpx.AsyncClient() as client:
-                try:
-                    question_data = await fetch_question(difficulty, topic)
-                    session_id = await create_session([user_id, peer_id], question_data)
-                    print(f"Session {session_id} started")
-                except Exception as e:
-                    print(f"Error initialising match: {e}")
-                    raise HTTPException(status_code=500, detail="Failed to initialise match")
+            try:
+                question_data = await fetch_question(difficulty, topic)
+                session_id = await create_session([user_id, peer_id], question_data)
+                print(f"Session {session_id} started")
 
                 await manager.send_event(user_id, "match.found", {"peer_id": peer_id, "session_id": session_id, "question": question_data})
                 await manager.send_event(peer_id, "match.found", {"peer_id": user_id, "session_id": session_id, "question": question_data})
 
                 return MatchResponse(success=True, peer_id=peer_id, message="Peer found")
+            except Exception as e:
+                print(f"Error initialising match: {e}")
+                raise HTTPException(status_code=500, detail="Failed to initialise match")
         else:
             # no suitable match
             queue.enqueue_user(difficulty, topic, language, user_id)
