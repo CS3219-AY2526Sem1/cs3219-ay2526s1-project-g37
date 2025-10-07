@@ -19,11 +19,13 @@ async def fetch_question(difficulty: str, topic: str):
         resp.raise_for_status()
         return resp.json()
     
-async def create_session(user_ids: list[str]):
+async def create_session(user_ids: list[str], question_data: dict):
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"{COLLAB_SERVICE_URL}/sessions/",
-            json={"user_ids": user_ids},
+            json={
+                "user_ids": user_ids,
+                "question": question_data},
             timeout=10.0
         )
         resp.raise_for_status()
@@ -48,7 +50,7 @@ class MatchingService:
             async with httpx.AsyncClient() as client:
                 try:
                     question_data = await fetch_question(difficulty, topic)
-                    session_id = await create_session([user_id, peer_id])
+                    session_id = await create_session([user_id, peer_id], question_data)
                     print(f"Session {session_id} started")
                 except Exception as e:
                     print(f"Error initialising match: {e}")
