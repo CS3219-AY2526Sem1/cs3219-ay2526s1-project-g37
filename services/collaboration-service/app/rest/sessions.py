@@ -1,6 +1,5 @@
 
-from http.client import HTTPException
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.schemas.collaboration import CreateSessionRequest, CreateSessionResponse
 from app.core.connection_manager import connection_manager
 from app.core.errors import SessionNotFoundError
