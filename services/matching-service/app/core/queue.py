@@ -15,15 +15,14 @@ def enqueue_user(difficulty: str, topic: str, language: str, user_id: str):
 
 def dequeue_user(difficulty: str, topic: str, language: str, current_user_id: str):
     key = _queue_key(difficulty, topic, language)
-    queue = r.lrange(key, 0, -1)
 
-    for user_id in queue:
+    while True:
+        user_id = r.lpop(key)
+        if user_id is None:
+            return None
         if user_id != current_user_id:
-            r.lrem(key, 0, user_id)
-            r.hdel("match_timestamps", user_id)
+            r.hdel("match timestamps", user_id)
             return user_id
-
-    return None
 
 def get_queue_position(difficulty: str, topic: str, language: str, user_id: str):
     key = _queue_key(difficulty, topic, language)
