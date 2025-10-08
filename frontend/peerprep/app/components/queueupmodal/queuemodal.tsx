@@ -18,6 +18,7 @@ export default function QueueModal() {
   const [redirectCountdown, setRedirectCountdown] = useState(3);
   const [searchParams] = useSearchParams();
   const [user, setUser] = useState(searchParams.get("user") || "user1");
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const form = useForm({
     initialValues: {
@@ -34,6 +35,13 @@ export default function QueueModal() {
   }, [searchParams]);
 
   const getRequestBody = () => {
+    console.log(
+      {
+      user_id: user,
+      difficulty: form.values.difficulty,
+      topic: form.values.topic,
+      language: 'python',
+    })
     return JSON.stringify({
       user_id: user,
       difficulty: form.values.difficulty,
@@ -94,12 +102,13 @@ export default function QueueModal() {
 
       newSocket.addEventListener("message", (event) => {
         const data = JSON.parse(event.data);
-        console.log("Message from server ", data);
+        console.log("Message from server ", data.data);
         if (data.event == "match.timeout") {
           setQueueStatus("timeout");
           newSocket.close();
         } else if (data.event == "match.found") {
           setQueueStatus("found");
+          setSessionId(data.data.session_id);
         } else if (data.event == "match.cancelled") {
           setQueueStatus("idle");
           newSocket.close();
@@ -140,6 +149,7 @@ export default function QueueModal() {
             }
 
             // Redirect to the match page
+            window.location.href = `/collab/${sessionId}/?user=${user}`;
           }
           return prev - 1;
         });

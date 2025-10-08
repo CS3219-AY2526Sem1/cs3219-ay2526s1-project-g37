@@ -1,5 +1,5 @@
 // CollabProvider.tsx
-import { createContext, useContext, useEffect, useState, useRef } from "react";
+import { createContext, useContext, useEffect, useState, useRef, useCallback, useImperativeHandle } from "react";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { useSearchParams } from "react-router";
@@ -9,11 +9,13 @@ const CollabContext = createContext<{
   provider: WebsocketProvider | null;
   sessionId: string;
   ydoc: Y.Doc | null;
+  clearWebsocketSession: () => void;
 } | null>(null);
 
 interface CollabProviderProps {
   sessionId: string;
   children: React.ReactNode;
+  collabRef?: React.RefObject<{ destroySession: () => void } | null>;
 }
 
 // Inject awareness cursor styles
@@ -59,7 +61,7 @@ function injectAwarenessStyles(clientId: number, color: string) {
   document.head.appendChild(style);
 }
 
-export function CollabProvider({ sessionId, children }: CollabProviderProps) {
+export function CollabProvider({ sessionId, children, collabRef }: CollabProviderProps) {
   const [provider, setProvider] = useState<WebsocketProvider | null>(null);
   const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
   const [searchParams] = useSearchParams();
@@ -68,6 +70,22 @@ export function CollabProvider({ sessionId, children }: CollabProviderProps) {
     searchParams.get("user_id") || `User-${Math.floor(Math.random() * 1000)}`
   );
   const USER_COLOR = useRef(stringToPaletteColor(USER.current));
+
+  const clearWebsocketSession = useCallback(() => {
+    console.log("Clearing websocket session...", provider);
+    if (provider && ydoc) {
+      ydoc.getText("monaco-code").delete(0, ydoc.getText("monaco-code").length);
+      ydoc.destroy();
+      provider.destroy();
+
+      setProvider(null);
+      setYdoc(null);
+    }
+  }, [provider]);
+
+  useImperativeHandle(collabRef, () => ({
+    destroySession: clearWebsocketSession
+  }), [clearWebsocketSession]);
 
   useEffect(() => {
     const ydocInstance = new Y.Doc();
@@ -99,15 +117,18 @@ export function CollabProvider({ sessionId, children }: CollabProviderProps) {
     wsProvider.on("sync", () => console.log("y-websocket: init sync complete"));
 
     setProvider(wsProvider);
+    console.log("Provider initialized:", wsProvider);
 
     return () => {
       wsProvider.awareness.off("update", updateAwareness);
       wsProvider.destroy();
+      setProvider(null);
+      setYdoc(null);
     };
   }, [sessionId, USER, USER_COLOR]);
 
   return (
-    <CollabContext.Provider value={{ provider, sessionId, ydoc }}>
+    <CollabContext.Provider value={{ provider, sessionId, ydoc, clearWebsocketSession }}>
       {children}
     </CollabContext.Provider>
   );
