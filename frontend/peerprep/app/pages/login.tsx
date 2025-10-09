@@ -14,6 +14,7 @@ export function meta() {
 export default function Login() {
     const { userLoggedIn } = useAuth();
     const [isSigningIn, setIsSigningIn] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const form = useForm({
         initialValues: {
             email: "",
@@ -33,7 +34,8 @@ export default function Login() {
                 await doSignInWithEmailAndPassword(values.email, values.password);
             } catch (error) {
                 setIsSigningIn(false);
-                throw new Error("Email sign-in error:", error);
+                console.log(error);
+                setError(error instanceof Error ? error.message : String(error));
             }
         }
     };
@@ -44,7 +46,7 @@ export default function Login() {
             try {
                 await doSignInWithGoogle();
             } catch (error) {
-                throw new Error("Google sign-in error:", error);
+                setError(error instanceof Error ? error.message : String(error));
             }
         }
     };
@@ -65,7 +67,7 @@ export default function Login() {
                                         type="email"
                                         key={form.key("email")}
                                         {...form.getInputProps("email")}
-                                        error={undefined}
+                                        error={error}
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={12}>
@@ -75,6 +77,7 @@ export default function Login() {
                                         type="password"
                                         key={form.key("password")}
                                         {...form.getInputProps("password")}
+                                        error={error}
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={12} mt="md">

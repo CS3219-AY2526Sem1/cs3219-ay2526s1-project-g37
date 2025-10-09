@@ -13,6 +13,7 @@ export function meta() {
 export default function Signup() {
     const { userLoggedIn } = useAuth();
     const [isRegistering, setIsRegistering] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const form = useForm({
         initialValues: {
@@ -34,7 +35,7 @@ export default function Signup() {
                 await doCreateUserWithEmailAndPassword(values.email, values.password);
             } catch (error) {
                 setIsRegistering(false);
-                throw new Error("Error during sign up:", error);
+                setError(error instanceof Error ? error.message : String(error));
             }
         }
     };
@@ -65,7 +66,7 @@ export default function Signup() {
                                         type="text"
                                         key={form.key("username")}
                                         {...form.getInputProps("username")}
-                                        error={undefined}
+                                        error={error}
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={12}>
@@ -75,6 +76,7 @@ export default function Signup() {
                                         type="password"
                                         key={form.key("password")}
                                         {...form.getInputProps("password")}
+                                        error={error}
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={12} mt="md">
