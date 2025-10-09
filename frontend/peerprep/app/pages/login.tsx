@@ -51,7 +51,7 @@ export default function Login() {
 
     return (
         <Stack>
-            {userLoggedIn && <Navigate to={"/home"} replace={true} />}
+            {userLoggedIn && <Navigate to={"/"} replace={true} />}
             <Grid>
                 <Grid.Col span={12}>
                     <Grid justify="center" gutter={"xs"} mt={{ base: 20, md: 200 }}>

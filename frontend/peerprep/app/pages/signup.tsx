@@ -1,6 +1,6 @@
 import { Grid, TextInput, Button, PasswordInput, Divider, Text, Image, Stack } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Link, useNavigate } from "react-router";
+import { Link, Navigate } from "react-router";
 import { doCreateUserWithEmailAndPassword } from "../firebase/auth";
 import { useAuth } from "../context/authContext";
 import logo from "../assets/images/logo.svg";
@@ -11,7 +11,6 @@ export function meta() {
 }
 
 export default function Signup() {
-    const navigate = useNavigate();
     const { userLoggedIn } = useAuth();
     const [isRegistering, setIsRegistering] = useState(false);
 
@@ -42,7 +41,7 @@ export default function Signup() {
 
     return (
         <Stack>
-            {userLoggedIn && navigate("/home", { replace: true })}
+            {userLoggedIn && <Navigate to={"/login"} replace={true} />}
             <Grid>
                 <Grid.Col span={12}>
                     <Grid justify="center" gutter={"xs"} mt={{ base: 20, md: 200 }}>
