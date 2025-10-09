@@ -1,6 +1,7 @@
 # dotenv files
 .env
-.env.local
+.env.dev
+.env.prod
 
 # Mac
 .DS_Store
