@@ -1,16 +1,25 @@
 # Virtual environments
-**/venv/
+venv/
+.venv/
 
+# Ignore Python cache files
 .pytest_cache/
-**/__pycache__/
+__pycache__/
 
 # Ignore environment variables file
 .env
+.env.dev
+.env.prod
+env/
 
 # Ignore service account key file
-services/**/serviceAccountKey.json
+serviceAccountKey.json
 
 # Ignore node modules
-**/node_modules/
+node_modules/
+
+# Mac
+.DS_Store
+
+# editor and IDE files
 .vscode/
-services/collaboration-service/env/
