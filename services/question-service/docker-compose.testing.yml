@@ -42,4 +42,11 @@ services:
       interval: 2s
       retries: 10
 
-
+  api-caller:
+    image: badouralix/curl-jq:latest
+    depends_on:
+      question-service:
+        condition: service_healthy
+    volumes:
+      - ./local-script-qn-with-img:/init-scripts
+    entrypoint: ["sh", "/init-scripts/post_question.sh"]
