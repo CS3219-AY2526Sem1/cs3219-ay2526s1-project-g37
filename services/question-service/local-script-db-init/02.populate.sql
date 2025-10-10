@@ -13,7 +13,8 @@ VALUES
     ('Recursion'),
     ('Databases'),
     ('Arrays'),
-    ('Brainteaser')
+    ('Brainteaser'),
+    ('[FOR TESTING]')
 ON CONFLICT DO NOTHING;
 
 -- Insert sample questions
