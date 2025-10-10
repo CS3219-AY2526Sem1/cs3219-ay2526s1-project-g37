@@ -21,4 +21,4 @@ jobs:
       - run: npm run lint
       - run: npm run build
     env:
-      REACT_ROUTER_SSR: "false"
+      REACT_ROUTER_SSR: false
