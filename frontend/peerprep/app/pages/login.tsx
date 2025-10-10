@@ -3,9 +3,12 @@ import { Stack, Grid, TextInput, Button, PasswordInput, Divider, Text, Image } f
 import { useForm } from "@mantine/form";
 import { Link, Navigate } from "react-router";
 import { doSignInWithEmailAndPassword, doSignInWithGoogle } from "~/firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { useAuth } from "../context/authContext";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import logo from "../assets/images/logo.svg";
+
+const INVALID_CREDENTIALS = "Invalid email/password, Please try again.";
 
 export function meta() {
     return [{ title: "PeerPrep - Login" }, { name: "description", content: "Welcome to PeerPrep!" }];
@@ -14,6 +17,7 @@ export function meta() {
 export default function Login() {
     const { userLoggedIn } = useAuth();
     const [isSigningIn, setIsSigningIn] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const form = useForm({
         initialValues: {
             email: "",
@@ -31,9 +35,17 @@ export default function Login() {
             setIsSigningIn(true);
             try {
                 await doSignInWithEmailAndPassword(values.email, values.password);
-            } catch (error) {
+            } catch (error: unknown) {
                 setIsSigningIn(false);
-                throw new Error("Email sign-in error:", error);
+                if (error instanceof FirebaseError) {
+                    if (error.code === "auth/invalid-credential") {
+                        setError(INVALID_CREDENTIALS);
+                    } else {
+                        setError(error.message);
+                    }
+                } else {
+                    setError(String(error));
+                }
             }
         }
     };
@@ -44,14 +56,14 @@ export default function Login() {
             try {
                 await doSignInWithGoogle();
             } catch (error) {
-                throw new Error("Google sign-in error:", error);
+                setError(error instanceof Error ? error.message : String(error));
             }
         }
     };
 
     return (
         <Stack>
-            {userLoggedIn && <Navigate to={"/home"} replace={true} />}
+            {userLoggedIn && <Navigate to={"/"} replace={true} />}
             <Grid>
                 <Grid.Col span={12}>
                     <Grid justify="center" gutter={"xs"} mt={{ base: 20, md: 200 }}>
@@ -65,7 +77,6 @@ export default function Login() {
                                         type="email"
                                         key={form.key("email")}
                                         {...form.getInputProps("email")}
-                                        error={undefined}
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={12}>
@@ -82,6 +93,13 @@ export default function Login() {
                                         Login
                                     </Button>
                                 </Grid.Col>
+                            {
+                                error && (
+                                    <Text color="red" size="sm" mt="md" style={{ textAlign: "center" }}>
+                                        {error}
+                                    </Text>
+                                )
+                            }
                             </form>
                             <Grid.Col span={12} mt="md">
                                 <Divider my="xs" />
@@ -95,10 +113,10 @@ export default function Login() {
                                 </Link>
                                 <Text span> Or </Text>
                                 <Button
-                                    variant="light"
                                     leftSection={<IconBrandGoogle size={14} />}
                                     onClick={onGoogleSignIn}
                                     disabled={isSigningIn}
+                                    className=" m-2"
                                 >
                                     Sign in with Google
                                 </Button>

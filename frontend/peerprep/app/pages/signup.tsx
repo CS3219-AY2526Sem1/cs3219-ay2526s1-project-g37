@@ -1,6 +1,6 @@
 import { Grid, TextInput, Button, PasswordInput, Divider, Text, Image, Stack } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Link, useNavigate } from "react-router";
+import { Link, Navigate } from "react-router";
 import { doCreateUserWithEmailAndPassword } from "../firebase/auth";
 import { useAuth } from "../context/authContext";
 import logo from "../assets/images/logo.svg";
@@ -10,10 +10,11 @@ export function meta() {
     return [{ title: "PeerPrep - Signup" }, { name: "description", content: "Welcome to PeerPrep!" }];
 }
 
+
 export default function Signup() {
-    const navigate = useNavigate();
     const { userLoggedIn } = useAuth();
     const [isRegistering, setIsRegistering] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const form = useForm({
         initialValues: {
@@ -35,14 +36,14 @@ export default function Signup() {
                 await doCreateUserWithEmailAndPassword(values.email, values.password);
             } catch (error) {
                 setIsRegistering(false);
-                throw new Error("Error during sign up:", error);
+                setError(error instanceof Error ? error.message : String(error));
             }
         }
     };
 
     return (
         <Stack>
-            {userLoggedIn && navigate("/home", { replace: true })}
+            {userLoggedIn && <Navigate to={"/login"} replace={true} />}
             <Grid>
                 <Grid.Col span={12}>
                     <Grid justify="center" gutter={"xs"} mt={{ base: 20, md: 200 }}>
@@ -66,7 +67,7 @@ export default function Signup() {
                                         type="text"
                                         key={form.key("username")}
                                         {...form.getInputProps("username")}
-                                        error={undefined}
+                                        error={error}
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={12}>
@@ -76,11 +77,12 @@ export default function Signup() {
                                         type="password"
                                         key={form.key("password")}
                                         {...form.getInputProps("password")}
+                                        error={error}
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={12} mt="md">
                                     <Button type="submit" fullWidth autoContrast>
-                                        Login
+                                        Sign Up 
                                     </Button>
                                 </Grid.Col>
                             </form>
