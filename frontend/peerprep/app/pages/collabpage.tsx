@@ -6,7 +6,7 @@ import { CodeEditor } from "../components/codeeditor/CodeEditor";
 import { useEffect, useRef, useState } from "react";
 import { CollabProvider } from "context/CollabProvider";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { useSearchParams, useParams } from "react-router";
+import { useSearchParams, useParams, useNavigate } from "react-router";
 
 type Question = {
   name: string;
@@ -31,13 +31,12 @@ export default function CollabPage() {
   const { sessionId } = params;
   const [user] = useState(searchParams.get("user") || "user1");
   const [question, setQuestion] = useState(TEST_QUESTION);
-
   const collabRef = useRef<{ destroySession: () => void }>(null);
-
-  
   const WS_URL = `${import.meta.env.VITE_WS_COLLAB_SERVICE_URL}/ws/sessions/${sessionId}?user_id=${user}`;
   const { sendJsonMessage, lastMessage, readyState, getWebSocket } =
     useWebSocket(WS_URL, { shouldReconnect: () => true });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log("py-collab: websocket state changed:", readyState);
@@ -100,7 +99,7 @@ export default function CollabPage() {
     }
 
     sessionStorage.setItem('sessionEnded', 'true');
-    window.location.replace('/user');
+    navigate('/user', { replace: true });
 
     // TODO: redirect to next page
     console.log("Redirecting to next page...");

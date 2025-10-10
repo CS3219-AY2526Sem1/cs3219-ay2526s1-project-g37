@@ -7,6 +7,7 @@ import FoundModal from "./foundmodal";
 import TimeoutModal from "./timeoutmodal";
 import SearchingModal from "./searchingmodal";
 import SelectionModal from "./selectionmodal";
+import { useNavigate } from "react-router";
 
 export default function QueueModal() {
   const [opened, { open, close }] = useDisclosure(false);
@@ -19,6 +20,7 @@ export default function QueueModal() {
   const [searchParams] = useSearchParams();
   const [user, setUser] = useState(searchParams.get("user") || "user1");
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const form = useForm({
     initialValues: {
@@ -63,7 +65,7 @@ export default function QueueModal() {
   };
 
   const sendLeaveRequest = () => {
-    fetch("http://localhost:8000/match/cancel", {
+    fetch(`${import.meta.env.VITE_MATCHING_SERVICE_URL}/match/cancel`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -96,20 +98,20 @@ export default function QueueModal() {
 
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       console.log("User ID from URL:", user);
-      const newSocket = new WebSocket(`ws://localhost:8000/match/ws/${user}`);
+      const newSocket = new WebSocket(`${import.meta.env.VITE_WS_MATCHING_SERVICE_URL}/match/ws/${user}`);
 
       setSocket(newSocket);
 
       newSocket.addEventListener("message", (event) => {
         const data = JSON.parse(event.data);
         console.log("Message from server ", data.data);
-        if (data.event == "match.timeout") {
+        if (data.event === "match.timeout") {
           setQueueStatus("timeout");
           newSocket.close();
-        } else if (data.event == "match.found") {
+        } else if (data.event === "match.found") {
           setQueueStatus("found");
           setSessionId(data.data.session_id);
-        } else if (data.event == "match.cancelled") {
+        } else if (data.event === "match.cancelled") {
           setQueueStatus("idle");
           newSocket.close();
         }
@@ -149,7 +151,7 @@ export default function QueueModal() {
             }
 
             // Redirect to the match page
-            window.location.href = `/collab/${sessionId}/?user=${user}`;
+            navigate(`/collab/${sessionId}/?user=${user}`);
           }
           return prev - 1;
         });

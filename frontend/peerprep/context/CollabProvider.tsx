@@ -81,7 +81,7 @@ export function CollabProvider({ sessionId, children, collabRef }: CollabProvide
       setProvider(null);
       setYdoc(null);
     }
-  }, [provider]);
+  }, [provider, ydoc]);
 
   useImperativeHandle(collabRef, () => ({
     destroySession: clearWebsocketSession
