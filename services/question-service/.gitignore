@@ -1,9 +1,0 @@
-# dotenv files
-.env
-.env.local
-
-# Mac
-.DS_Store
-
-# editor and IDE files
-.vscode/

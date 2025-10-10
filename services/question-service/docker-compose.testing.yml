@@ -10,8 +10,20 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=postgres-service
-      - DB_PORT=5432
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - AWS_REGION=${AWS_REGION}
+    depends_on:
+      postgres-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 180s
+      timeout: 3s
+      retries: 3
 
   postgres-service:
     image: postgres:latest
@@ -24,10 +36,17 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
-      - ./init-scripts:/docker-entrypoint-initdb.d  # Runs populate scripts on first init
+      - ./local-script-db-init:/docker-entrypoint-initdb.d  # Runs populate scripts on first init
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
       interval: 2s
       retries: 10
 
-
+  api-caller:
+    image: badouralix/curl-jq:latest
+    depends_on:
+      question-service:
+        condition: service_healthy
+    volumes:
+      - ./local-script-qn-with-img:/init-scripts
+    entrypoint: ["sh", "/init-scripts/post_question.sh"]

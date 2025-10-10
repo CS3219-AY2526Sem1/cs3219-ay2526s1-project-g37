@@ -11,7 +11,25 @@
 - go to firebase project settings > service account > generate new private key.
 - rename the downloaded json file into serviceAccountKey.json and paste it the same dir as .env.
 
-<hr/>
+---
+
+### To Test Question Service
+1. Create a copy of `./services/question-service/.env.dev.example` and name it `.env.dev`
+1. Populate the file with the **DEV** credentials for question service
+1. Ensure you have docker desktop installed
+1. Run this command in the root directory of this repo:
+    ```bash
+    docker-compose -f ./services/question-service/docker-compose.testing.yml --env-file ./services/question-service/.env.dev up
+    ```
+    This does the following
+    1. Start the local postgres DB
+    2. Start the question service FastAPI server
+    3. Runs a script that inserts one question with markdown description and two images (Note that the images are inserted into the dev S3 bucket)
+2. View the Swagger docs at http://localhost:8000/docs
+3. Make API calls to the service either through the Swagger UI or using your own methods
+
+---
+
 
 ### To test alpha version collab service:
 1. Run this command on root:
