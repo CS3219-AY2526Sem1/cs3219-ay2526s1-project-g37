@@ -21,4 +21,4 @@ jobs:
       - run: npm run lint
       - run: npm run build
     env:
-      REACT_ROUTER_SSR: false
+      VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
