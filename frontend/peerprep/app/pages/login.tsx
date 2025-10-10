@@ -2,10 +2,13 @@ import { useState } from "react";
 import { Stack, Grid, TextInput, Button, PasswordInput, Divider, Text, Image } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Link, Navigate } from "react-router";
-import { doSignInWithEmailAndPassword, doSignInWithGoogle } from "~/firebase/auth";
+import { doSignInWithEmailAndPassword, doSignInWithGoogle, isFirebaseError } from "~/firebase/auth";
 import { useAuth } from "../context/authContext";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import logo from "../assets/images/logo.svg";
+
+
+const INVALID_CREDENTIALS = "Invalid email or password, Please try again later.";
 
 export function meta() {
     return [{ title: "PeerPrep - Login" }, { name: "description", content: "Welcome to PeerPrep!" }];
@@ -32,10 +35,18 @@ export default function Login() {
             setIsSigningIn(true);
             try {
                 await doSignInWithEmailAndPassword(values.email, values.password);
-            } catch (error) {
+            } catch (err: unknown) {
                 setIsSigningIn(false);
-                console.log(error);
-                setError(error instanceof Error ? error.message : String(error));
+                console.log(err);
+                if (isFirebaseError(err) && err.code === "auth/invalid-credential") {
+                    setError(INVALID_CREDENTIALS);
+                } else if (isFirebaseError(err)) {
+                    setError(err.message);
+                } else if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError(String(err));
+                }
             }
         }
     };
@@ -67,7 +78,6 @@ export default function Login() {
                                         type="email"
                                         key={form.key("email")}
                                         {...form.getInputProps("email")}
-                                        error={error}
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={12}>
@@ -77,7 +87,6 @@ export default function Login() {
                                         type="password"
                                         key={form.key("password")}
                                         {...form.getInputProps("password")}
-                                        error={error}
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={12} mt="md">
@@ -85,6 +94,13 @@ export default function Login() {
                                         Login
                                     </Button>
                                 </Grid.Col>
+                            {
+                                error && (
+                                    <Text color="red" size="sm" mt="md" style={{ textAlign: "center" }}>
+                                        {error}
+                                    </Text>
+                                )
+                            }
                             </form>
                             <Grid.Col span={12} mt="md">
                                 <Divider my="xs" />

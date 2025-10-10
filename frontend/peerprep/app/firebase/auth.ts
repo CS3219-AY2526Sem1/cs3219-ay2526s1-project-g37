@@ -1,3 +1,4 @@
+import type { FirebaseError } from "firebase/app";
 import { auth } from "./firebase";
 import {
     createUserWithEmailAndPassword,
@@ -56,3 +57,9 @@ export const doSendEmailVerification = () => {
         url: `${window.location.origin}/home`,
     });
 };
+
+export const isFirebaseError = (e: unknown): e is FirebaseError => {
+    return typeof e === "object" && e !== null && "code" in e && typeof (e as any).code === "string";
+}
+
+
