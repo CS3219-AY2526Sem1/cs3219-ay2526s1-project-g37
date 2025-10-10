@@ -13,13 +13,16 @@ def enqueue_user(difficulty: str, topic: str, language: str, user_id: str):
     r.rpush(key, user_id)
     r.hset("match_timestamps", user_id, int(time.time()))
 
-def dequeue_user(difficulty: str, topic: str, language: str):
+def dequeue_user(difficulty: str, topic: str, language: str, current_user_id: str):
     key = _queue_key(difficulty, topic, language)
-    # pop from the front (FIFO)
-    user_id = r.lpop(key)
-    if user_id:
-        r.hdel("match_timestamps", user_id)
-    return user_id
+
+    while True:
+        user_id = r.lpop(key)
+        if user_id is None:
+            return None
+        if user_id != current_user_id:
+            r.hdel("match timestamps", user_id)
+            return user_id
 
 def get_queue_position(difficulty: str, topic: str, language: str, user_id: str):
     key = _queue_key(difficulty, topic, language)

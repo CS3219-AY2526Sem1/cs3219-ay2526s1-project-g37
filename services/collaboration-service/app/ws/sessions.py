@@ -1,13 +1,11 @@
-
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 from app.core.connection_manager import connection_manager
 from app.core.users import UserState
-from app.schemas.messages import Message, CollaboratorConnectMessage, CollaboratorDisconnectMessage, DisplayMessage
+from app.schemas.messages import CollaboratorEndedMessage, Message, CollaboratorConnectMessage, CollaboratorDisconnectMessage, DisplayMessage
 
 from datetime import datetime
 import asyncio
-
-DEFAULT_PING_INTERVAL = 2  # seconds
+import json
 
 router = APIRouter()
 
@@ -34,10 +32,15 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, user_id: str = Quer
         try:
             while True:
                 msg = await ws.receive_text()
-                await connection_manager.on_message(session_id, user_id, msg)
+                print(msg)
+
+                json_msg = json.loads(msg)
+                if json_msg.get("type") == "collaborator_ended":
+                    payload = CollaboratorEndedMessage()
+
+                await connection_manager.on_message(session_id, user_id, payload)
         except WebSocketDisconnect:
             try:
-                print("handle disconnect")
                 await connection_manager.on_disconnect(session_id, user_id)
             except ValueError as e:
                 print(f"Error handling disconnect: {e}")
@@ -50,12 +53,15 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, user_id: str = Quer
 
             if isinstance(msg, CollaboratorConnectMessage):
                 user_status = UserState.AWAIT_POLLING
-                await ws.send_text(f"Connected to session {session_id} as user {user_id}. You can start collaborating!")
+                await ws.send_text(json.dumps(msg.model_dump()))
             elif isinstance(msg, CollaboratorDisconnectMessage):
                 user_status = UserState.AWAIT_CONNECT
-                await ws.send_text(f"Collaborator disconnected, awaiting reconnection...")
+                await ws.send_text(json.dumps(msg.model_dump()))
+            elif isinstance(msg, CollaboratorEndedMessage):
+                user_status = UserState.AWAIT_CONNECT
+                await ws.send_text(json.dumps(msg.model_dump()))
             elif isinstance(msg, DisplayMessage):
-                await ws.send_text(f"[{datetime.now().timestamp()}] {msg.msg}")
+                await ws.send_text(json.dumps(msg.model_dump()))
             else:
                 await ws.send_text(f"Unknown message type received.")
 
@@ -70,7 +76,7 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, user_id: str = Quer
     finally:
         receiver_task.cancel()
 
-        
+
 
 
 
