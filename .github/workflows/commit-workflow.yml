@@ -20,5 +20,5 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
-    env:
-      VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
