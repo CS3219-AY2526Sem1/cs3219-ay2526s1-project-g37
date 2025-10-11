@@ -1,10 +1,12 @@
 import { Grid, TextInput, Button, PasswordInput, Divider, Text, Image, Stack } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Link, Navigate } from "react-router";
-import { doCreateUserWithEmailAndPassword } from "../firebase/auth";
+import { doCreateUserWithEmailAndPassword, doUpdateUserProfile } from "../firebase/auth";
 import { useAuth } from "../context/authContext";
 import logo from "../assets/images/logo.svg";
 import { useState } from "react";
+import { auth } from "~/firebase/firebase";
+import type { User } from "firebase/auth";
 
 export function meta() {
     return [{ title: "PeerPrep - Signup" }, { name: "description", content: "Welcome to PeerPrep!" }];
@@ -34,6 +36,7 @@ export default function Signup() {
             setIsRegistering(true);
             try {
                 await doCreateUserWithEmailAndPassword(values.email, values.password);
+                await doUpdateUserProfile(values.username);
             } catch (error) {
                 setIsRegistering(false);
                 setError(error instanceof Error ? error.message : String(error));
