@@ -1,5 +1,5 @@
 import { Text, Button } from "@mantine/core";
-import { useCollabProvider } from "context/CollabProvider";
+import { useCollabProvider } from "~/context/CollabProvider";
 
 export default function SessionControlBar(props: {user: string | null, onEndSession?: () => void}) {
   const { user, onEndSession } = props;

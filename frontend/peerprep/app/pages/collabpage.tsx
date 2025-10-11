@@ -4,9 +4,10 @@ import SessionControlBar from "../components/sessioncontrolbar/SessionControlBar
 import TestCase from "../components/testcases/TestCase";
 import { CodeEditor } from "../components/codeeditor/CodeEditor";
 import { useEffect, useRef, useState } from "react";
-import { CollabProvider } from "context/CollabProvider";
+import { CollabProvider } from "~/context/CollabProvider";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useSearchParams, useParams, useNavigate } from "react-router";
+import { useAuth } from "../context/authContext";
 
 type Question = {
   name: string;
@@ -23,16 +24,12 @@ Vivamus efficitur consequat ultricies. Sed neque sem, dictum ac nulla eget, fauc
 
 export default function CollabPage() {
   // TODO: retrieve details from matching page
-  const [searchParams] = useSearchParams();
   const params = useParams();
-  const [connectedWith] = useState(
-    searchParams.get("user") === "user1" ? "user2" : "user1"
-  );
   const { sessionId } = params;
-  const [user] = useState(searchParams.get("user") || "user1");
   const [question, setQuestion] = useState(TEST_QUESTION);
   const collabRef = useRef<{ destroySession: () => void }>(null);
-  const WS_URL = `${import.meta.env.VITE_WS_COLLAB_SERVICE_URL}/ws/sessions/${sessionId}?user_id=${user}`;
+  const { userId } = useAuth();
+  const WS_URL = `${import.meta.env.VITE_WS_COLLAB_SERVICE_URL}/ws/sessions/${sessionId}?user_id=${userId}`;
   const { sendJsonMessage, lastMessage, readyState, getWebSocket } =
     useWebSocket(WS_URL, { shouldReconnect: () => true });
 
@@ -114,7 +111,7 @@ export default function CollabPage() {
       <Grid>
         <Grid.Col span={{ base: 12 }}>
           <SessionControlBar
-            user={connectedWith}
+            user={userId}
             onEndSession={handleEndSession}
           />
         </Grid.Col>

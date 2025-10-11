@@ -5,9 +5,11 @@ import { Container, Group, Text } from "@mantine/core";
 import { useNavigate } from "react-router";
 import classes from "./header.module.css";
 import logo from "../../assets/images/logo.svg";
+import { useAuth } from "../../context/authContext";
 
 export default function Header() {
   const navigate = useNavigate();
+  const { displayName } = useAuth();
 
   return (
     <header className={classes.header}>
@@ -21,7 +23,7 @@ export default function Header() {
           />
         </Group>
         <Group gap={5}>
-          <Text>NorbertLoh</Text>
+          <Text>{displayName}</Text>
         </Group>
       </Container>
     </header>

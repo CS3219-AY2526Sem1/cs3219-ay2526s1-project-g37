@@ -18,6 +18,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import Header from "./components/header/header";
 import { AuthProvider } from "./context/authContext";
+import { getAuth, updateProfile } from "firebase/auth";
 
 export const links: Route.LinksFunction = () => [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -153,7 +154,7 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const linksWithHeader = ["/user", "/admin", "/collab"];
-
+    const auth = getAuth();
   const isHeader = () => {
     return linksWithHeader.some(path => location.pathname.startsWith(path));
   };

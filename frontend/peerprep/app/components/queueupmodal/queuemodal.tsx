@@ -2,12 +2,12 @@ import { useDisclosure } from "@mantine/hooks";
 import { Modal, Button } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
 import FoundModal from "./foundmodal";
 import TimeoutModal from "./timeoutmodal";
 import SearchingModal from "./searchingmodal";
 import SelectionModal from "./selectionmodal";
 import { useNavigate } from "react-router";
+import { useAuth } from "../../context/authContext";
 
 export default function QueueModal() {
   const [opened, { open, close }] = useDisclosure(false);
@@ -17,10 +17,10 @@ export default function QueueModal() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [redirectCountdown, setRedirectCountdown] = useState(3);
-  const [searchParams] = useSearchParams();
-  const [user, setUser] = useState(searchParams.get("user") || "user1");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { userId } = useAuth();
+  const [shouldNavigate, setShouldNavigate] = useState(false);
 
   const form = useForm({
     initialValues: {
@@ -29,31 +29,23 @@ export default function QueueModal() {
     },
   });
 
-  useEffect(() => {
-    const userId = searchParams.get("user");
-    if (userId) {
-      setUser(userId);
-    }
-  }, [searchParams]);
-
   const getRequestBody = () => {
-    console.log(
-      {
-      user_id: user,
+    console.log({
+      user_id: userId,
       difficulty: form.values.difficulty,
       topic: form.values.topic,
-      language: 'python',
-    })
+      language: "python",
+    });
     return JSON.stringify({
-      user_id: user,
+      user_id: userId,
       difficulty: form.values.difficulty,
       topic: form.values.topic,
-      language: 'python',
+      language: "python",
     });
   };
 
   const sendQueueRequest = () => {
-    fetch("http://localhost:8000/match/request", {
+    fetch(`${import.meta.env.VITE_MATCHING_SERVICE_URL}/match/request`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -97,8 +89,10 @@ export default function QueueModal() {
     setQueueStatus("searching");
 
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-      console.log("User ID from URL:", user);
-      const newSocket = new WebSocket(`${import.meta.env.VITE_WS_MATCHING_SERVICE_URL}/match/ws/${user}`);
+      console.log("User ID from URL:", userId);
+      const newSocket = new WebSocket(
+        `${import.meta.env.VITE_WS_MATCHING_SERVICE_URL}/match/ws/${userId}`
+      );
 
       setSocket(newSocket);
 
@@ -151,7 +145,7 @@ export default function QueueModal() {
             }
 
             // Redirect to the match page
-            navigate(`/collab/${sessionId}/?user=${user}`);
+            setShouldNavigate(true);
           }
           return prev - 1;
         });
@@ -164,6 +158,12 @@ export default function QueueModal() {
       clearInterval(timer);
     };
   }, [queueStatus]);
+
+  useEffect(() => {
+    if (shouldNavigate) {
+      navigate(`/collab/${sessionId}`);
+    }
+  }, [shouldNavigate]);
 
   // unload when user closes tab
   useEffect(() => {
@@ -196,10 +196,18 @@ export default function QueueModal() {
   return (
     <>
       <Modal opened={opened} onClose={close} c="white" title={getTitle()}>
-        {queueStatus === "idle" && <SelectionModal form={form} handleQueue={handleQueue} />}
-        {queueStatus === "searching" && <SearchingModal elapsedTime={elapsedTime} leaveQueue={leaveQueue} />}
-        {queueStatus === "timeout" && <TimeoutModal setQueueStatus={setQueueStatus} />}
-        {queueStatus === "found" && <FoundModal redirectCountdown={redirectCountdown} />}
+        {queueStatus === "idle" && (
+          <SelectionModal form={form} handleQueue={handleQueue} />
+        )}
+        {queueStatus === "searching" && (
+          <SearchingModal elapsedTime={elapsedTime} leaveQueue={leaveQueue} />
+        )}
+        {queueStatus === "timeout" && (
+          <TimeoutModal setQueueStatus={setQueueStatus} />
+        )}
+        {queueStatus === "found" && (
+          <FoundModal redirectCountdown={redirectCountdown} />
+        )}
       </Modal>
       <Button fullWidth onClick={open}>
         Queue Up
