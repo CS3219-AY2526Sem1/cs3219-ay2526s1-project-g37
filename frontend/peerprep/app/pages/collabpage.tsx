@@ -6,7 +6,7 @@ import { CodeEditor } from "../components/codeeditor/CodeEditor";
 import { useEffect, useRef, useState } from "react";
 import { CollabProvider } from "~/context/CollabProvider";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { useSearchParams, useParams, useNavigate } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../context/authContext";
 
 type Question = {

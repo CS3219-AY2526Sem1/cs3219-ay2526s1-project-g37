@@ -5,8 +5,6 @@ import { doCreateUserWithEmailAndPassword, doUpdateUserProfile } from "../fireba
 import { useAuth } from "../context/authContext";
 import logo from "../assets/images/logo.svg";
 import { useState } from "react";
-import { auth } from "~/firebase/firebase";
-import type { User } from "firebase/auth";
 
 export function meta() {
     return [{ title: "PeerPrep - Signup" }, { name: "description", content: "Welcome to PeerPrep!" }];
