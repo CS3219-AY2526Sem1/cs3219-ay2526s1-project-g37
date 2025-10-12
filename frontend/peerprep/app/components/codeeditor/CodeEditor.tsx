@@ -1,7 +1,7 @@
 import { Editor, type EditorProps, type OnMount } from "@monaco-editor/react";
 import { useEffect, useRef, useState } from "react";
 import type { MonacoBinding } from "y-monaco";
-import { useCollabProvider } from "../../../context/CollabProvider";
+import { useCollabProvider } from "../../context/CollabProvider";
 
 export function CodeEditor(props: EditorProps) {
   const [isBindingLoaded, setIsBindingLoaded] = useState(false);
