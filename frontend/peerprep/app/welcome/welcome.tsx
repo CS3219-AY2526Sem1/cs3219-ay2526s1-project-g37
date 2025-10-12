@@ -16,6 +16,14 @@ export function Welcome() {
         }
     }, [userLoggedIn, navigate]);
 
+    // example of getting tokenId
+    // useEffect(() => {
+    //     if (currentUser) {
+    //         const tokenId = await currentUser.getIdToken();
+    //         console.log("tokenId", tokenId);
+    //     }
+    // }, [currentUser]);
+
     return (
         <main className="flex items-center justify-center pt-16 pb-4">
             <div className="flex-1 flex flex-col items-center gap-16 min-h-0">
@@ -45,7 +53,14 @@ export function Welcome() {
                         </ul>
                     </nav>
                 </div>
-                <button type="button" style={{ backgroundColor: "red", color: "white" }} onClick={() => doSignOut()}>
+                <button
+                    type="button"
+                    style={{
+                        backgroundColor: "red",
+                        color: "white",
+                    }}
+                    onClick={() => doSignOut()}
+                >
                     Sign Out
                 </button>
             </div>

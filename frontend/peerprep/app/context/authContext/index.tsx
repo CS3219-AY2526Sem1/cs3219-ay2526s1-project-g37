@@ -37,7 +37,7 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
 
     async function initializeUser(user: User | null) {
         if (user) {
-            setCurrentUser({ ...user });
+            setCurrentUser(user);
 
             // check if provider is email and password login
             const isEmail = user.providerData.some((provider: UserInfo) => provider.providerId === "password");
