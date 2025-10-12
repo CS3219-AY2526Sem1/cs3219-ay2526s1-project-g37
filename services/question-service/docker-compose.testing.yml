@@ -20,10 +20,11 @@ services:
       postgres-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      test: ["CMD", "curl", "-f", "-s", "http://localhost:8000/docs"]
       interval: 180s
       timeout: 3s
       retries: 3
+      start_period: 3s
 
   postgres-service:
     image: postgres:latest
