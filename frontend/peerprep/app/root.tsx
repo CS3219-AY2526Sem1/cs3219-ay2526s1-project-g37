@@ -153,7 +153,6 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const linksWithHeader = ["/user", "/admin", "/collab"];
-
   const isHeader = () => {
     return linksWithHeader.some(path => location.pathname.startsWith(path));
   };

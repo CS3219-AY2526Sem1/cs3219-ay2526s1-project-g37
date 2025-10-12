@@ -93,13 +93,11 @@ export default function Login() {
                                         Login
                                     </Button>
                                 </Grid.Col>
-                            {
-                                error && (
+                                {error && (
                                     <Text color="red" size="sm" mt="md" style={{ textAlign: "center" }}>
                                         {error}
                                     </Text>
-                                )
-                            }
+                                )}
                             </form>
                             <Grid.Col span={12} mt="md">
                                 <Divider my="xs" />
@@ -115,7 +113,7 @@ export default function Login() {
                                 <Button
                                     leftSection={<IconBrandGoogle size={14} />}
                                     onClick={onGoogleSignIn}
-                                    disabled={isSigningIn}
+                                    // disabled={isSigningIn}
                                     className=" m-2"
                                 >
                                     Sign in with Google
