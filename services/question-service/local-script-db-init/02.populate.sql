@@ -14,7 +14,7 @@ VALUES
     ('Databases'),
     ('Arrays'),
     ('Brainteaser'),
-    ('[FOR TESTING]')
+    ('FOR_TESTING')
 ON CONFLICT DO NOTHING;
 
 -- Insert sample questions

@@ -5,10 +5,10 @@
 # --arg var_name value: Passes a simple string value into a jq variable.
 
 JSON=$(jq -n \
-  --arg name "[FOR TESTING] Question with images" \
+  --arg name "FOR_TESTING Question with images" \
   --rawfile description /init-scripts/sample_qn.md \
   --arg difficulty "Easy" \
-  --arg topic "[FOR TESTING]" \
+  --arg topic "FOR_TESTING" \
   --arg img1 "$(base64 -w 0 /init-scripts/basic_tree.png)" \
   --arg img2 "$(base64 -w 0 /init-scripts/basic_tree2.png)" \
   '{
