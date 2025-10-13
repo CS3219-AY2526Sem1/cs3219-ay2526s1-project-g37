@@ -1,0 +1,128 @@
+services:
+  frontend:
+    build:
+      context: ./frontend/peerprep
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - PORT=5173
+      - VITE_COLLAB_SERVICE_URL=localhost:8000
+      - VITE_MATCHING_SERVICE_URL=localhost:8001
+      - VITE_YJS_WS_URL=ws://localhost:1234
+    depends_on:
+      - collaboration-service
+      - y-websocket-server
+
+  # frontend-2:
+  #   image: peerprep:local          # <-- reuse the built image (no build:)
+  #   container_name: frontend-2
+  #   ports:
+  #     - "5174:5174"
+  #   environment:
+  #     - PORT=5174
+  #     - VITE_COLLAB_SERVICE_URL=localhost:8000
+  #     - VITE_YJS_WS_URL=ws://localhost:1234
+  #     - VITE_DUMMY_USER_ID=user2
+  #   depends_on:
+  #     - collaboration-service
+  #     - y-websocket-server
+  #   command: ["npm","run","dev","--","--host","0.0.0.0","--port","5174"]
+
+  collaboration-service:
+    build:
+      context: ./services/collaboration-service
+      dockerfile: Dockerfile
+    container_name: collaboration-service
+    ports:
+      - "8000:8000"  # Collaboration service API
+
+  y-websocket-server:
+    image: alokinplc/y-websocket:latest
+    container_name: y-websocket-server
+    ports:
+      - "1234:1234"  # Yjs WebSocket server
+    environment:
+      - PORT=1234
+
+  matching-service:
+    build:
+      context: ./services/matching-service
+      dockerfile: Dockerfile
+    container_name: matching-service
+    ports:
+      - "8001:8001"  # Matching service API
+    environment:
+      - PORT=8001
+      - REDIS_HOST=redis-service
+      - REDIS_PORT=6379
+      - QUESTION_SERVICE_URL=question-service:8002
+      - COLLAB_SERVICE_URL=collaboration-service:8000
+    depends_on:
+      - collaboration-service
+      - redis-service
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
+
+  redis-service:
+    image: redis:latest
+    container_name: redis-service
+    ports:
+      - "6379:6379"  # Redis service for matching
+    command: ["redis-server"]
+
+  question-service:
+    build:
+      context: ./services/question-service
+      dockerfile: Dockerfile
+    container_name: question-service
+    ports:
+      - "8002:8002"  # Question service API
+    environment:
+      - PORT=8002
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - AWS_REGION=${AWS_REGION}
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
+    depends_on:
+      postgres-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-s", "http://localhost:8002/docs"]
+      interval: 180s
+      timeout: 3s
+      retries: 3
+      start_period: 3s
+
+  postgres-service:
+    image: postgres:latest
+    container_name: postgres-service
+    restart: always
+    ports:
+      - "5433:5432"  # Postgres database
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./services/question-service/local-script-db-init:/docker-entrypoint-initdb.d  # Runs populate scripts on first init
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      interval: 2s
+      retries: 10
+      
+  api-caller:
+    image: badouralix/curl-jq:latest
+    depends_on:
+      question-service:
+        condition: service_healthy
+    volumes:
+      - ./services/question-service/local-script-qn-with-img:/init-scripts
+    entrypoint: ["sh", "/init-scripts/post_question.sh"]
+

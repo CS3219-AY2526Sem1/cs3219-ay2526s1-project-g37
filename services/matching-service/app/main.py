@@ -5,7 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title="Matching Service")
 
 origins = [
-    "http://localhost",
     "http://localhost:5173",
 ]
 

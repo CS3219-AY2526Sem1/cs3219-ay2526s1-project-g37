@@ -1,10 +1,10 @@
-import { auth } from "./firebase";
+import { auth } from "./init";
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    sendPasswordResetEmail,
-    sendEmailVerification,
-    updatePassword,
+    // sendPasswordResetEmail,
+    // sendEmailVerification,
+    // updatePassword,
     signInWithRedirect,
     GoogleAuthProvider,
     updateProfile,
@@ -45,22 +45,23 @@ export const doSignOut = () => {
     return auth.signOut();
 };
 
-export const doPasswordReset = (email: AuthCredentials["email"]) => {
-    return sendPasswordResetEmail(auth, email);
-};
+// export const doPasswordReset = (email: AuthCredentials["email"]) => {
+//     return sendPasswordResetEmail(auth, email);
+// };
 
-export const doPasswordChange = (password: AuthCredentials["password"]) => {
-    if (!auth.currentUser) {
-        throw new Error("No authenticated user found.");
-    }
-    return updatePassword(auth.currentUser, password);
-};
+// export const doPasswordChange = (password: AuthCredentials["password"]) => {
+//     if (!auth.currentUser) {
+//         throw new Error("No authenticated user found.");
+//     }
+//     return updatePassword(auth.currentUser, password);
+// };
 
-export const doSendEmailVerification = () => {
-    if (!auth.currentUser) {
-        throw new Error("No authenticated user found.");
-    }
-    return sendEmailVerification(auth.currentUser, {
-        url: `${window.location.origin}/home`,
-    });
-};
+// export const doSendEmailVerification = () => {
+//     if (!auth.currentUser) {
+//         throw new Error("No authenticated user found.");
+//     }
+//     return sendEmailVerification(auth.currentUser, {
+//         url: `${window.location.origin}/home`,
+//     });
+// };
+

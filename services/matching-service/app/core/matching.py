@@ -12,7 +12,7 @@ TIMEOUT_SECONDS = 60
 async def fetch_question(difficulty: str, topic: str):
     async with httpx.AsyncClient() as client:
         resp = await client.get(
-            f"{QUESTION_SERVICE_URL}/questions/random",
+            f"http://{QUESTION_SERVICE_URL}/questions/random",
             params={"difficulty": difficulty, "topic": topic},
             timeout=10.0
         )
@@ -22,7 +22,7 @@ async def fetch_question(difficulty: str, topic: str):
 async def create_session(user_ids: list[str], question_data: dict):
     async with httpx.AsyncClient() as client:
         resp = await client.post(
-            f"{COLLAB_SERVICE_URL}/sessions/",
+            f"http://{COLLAB_SERVICE_URL}/sessions/",
             json={
                 "user_ids": user_ids,
                 "question": question_data},

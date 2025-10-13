@@ -29,7 +29,7 @@ export default function CollabPage() {
   const [question, setQuestion] = useState(TEST_QUESTION);
   const collabRef = useRef<{ destroySession: () => void }>(null);
   const { userId } = useAuth();
-  const WS_URL = `${import.meta.env.VITE_WS_COLLAB_SERVICE_URL}/ws/sessions/${sessionId}?user_id=${userId}`;
+  const WS_URL = `ws://${import.meta.env.VITE_COLLAB_SERVICE_URL}/ws/sessions/${sessionId}?user_id=${userId}`;
   const { sendJsonMessage, lastMessage, readyState, getWebSocket } =
     useWebSocket(WS_URL, { shouldReconnect: () => true });
 
@@ -58,7 +58,7 @@ export default function CollabPage() {
   }, [lastMessage]);
 
   const fetchQuestionDetails = async () => {
-    const url = `${import.meta.env.VITE_COLLAB_SERVICE_URL}/sessions/${sessionId}/question`;
+    const url = `http://${import.meta.env.VITE_COLLAB_SERVICE_URL}/sessions/${sessionId}/question`;
 
     try {
       const response = await fetch(url);
