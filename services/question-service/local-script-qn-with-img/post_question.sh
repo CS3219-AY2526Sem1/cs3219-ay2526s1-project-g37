@@ -27,6 +27,6 @@ if [ $? -ne 0 ]; then
 fi
 
 # Send the API request
-curl -X POST http://question-service:8000/questions \
+curl -X POST http://question-service:8002/questions \
   -H "Content-Type: application/json" \
   -d "$JSON"
