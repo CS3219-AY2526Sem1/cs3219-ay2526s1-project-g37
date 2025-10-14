@@ -261,6 +261,6 @@ def upload_image_and_get_url(file_bytes: bytes, filename: str, content_type: Opt
 
     # Normalize CDN prefix (avoid double slashes)
     cdn = cdn.rstrip("/")
-    url = f"{cdn}/{bucket}/{key}"
+    url = f"https://{cdn}/{key}"
     return url
 

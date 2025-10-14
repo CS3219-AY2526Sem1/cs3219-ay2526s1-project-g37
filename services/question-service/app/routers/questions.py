@@ -25,7 +25,7 @@ def create_question_endpoint(q: QuestionRequest):
     return {"id": new_qid, "message": "Created successfully"}
 
 
-@router.get("/random", response_model=Question)
+@router.get("/random", response_model=QuestionRequest)
 def get_random_question_endpoint(
     difficulty: str = Query(..., description="The difficulty level to filter by"),
     topic: str = Query(..., description="The topic to filter by")
