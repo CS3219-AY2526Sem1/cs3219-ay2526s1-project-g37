@@ -1,4 +1,13 @@
-import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation } from "react-router";
+import {
+  isRouteErrorResponse,
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useLocation,
+  useNavigate,
+} from "react-router";
 
 import "@mantine/core/styles.css";
 import "@mantine/tiptap/styles.css";
@@ -141,21 +150,28 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-    const location = useLocation();
-    const linksWithHeader = ["/user"];
+  const location = useLocation();
+  const navigate = useNavigate();
+  const linksWithHeader = ["/user", "/admin", "/collab"];
 
-    const isHeader = () => {
-        return linksWithHeader.includes(location.pathname);
-    };
+  const isHeader = () => {
+    return linksWithHeader.some(path => location.pathname.startsWith(path));
+  };
 
-    return (
-        <AuthProvider>
-            <MantineProvider theme={theme} defaultColorScheme="dark">
-                {isHeader() && <Header />}
-                <Container fluid>{<Outlet />}</Container>
-            </MantineProvider>
-        </AuthProvider>
-    );
+  return (
+    <AuthProvider>
+        <MantineProvider theme={theme} defaultColorScheme="dark">
+        {isHeader() && <Header />}
+
+        <Container fluid>{<Outlet />}</Container>      
+        {location.pathname === "/" && (
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 15 }}>
+            <Button onClick={() => navigate("/collab")}>Go to Collab</Button>
+            </div>
+        )}
+        </MantineProvider>
+    </AuthProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

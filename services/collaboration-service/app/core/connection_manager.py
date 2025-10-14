@@ -1,22 +1,26 @@
 from typing import Dict
 import uuid 
 import asyncio
-from app.schemas.messages import CollaboratorConnectMessage, CollaboratorDisconnectMessage, DisplayMessage
+from app.schemas.messages import CollaboratorConnectMessage, CollaboratorDisconnectMessage, DisplayMessage, Message
 from app.core.errors import SessionNotFoundError, UserNotFoundError, InvalidUserIDsError
+from app.schemas.questions import QuestionBase64Images
 
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, Dict[str, asyncio.Queue]] = {}
+        self.questions: Dict[str, QuestionBase64Images] = {}
         self.condition = asyncio.Condition()
-    
-    def init_session(self, user_ids: list[str]) -> str:
+
+    def init_session(self, user_ids: list[str], question: QuestionBase64Images) -> str:
         if len(user_ids) != 2:
             raise InvalidUserIDsError()
         session_id = self.generate_uuid(user_ids[0], user_ids[1])
 
         self.active_connections[session_id] = {}
+        self.questions[session_id] = question
         for user_id in user_ids:
-            self.active_connections[session_id][user_id] = None
+            if self.active_connections[session_id].get(user_id) is None:
+                self.active_connections[session_id][user_id] = None
         return session_id
     
     def _get_collaborator_q(self, session_id, user_id):
@@ -62,18 +66,23 @@ class ConnectionManager:
         
         await collaborator_q.put(CollaboratorDisconnectMessage())
 
-    async def on_message(self, session_id: str, user_id: str, msg: str):
+    async def on_message(self, session_id: str, user_id: str, msg: Message):
         collaborator_q = self._get_collaborator_q(session_id, user_id)
 
         if collaborator_q is None:
             return None
 
-        await collaborator_q.put(DisplayMessage(msg=msg))
+        await collaborator_q.put(msg)
 
     def generate_uuid(self, user1: str, user2: str) -> str:
         namespace = uuid.NAMESPACE_DNS  
         seed = ''.join(sorted([user1, user2]))
         return str(uuid.uuid5(namespace, seed))
+    
+    def get_question(self, session_id: str) -> QuestionBase64Images:
+        if session_id not in self.questions:
+            raise SessionNotFoundError()
+        return self.questions[session_id]
 
 
 connection_manager = ConnectionManager()

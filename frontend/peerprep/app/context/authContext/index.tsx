@@ -23,7 +23,7 @@ export function useAuth() {
     return useContext(AuthContext);
 }
 
-export function AuthProvider({ children }: React.PropsWithChildren<{}>) {
+export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [userLoggedIn, setUserLoggedIn] = useState(false);
     const [isEmailUser, setIsEmailUser] = useState(false);

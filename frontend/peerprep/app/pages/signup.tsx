@@ -10,6 +10,7 @@ export function meta() {
     return [{ title: "PeerPrep - Signup" }, { name: "description", content: "Welcome to PeerPrep!" }];
 }
 
+
 export default function Signup() {
     const { userLoggedIn } = useAuth();
     const [isRegistering, setIsRegistering] = useState(false);
@@ -81,7 +82,7 @@ export default function Signup() {
                                 </Grid.Col>
                                 <Grid.Col span={12} mt="md">
                                     <Button type="submit" fullWidth autoContrast>
-                                        Login
+                                        Sign Up 
                                     </Button>
                                 </Grid.Col>
                             </form>
