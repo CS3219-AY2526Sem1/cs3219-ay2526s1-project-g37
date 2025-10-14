@@ -1,4 +1,6 @@
 import uuid
+import os
+import mimetypes
 from typing import List, Dict, Optional
 from app.core.utils import get_conn, upload_to_s3, get_from_s3, delete_from_s3
 from app.models.exceptions import QuestionNotFoundException
@@ -65,13 +67,13 @@ def create_question(
     qid = str(uuid.uuid4()) if qid is None else qid
     
     # Prepare images for S3 upload
-    files_and_keys = []
+    uploaded_keys: List[str] = []
     if images:
-        files_and_keys = [(img, f"questions/{qid}/{i}") for i, img in enumerate(images)]
-
-    # Upload images to S3
-    if files_and_keys:
-        upload_to_s3(files_and_keys)
+        for i, img in enumerate(images):
+            key = f"questions/{qid}/{i}"
+            # Unknown content type; default to binary stream
+            upload_to_s3(img, key, content_type="application/octet-stream")
+            uploaded_keys.append(key)
 
     try:
         with get_conn() as conn:
@@ -86,7 +88,7 @@ def create_question(
                 )
 
                 # Insert images metadata into database
-                for _, key in files_and_keys:
+                for key in uploaded_keys:
                     image_id = str(uuid.uuid4())
                     cur.execute(
                         "INSERT INTO question_images (id, question_id, s3_key) VALUES (%s, %s, %s)",
@@ -95,7 +97,7 @@ def create_question(
         return qid
     except Exception:
         # If any error occurs, delete the uploaded images from S3
-        delete_from_s3([key for _, key in files_and_keys])
+        delete_from_s3(uploaded_keys)
         raise
 
 
@@ -300,4 +302,45 @@ def delete_question(qid: str):
         except Exception:
             conn.rollback()
             raise
+
+
+def upload_image_and_get_url(file_bytes: bytes, filename: str, content_type: Optional[str] = None) -> str:
+    """
+    Upload a single image to S3 with a random UUID prefix and return its CloudFront URL.
+
+    Args:
+        file_bytes: Raw image bytes
+        filename: Original filename to preserve extension
+
+    Returns:
+        str: Public URL constructed as <CLOUDFRONT_DOMAIN>/<S3_BUCKET_NAME>/<uuid>/<filename>
+
+    Raises:
+        ValueError: If required environment variables are missing
+    """
+    if not file_bytes:
+        raise ValueError("file_bytes is empty")
+    if not filename:
+        raise ValueError("filename is required")
+
+    bucket = os.getenv("S3_BUCKET_NAME")
+    cdn = os.getenv("CLOUDFRONT_DOMAIN")
+    if not bucket or not cdn:
+        raise ValueError("Missing required env vars: S3_BUCKET_NAME and/or CLOUDFRONT_DOMAIN")
+
+    prefix = uuid.uuid4().hex
+    key = f"{prefix}/{filename}"
+
+    # Upload to S3
+    if not content_type:
+        guessed, _ = mimetypes.guess_type(filename)
+        if not guessed:
+            raise ValueError("Could not determine content type; please specify explicitly")
+        content_type = guessed
+    upload_to_s3(file_bytes, key, content_type=content_type)
+
+    # Normalize CDN prefix (avoid double slashes)
+    cdn = cdn.rstrip("/")
+    url = f"{cdn}/{bucket}/{key}"
+    return url
 
