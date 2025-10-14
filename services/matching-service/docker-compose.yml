@@ -17,4 +17,4 @@ services:
     container_name: redis-service
     ports:
       - "${REDIS_PORT}:6379"  # Redis service for matching
-    command: ["redis-server", "--port", "${REDIS_PORT}"]
+    command: ["redis-server"]
