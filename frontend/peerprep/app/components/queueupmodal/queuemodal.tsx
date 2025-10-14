@@ -45,7 +45,7 @@ export default function QueueModal() {
   };
 
   const sendQueueRequest = () => {
-    fetch(`http://${import.meta.env.VITE_MATCHING_SERVICE_URL}/match/request`, {
+    fetch(`${import.meta.env.VITE_MATCHING_SERVICE_URL}/match/request`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -57,7 +57,7 @@ export default function QueueModal() {
   };
 
   const sendLeaveRequest = () => {
-    fetch(`http://${import.meta.env.VITE_MATCHING_SERVICE_URL}/match/cancel`, {
+    fetch(`${import.meta.env.VITE_MATCHING_SERVICE_URL}/match/cancel`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -88,10 +88,15 @@ export default function QueueModal() {
   const handleQueue = (values: typeof form.values) => {
     setQueueStatus("searching");
 
+    const VITE_MATCHING_SERVICE_WS_URL = import.meta.env.VITE_MATCHING_SERVICE_URL.replace(
+      /^http/,
+      "ws"
+    );
+
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       console.log("User ID from URL:", userId);
       const newSocket = new WebSocket(
-        `ws://${import.meta.env.VITE_MATCHING_SERVICE_URL}/match/ws/${userId}`
+        `${VITE_MATCHING_SERVICE_WS_URL}/match/ws/${userId}`
       );
 
       setSocket(newSocket);
