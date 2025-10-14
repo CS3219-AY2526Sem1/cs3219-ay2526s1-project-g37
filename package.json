@@ -1,0 +1,7 @@
+{
+  "name": "cs3219-project",
+  "scripts": {
+    "start-all": "docker-compose --env-file .env -f services/question-service/docker-compose.yml -f services/matching-service/docker-compose.yml -f services/collaboration-service/docker-compose.yml -f frontend/peerprep/docker-compose.yml up",  
+    "start-build": "docker-compose --env-file .env -f services/question-service/docker-compose.yml -f services/matching-service/docker-compose.yml -f services/collaboration-service/docker-compose.yml -f frontend/peerprep/docker-compose.yml up --build"
+  }
+}
