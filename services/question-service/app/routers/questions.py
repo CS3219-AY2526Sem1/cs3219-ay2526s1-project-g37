@@ -3,6 +3,7 @@ from app.models.endpoint_models import QuestionRequest, Question
 from app.models.exceptions import QuestionNotFoundException
 from app.core.crud import (
     create_question,
+    check_question_exists,
     get_question,
     get_random_question_by_difficulty_and_topic,
     override_question,
@@ -23,6 +24,15 @@ def create_question_endpoint(q: QuestionRequest):
         topic=q.topic,
     )
     return {"id": new_qid, "message": "Created successfully"}
+
+
+@router.post("/valid-config", response_model=bool)
+def validate_question_config_endpoint(
+    difficulties: list[str] = Query(..., description="List of difficulty levels"),
+    topics: list[str] = Query(..., description="List of topics")
+):
+    """Validate if there exists at least one question for any combination of difficulty and topic"""
+    return check_question_exists(difficulties, topics)
 
 
 @router.get("/random", response_model=QuestionRequest)

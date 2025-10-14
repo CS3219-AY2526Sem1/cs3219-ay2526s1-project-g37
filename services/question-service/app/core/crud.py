@@ -72,6 +72,27 @@ def create_question(
     return qid
 
 
+def check_question_exists(difficulties: List[str], topics: List[str]) -> bool:
+    """
+    Checks if there exists at least one question for any combination of the provided difficulties and topics.
+    
+    Args:
+        difficulties (list[str]): List of difficulty levels to check
+        topics (list[str]): List of topics to check
+    Returns:
+        bool: True if at least one question exists for any combination, False otherwise
+    """
+    if not difficulties or not topics:
+        return False
+
+    with get_conn() as conn, conn.cursor() as cur:
+        sql = "SELECT EXISTS (SELECT 1 FROM questions WHERE difficulty = ANY(%s) AND topic = ANY(%s) LIMIT 1);"
+        cur.execute(sql, (difficulties, topics))
+        exists = cur.fetchone()[0]
+    
+    return exists
+
+
 def get_question(qid: str):
     """
     Retrieves a single question by its ID.
