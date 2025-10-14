@@ -5,8 +5,9 @@ import {
     sendPasswordResetEmail,
     sendEmailVerification,
     updatePassword,
-    signInWithPopup,
+    // signInWithRedirect,
     GoogleAuthProvider,
+    signInWithPopup,
 } from "firebase/auth";
 
 export interface AuthCredentials {

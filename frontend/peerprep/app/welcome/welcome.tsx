@@ -16,6 +16,17 @@ export function Welcome() {
         }
     }, [userLoggedIn, navigate]);
 
+    // example of getting tokenId
+    // useEffect(() => {
+    //     async function logTokenId() {
+    //         if (currentUser) {
+    //             const tokenId = await currentUser.getIdToken();
+    //             console.log("tokenId", tokenId);
+    //         }
+    //     }
+    //     logTokenId();
+    // }, [currentUser]);
+
     return (
         <main className="flex items-center justify-center pt-16 pb-4">
             <div className="flex-1 flex flex-col items-center gap-16 min-h-0">
