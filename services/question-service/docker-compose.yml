@@ -1,12 +1,12 @@
-services:
+ services:
   question-service:
     build:
       dockerfile: Dockerfile
     container_name: question-service
     ports:
-      - "8000:8000"  # Question service API
+      - "${PORT}:${PORT}"  # Question service API
     environment:
-      - PORT=8000
+      - PORT=${PORT}
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
@@ -16,11 +16,12 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - S3_BUCKET_NAME=${S3_BUCKET_NAME}
       - AWS_REGION=${AWS_REGION}
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "${PORT}"]
     depends_on:
       postgres-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "-s", "http://localhost:8000/docs"]
+      test: ["CMD", "curl", "-f", "-s", "http://localhost:${PORT}/docs"]
       interval: 180s
       timeout: 3s
       retries: 3
@@ -42,7 +43,7 @@ services:
       test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
       interval: 2s
       retries: 10
-
+      
   api-caller:
     image: badouralix/curl-jq:latest
     depends_on:
