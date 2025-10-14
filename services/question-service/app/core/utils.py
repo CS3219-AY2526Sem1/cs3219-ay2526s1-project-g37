@@ -2,7 +2,8 @@ import os
 import psycopg
 import boto3
 import base64
-from typing import List, Tuple
+from typing import List, Optional
+
 
 def get_conn():
     """Establishes and returns a new postgres database connection"""
@@ -15,10 +16,17 @@ def get_conn():
     )
 
 
-def upload_to_s3(files_and_keys: List[Tuple[bytes, str]]):
-    """Uploads files to S3 with the given keys."""
-    if not files_and_keys:
-        return
+def upload_to_s3(file: bytes, key: str, content_type: Optional[str] = None):
+    """
+    Upload a single file to S3 with the given key and optional content type.
+
+    Args:
+        file: Raw bytes to upload
+        key: Destination key (path) within the bucket
+        content_type: MIME type of the object (e.g., 'image/png')
+    """
+    if file is None or key is None:
+        raise ValueError("file and key are required")
     s3 = boto3.client(
         "s3",
         aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
@@ -26,8 +34,10 @@ def upload_to_s3(files_and_keys: List[Tuple[bytes, str]]):
         region_name=os.getenv("AWS_REGION"),
     )
     bucket_name = os.getenv("S3_BUCKET_NAME")
-    for file, key in files_and_keys:
-        s3.put_object(Bucket=bucket_name, Key=key, Body=file)
+    put_args = {"Bucket": bucket_name, "Key": key, "Body": file}
+    if content_type:
+        put_args["ContentType"] = content_type
+    s3.put_object(**put_args)
 
 
 def get_from_s3(keys: List[str]) -> List[bytes]:
@@ -82,6 +92,7 @@ def batch_convert_base64_to_bytes(images: List[str]) -> List[bytes]:
     except Exception as e:
         raise ValueError(f"Invalid base64 image: {str(e)}")
     return images_bytes
+
 
 def batch_convert_bytes_to_base64(images: List[bytes]) -> List[str]:
     """Convert a list of bytes to a list of base64 strings"""

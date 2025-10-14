@@ -6,17 +6,14 @@
 
 JSON=$(jq -n \
   --arg name "FOR_TESTING Question with images" \
-  --rawfile description /init-scripts/sample_qn.md \
+  --rawfile description /init-scripts/sample_qn.html \
   --arg difficulty "Easy" \
   --arg topic "FOR_TESTING" \
-  --arg img1 "$(base64 -w 0 /init-scripts/basic_tree.png)" \
-  --arg img2 "$(base64 -w 0 /init-scripts/basic_tree2.png)" \
   '{
     name: $name,
     description: $description,
     difficulty: $difficulty,
-    topic: $topic,
-    images: [$img1, $img2]
+    topic: $topic
   }'
 )
 

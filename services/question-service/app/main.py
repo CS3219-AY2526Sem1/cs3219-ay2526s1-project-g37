@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from dotenv import load_dotenv
-from app.routers import questions_router, labels_router
+from app.routers import questions_router, labels_router, images_router
 from fastapi.middleware.cors import CORSMiddleware  
 
 load_dotenv()
@@ -22,3 +22,4 @@ app.add_middleware(
 # Include routers
 app.include_router(questions_router)
 app.include_router(labels_router)
+app.include_router(images_router)
