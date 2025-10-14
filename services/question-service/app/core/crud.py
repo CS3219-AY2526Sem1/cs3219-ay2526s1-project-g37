@@ -242,7 +242,6 @@ def delete_question(qid: str):
         deleted = cur.fetchone()
         if not deleted:
             raise QuestionNotFoundException(qid)
-        return
 
 
 def upload_image_and_get_url(file_bytes: bytes, filename: str, content_type: Optional[str] = None) -> str:
@@ -254,7 +253,7 @@ def upload_image_and_get_url(file_bytes: bytes, filename: str, content_type: Opt
         filename: Original filename to preserve extension
 
     Returns:
-        str: Public URL constructed as <CLOUDFRONT_DOMAIN>/<S3_BUCKET_NAME>/<uuid>/<filename>
+        str: Public URL constructed as <CLOUDFRONT_DOMAIN>/<uuid>/<filename>
 
     Raises:
         ValueError: If required environment variables are missing
