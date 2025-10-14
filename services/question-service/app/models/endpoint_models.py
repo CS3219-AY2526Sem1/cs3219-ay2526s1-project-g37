@@ -1,12 +1,11 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
+from pydantic import BaseModel
 
 
-class QuestionBase64Images(BaseModel):
-    """Question model with images as base64 strings - used for API requests/responses"""
-    id: Optional[str] = None
+class QuestionRequest(BaseModel):
     name: str
     description: str
     difficulty: str
     topic: str
-    images: Optional[List[str]] = Field(default=None, description="Base64 encoded images")
+    
+class Question(QuestionRequest):
+    id: str

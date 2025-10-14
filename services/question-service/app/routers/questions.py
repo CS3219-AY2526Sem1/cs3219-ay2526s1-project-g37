@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
-from app.models.endpoint_models import QuestionBase64Images
+from app.models.endpoint_models import QuestionRequest, Question
 from app.models.exceptions import QuestionNotFoundException
-from app.core.utils import batch_convert_base64_to_bytes, batch_convert_bytes_to_base64
 from app.core.crud import (
     create_question,
     get_question,
@@ -16,26 +15,17 @@ router = APIRouter(
 )
 
 @router.post("")
-def create_question_endpoint(q: QuestionBase64Images):
-    # Convert images and call CRUD with primitive types
-    images_bytes = batch_convert_base64_to_bytes(q.images)
-    
+def create_question_endpoint(q: QuestionRequest):
     new_qid = create_question(
         name=q.name,
-        description=q.description, 
+        description=q.description,
         difficulty=q.difficulty,
         topic=q.topic,
-        images=images_bytes
     )
-    
-    # Get the created question and convert to response model
-    return {
-        "id": new_qid,
-        "message": "Created successfully"
-    }
+    return {"id": new_qid, "message": "Created successfully"}
 
 
-@router.get("/random")
+@router.get("/random", response_model=Question)
 def get_random_question_endpoint(
     difficulty: str = Query(..., description="The difficulty level to filter by"),
     topic: str = Query(..., description="The topic to filter by")
@@ -45,24 +35,20 @@ def get_random_question_endpoint(
         question_dict = get_random_question_by_difficulty_and_topic(difficulty, topic)
     except QuestionNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e))
-    question_dict['images'] = batch_convert_bytes_to_base64(question_dict['images'])
     return question_dict
 
 
-@router.get("/{qid}", response_model=QuestionBase64Images) 
+@router.get("/{qid}", response_model=Question)
 def get_question_endpoint(qid: str):
     try:
         question_dict = get_question(qid)
     except QuestionNotFoundException as e:
         raise HTTPException(status_code=404, detail=f"Question {e.question_id} not found")
-    question_dict['images'] = batch_convert_bytes_to_base64(question_dict['images'])
     return question_dict
 
 
 @router.put("/{qid}")
-def update_question_endpoint(qid: str, q: QuestionBase64Images):
-    images_bytes = batch_convert_base64_to_bytes(q.images)
-    
+def update_question_endpoint(qid: str, q: QuestionRequest):
     try:
         override_question(
             qid=qid,
@@ -70,7 +56,6 @@ def update_question_endpoint(qid: str, q: QuestionBase64Images):
             description=q.description,
             difficulty=q.difficulty, 
             topic=q.topic,
-            images=images_bytes
         )
     except QuestionNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e))
