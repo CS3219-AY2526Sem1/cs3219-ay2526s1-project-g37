@@ -10,10 +10,10 @@
 ## How to run full service:
 
 1. Create root `.env` and add required parameters (can copy paste from telegram chat) 
-2. Prod Run with `docker-compose -f docker-compose.yml up --profile prod`
-3. Dev Run with `docker-compose -f docker-compose.yml up --profile dev`
+2. Prod Run with `docker-compose --profile prod up`
+3. Dev Run with `docker-compose --profile dev up`
 4. To rebuild, add `--build` flag to above command
-5. To change between prod and dev stop the current running containers with `docker-compose -f docker-compose.yml down` and re-run the above command with the desired profile.
+5. To change between prod and dev stop the current running containers with `docker compose down` and re-run the above command with the desired profile.
 
 <hr />
 
