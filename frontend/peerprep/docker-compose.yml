@@ -1,8 +1,14 @@
 services:
+  # ----------------------------------------------------------------------
+  # 1. Base/Production Service (Runs by default without a profile)
+  # ----------------------------------------------------------------------
   frontend:
+    # Use the 'prod' profile to prevent it from starting by default
+    profiles: ["prod"] 
     build:
+      context: .
       dockerfile: Dockerfile
-    container_name: frontend
+    container_name: frontend_prod
     environment:
       - VITE_COLLAB_SERVICE_URL=${VITE_COLLAB_SERVICE_URL}
       - VITE_MATCHING_SERVICE_URL=${VITE_MATCHING_SERVICE_URL}
@@ -16,3 +22,32 @@ services:
       - VITE_FIREBASE_MEASUREMENT_ID=${VITE_FIREBASE_MEASUREMENT_ID}
     ports:
       - "5173:5173"
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    
+  # ----------------------------------------------------------------------
+  # 2. Development Service (Activated with '--profile dev')
+  # ----------------------------------------------------------------------
+  frontend-dev:
+    # This service is only active when the 'dev' profile is used.
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: frontend_dev
+    environment:
+      - VITE_COLLAB_SERVICE_URL=${VITE_COLLAB_SERVICE_URL}
+      - VITE_MATCHING_SERVICE_URL=${VITE_MATCHING_SERVICE_URL}
+      - VITE_YJS_WS_URL=${VITE_YJS_WS_URL}
+      - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+      - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}
+      - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+      - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
+      - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
+      - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+      - VITE_FIREBASE_MEASUREMENT_ID=${VITE_FIREBASE_MEASUREMENT_ID}
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0 --port 5173

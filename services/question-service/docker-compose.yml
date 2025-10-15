@@ -1,10 +1,16 @@
  services:
-  question-service:
+  # ----------------------------------------------------------------------
+  # Production Service (No volumes, no auto-reloading)
+  # ----------------------------------------------------------------------
+  question-service-prod:
+    # Use the 'prod' profile to prevent it from starting when no profile is given
+    profiles: ["prod"] 
     build:
+      context: .
       dockerfile: Dockerfile
-    container_name: question-service
+    container_name: question-service-prod
     ports:
-      - "${QUESTIONS_PORT}:${QUESTIONS_PORT}"  # Question service API
+      - "${QUESTIONS_PORT}:${QUESTIONS_PORT}" 
     environment:
       - PORT=${QUESTIONS_PORT}
       - DB_NAME=${DB_NAME}
@@ -26,7 +32,46 @@
       timeout: 3s
       retries: 3
       start_period: 5s
+ 
+  # ----------------------------------------------------------------------
+  # Development Service (With volumes for hot-reload)
+  # ----------------------------------------------------------------------
+  question-service-dev:
+    # This service is only active when the 'dev' profile is used.
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: question-service-dev
+    ports:
+      - "${QUESTIONS_PORT}:${QUESTIONS_PORT}" 
+    environment:
+      - PORT=${QUESTIONS_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - AWS_REGION=${AWS_REGION}
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port ${QUESTIONS_PORT} --reload
+    depends_on:
+      postgres-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-s", "http://localhost:${QUESTIONS_PORT}/docs"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
+  # ----------------------------------------------------------------------
+  # Shared Services (Remain unchanged, as they are not profile-specific)
+  # ----------------------------------------------------------------------
   postgres-service:
     image: postgres:latest
     container_name: postgres-service
@@ -43,11 +88,26 @@
       test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
       interval: 2s
       retries: 10
-      
-  api-caller:
+
+  api-caller-prod:
+    profiles: ["prod"] # Only runs when 'prod' profile is active
     image: badouralix/curl-jq:latest
+    container_name: api-caller-prod
     depends_on:
-      question-service:
+      # Depends on the PROD question service
+      question-service-prod:
+        condition: service_healthy
+    volumes:
+      - ./local-script-qn-with-img:/init-scripts
+    entrypoint: ["sh", "/init-scripts/post_question.sh"]
+ 
+  api-caller-dev:
+    profiles: ["dev"] # Only runs when 'dev' profile is active
+    image: badouralix/curl-jq:latest
+    container_name: api-caller-dev
+    depends_on:
+      # Depends on the DEV question service
+      question-service-dev:
         condition: service_healthy
     volumes:
       - ./local-script-qn-with-img:/init-scripts

@@ -6,10 +6,14 @@
 - The teaching team should be given access to the repositories as we may require viewing the history of the repository in case of any disputes or disagreements. 
 
 <hr/>
+
 ## How to run full service:
+
 1. Create root `.env` and add required parameters (can copy paste from telegram chat) 
-2. Run with `docker-compose -f docker-compose.yml up`
-    - Add `--build` flag to rebuild
+2. Prod Run with `docker-compose -f docker-compose.yml up --profile prod`
+3. Dev Run with `docker-compose -f docker-compose.yml up --profile dev`
+4. To rebuild, add `--build` flag to above command
+5. To change between prod and dev stop the current running containers with `docker-compose -f docker-compose.yml down` and re-run the above command with the desired profile.
 
 <hr />
 
