@@ -6,6 +6,12 @@
 - The teaching team should be given access to the repositories as we may require viewing the history of the repository in case of any disputes or disagreements. 
 
 <hr/>
+## How to run full service:
+1. Create root `.env` and add required parameters (can copy paste from telegram chat) 
+2. Run with `docker-compose -f docker-compose.yml up`
+    - Add `--build` flag to rebuild
+
+<hr />
 
 ### for user-service
 - go to firebase project settings > service account > generate new private key.
@@ -19,7 +25,7 @@
 1. Ensure you have docker desktop installed
 1. Run this command in the root directory of this repo:
     ```bash
-    docker-compose -f ./services/question-service/docker-compose.local.yml up
+    docker-compose -f ./services/question-service/docker-compose.yml up
     ```
     This does the following
     1. Start the local postgres DB

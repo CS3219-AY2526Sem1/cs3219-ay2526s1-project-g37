@@ -9,7 +9,6 @@ app.include_router(ws_sessions.router, prefix="/ws/sessions")
 
 origins = [
     "http://localhost:5173",
-    "http://localhost:5174",        ## TODO: remove for production, keeping for testing purposes
 ]
 
 app.add_middleware(

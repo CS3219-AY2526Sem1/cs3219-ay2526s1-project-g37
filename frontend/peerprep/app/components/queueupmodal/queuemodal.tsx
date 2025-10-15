@@ -88,10 +88,15 @@ export default function QueueModal() {
   const handleQueue = (values: typeof form.values) => {
     setQueueStatus("searching");
 
+    const VITE_MATCHING_SERVICE_WS_URL = import.meta.env.VITE_MATCHING_SERVICE_URL.replace(
+      /^http/,
+      "ws"
+    );
+
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       console.log("User ID from URL:", userId);
       const newSocket = new WebSocket(
-        `${import.meta.env.VITE_WS_MATCHING_SERVICE_URL}/match/ws/${userId}`
+        `${VITE_MATCHING_SERVICE_WS_URL}/match/ws/${userId}`
       );
 
       setSocket(newSocket);

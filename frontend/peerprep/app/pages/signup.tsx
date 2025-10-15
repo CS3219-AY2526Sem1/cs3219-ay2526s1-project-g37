@@ -1,7 +1,7 @@
 import { Grid, TextInput, Button, PasswordInput, Divider, Text, Image, Stack } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Link, Navigate } from "react-router";
-import { doCreateUserWithEmailAndPassword, doUpdateUserProfile } from "../firebase/auth";
+import { doCreateUserWithEmailAndPassword, doUpdateUserProfile } from "../firebase/helper";
 import { useAuth } from "../context/authContext";
 import logo from "../assets/images/logo.svg";
 import { useState } from "react";
