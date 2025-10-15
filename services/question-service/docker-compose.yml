@@ -22,10 +22,10 @@
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "-s", "http://localhost:${QUESTIONS_PORT}/docs"]
-      interval: 180s
+      interval: 10s
       timeout: 3s
       retries: 3
-      start_period: 3s
+      start_period: 5s
 
   postgres-service:
     image: postgres:latest
