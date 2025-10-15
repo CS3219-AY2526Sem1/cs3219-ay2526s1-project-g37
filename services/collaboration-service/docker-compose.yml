@@ -1,13 +1,41 @@
 services:
-  collaboration-service:
+  # ----------------------------------------------------------------------
+  # Production Service (Profile: prod)
+  # ----------------------------------------------------------------------
+  collaboration-service-prod:
+    # Only runs when the 'prod' profile is explicitly active
+    profiles: ["prod"]
     build:
+      context: .
       dockerfile: Dockerfile
-    container_name: collaboration-service
+    container_name: collaboration-service-prod
     ports:
-      - "8000:8000"  # Collaboration service API
+      - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
+  # ----------------------------------------------------------------------
+  # Development Service (Profile: dev)
+  # ----------------------------------------------------------------------
+  collaboration-service-dev:
+    # Only runs when the 'dev' profile is explicitly active
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: collaboration-service-dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ----------------------------------------------------------------------
+  # Yjs WebSocket Server (Shared - No Profile)
+  #    This service runs in both dev and prod environments by default.
+  # ----------------------------------------------------------------------
   y-websocket-server:
     image: alokinplc/y-websocket:latest
     container_name: y-websocket-server
     ports:
-      - "1234:1234"  # Yjs WebSocket server
+      - "1234:1234"
