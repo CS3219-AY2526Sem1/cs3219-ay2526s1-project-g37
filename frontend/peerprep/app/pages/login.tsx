@@ -56,6 +56,7 @@ export default function Login() {
             try {
                 await doSignInWithGoogle();
             } catch (error) {
+                setIsSigningIn(false);
                 setError(error instanceof Error ? error.message : String(error));
             }
         }
@@ -89,7 +90,13 @@ export default function Login() {
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={12} mt="md">
-                                    <Button type="submit" fullWidth autoContrast>
+                                    <Button
+                                        type="submit"
+                                        fullWidth
+                                        autoContrast
+                                        disabled={isSigningIn}
+                                        loading={isSigningIn}
+                                    >
                                         Login
                                     </Button>
                                 </Grid.Col>
@@ -113,7 +120,8 @@ export default function Login() {
                                 <Button
                                     leftSection={<IconBrandGoogle size={14} />}
                                     onClick={onGoogleSignIn}
-                                    // disabled={isSigningIn}
+                                    loading={isSigningIn}
+                                    disabled={isSigningIn}
                                     className=" m-2"
                                 >
                                     Sign in with Google

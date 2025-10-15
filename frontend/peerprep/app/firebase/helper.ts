@@ -2,11 +2,12 @@ import { auth } from "./init";
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    // sendPasswordResetEmail,
-    // sendEmailVerification,
-    // updatePassword,
-    signInWithRedirect,
+    sendPasswordResetEmail,
+    sendEmailVerification,
+    updatePassword,
+    // signInWithRedirect,
     GoogleAuthProvider,
+    signInWithPopup,
     updateProfile,
 } from "firebase/auth";
 
@@ -38,30 +39,30 @@ export const doSignInWithEmailAndPassword = (
 
 export const doSignInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithRedirect(auth, provider);
+    await signInWithPopup(auth, provider);
 };
 
 export const doSignOut = () => {
     return auth.signOut();
 };
 
-// export const doPasswordReset = (email: AuthCredentials["email"]) => {
-//     return sendPasswordResetEmail(auth, email);
-// };
+export const doPasswordReset = (email: AuthCredentials["email"]) => {
+    return sendPasswordResetEmail(auth, email);
+};
 
-// export const doPasswordChange = (password: AuthCredentials["password"]) => {
-//     if (!auth.currentUser) {
-//         throw new Error("No authenticated user found.");
-//     }
-//     return updatePassword(auth.currentUser, password);
-// };
+export const doPasswordChange = (password: AuthCredentials["password"]) => {
+    if (!auth.currentUser) {
+        throw new Error("No authenticated user found.");
+    }
+    return updatePassword(auth.currentUser, password);
+};
 
-// export const doSendEmailVerification = () => {
-//     if (!auth.currentUser) {
-//         throw new Error("No authenticated user found.");
-//     }
-//     return sendEmailVerification(auth.currentUser, {
-//         url: `${window.location.origin}/home`,
-//     });
-// };
+export const doSendEmailVerification = () => {
+    if (!auth.currentUser) {
+        throw new Error("No authenticated user found.");
+    }
+    return sendEmailVerification(auth.currentUser, {
+        url: `${window.location.origin}/home`,
+    });
+};
 

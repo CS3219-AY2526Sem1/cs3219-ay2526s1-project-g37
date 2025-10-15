@@ -18,10 +18,13 @@ export function Welcome() {
 
     // example of getting tokenId
     // useEffect(() => {
-    //     if (currentUser) {
-    //         const tokenId = await currentUser.getIdToken();
-    //         console.log("tokenId", tokenId);
+    //     async function logTokenId() {
+    //         if (currentUser) {
+    //             const tokenId = await currentUser.getIdToken();
+    //             console.log("tokenId", tokenId);
+    //         }
     //     }
+    //     logTokenId();
     // }, [currentUser]);
 
     return (
