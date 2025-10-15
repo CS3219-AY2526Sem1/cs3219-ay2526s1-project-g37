@@ -1,0 +1,20 @@
+services:
+  matching-service:
+    build:
+      dockerfile: Dockerfile
+    container_name: matching-service
+    ports:
+      - "${MATCHING_PORT}:${MATCHING_PORT}"  # Matching service API
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - QUESTION_SERVICE_URL=${QUESTION_SERVICE_URL}
+      - COLLAB_SERVICE_URL=${COLLAB_SERVICE_URL}
+    command: uvicorn app.main:app --host 0.0.0.0 --port ${MATCHING_PORT}
+
+  redis-service:
+    image: redis:latest
+    container_name: redis-service
+    ports:
+      - "${REDIS_PORT}:6379"  # Redis service for matching
+    command: ["redis-server"]

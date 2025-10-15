@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Stack, Grid, TextInput, Button, PasswordInput, Divider, Text, Image } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Link, Navigate } from "react-router";
-import { doSignInWithEmailAndPassword, doSignInWithGoogle } from "~/firebase/auth";
+import { doSignInWithEmailAndPassword, doSignInWithGoogle } from "~/firebase/helper";
 import { FirebaseError } from "firebase/app";
 import { useAuth } from "../context/authContext";
 import { IconBrandGoogle } from "@tabler/icons-react";
@@ -64,7 +64,7 @@ export default function Login() {
 
     return (
         <Stack>
-            {userLoggedIn && <Navigate to={"/"} replace={true} />}
+            {userLoggedIn && <Navigate to={"/user"} replace={true} />}
             <Grid>
                 <Grid.Col span={12}>
                     <Grid justify="center" gutter={"xs"} mt={{ base: 20, md: 200 }}>

@@ -1,0 +1,54 @@
+ services:
+  question-service:
+    build:
+      dockerfile: Dockerfile
+    container_name: question-service
+    ports:
+      - "${QUESTIONS_PORT}:${QUESTIONS_PORT}"  # Question service API
+    environment:
+      - PORT=${QUESTIONS_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - AWS_REGION=${AWS_REGION}
+    command: uvicorn app.main:app --host 0.0.0.0 --port ${QUESTIONS_PORT}
+    depends_on:
+      postgres-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-s", "http://localhost:${QUESTIONS_PORT}/docs"]
+      interval: 180s
+      timeout: 3s
+      retries: 3
+      start_period: 3s
+
+  postgres-service:
+    image: postgres:latest
+    container_name: postgres-service
+    restart: always
+    ports:
+      - "${DB_PORT}:5432"  # Postgres database
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./local-script-db-init:/docker-entrypoint-initdb.d  # Runs populate scripts on first init
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      interval: 2s
+      retries: 10
+      
+  api-caller:
+    image: badouralix/curl-jq:latest
+    depends_on:
+      question-service:
+        condition: service_healthy
+    volumes:
+      - ./local-script-qn-with-img:/init-scripts
+    entrypoint: ["sh", "/init-scripts/post_question.sh"]

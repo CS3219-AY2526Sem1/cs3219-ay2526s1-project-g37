@@ -1,6 +1,6 @@
 import logoDark from "./logo-dark.svg";
 import logoLight from "./logo-light.svg";
-import { doSignOut } from "../firebase/auth";
+import { doSignOut } from "../firebase/helper";
 import { useEffect } from "react";
 import { useAuth } from "../context/authContext";
 import { useNavigate } from "react-router";
@@ -56,7 +56,14 @@ export function Welcome() {
                         </ul>
                     </nav>
                 </div>
-                <button type="button" style={{ backgroundColor: "red", color: "white" }} onClick={() => doSignOut()}>
+                <button
+                    type="button"
+                    style={{
+                        backgroundColor: "red",
+                        color: "white",
+                    }}
+                    onClick={() => doSignOut()}
+                >
                     Sign Out
                 </button>
             </div>

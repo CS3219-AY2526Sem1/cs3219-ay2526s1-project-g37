@@ -1,8 +1,9 @@
 import redis
 import json
 import time
+from app.config import REDIS_HOST, REDIS_PORT
 
-r = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=True)
 
 def _queue_key(difficulty: str, topic: str, language: str) -> str:
     return f"match_queue:{difficulty}:{topic}:{language}"

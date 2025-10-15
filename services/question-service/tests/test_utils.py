@@ -13,6 +13,7 @@ def aws_credentials():
     os.environ["AWS_SESSION_TOKEN"] = "testing"
     os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
     os.environ["S3_BUCKET_NAME"] = "test-bucket"
+    os.environ["AWS_REGION"] = "us-east-1"
 
 @pytest.fixture(scope="function")
 def mocked_aws(aws_credentials):
@@ -55,12 +56,13 @@ def mock_jpeg_s3_keys():
     return "questions/qid2/0.jpeg"
 
 @mock_aws
-def test_upload_to_s3_empty_list():
-    """Tests that upload_to_s3 handles an empty list without error."""
-    try:
-        upload_to_s3([])
-    except Exception as e:
-        pytest.fail(f"upload_to_s3 raised an exception with an empty list: {e}")
+def test_upload_to_s3_single(mocked_aws, mock_image_png, mock_png_s3_keys):
+    """Uploads a single object and verifies it exists."""
+    s3_client = boto3.client("s3")
+    s3_client.create_bucket(Bucket=os.getenv("S3_BUCKET_NAME"))
+    upload_to_s3(mock_image_png, mock_png_s3_keys, content_type="image/png")
+    obj = s3_client.get_object(Bucket=os.getenv("S3_BUCKET_NAME"), Key=mock_png_s3_keys)
+    assert obj["Body"].read() == mock_image_png
 
 @mock_aws
 def test_get_from_s3_empty_list():
@@ -85,11 +87,8 @@ def test_s3_upload_get_delete_integration(mocked_aws, mock_image_png, mock_png_s
     s3_client.create_bucket(Bucket=os.getenv("S3_BUCKET_NAME"))
 
     # 1. Upload
-    files_to_upload = [
-        (mock_image_png, mock_png_s3_keys),
-        (mock_image_jpeg, mock_jpeg_s3_keys)
-    ]
-    upload_to_s3(files_to_upload)
+    upload_to_s3(mock_image_png, mock_png_s3_keys, content_type="image/png")
+    upload_to_s3(mock_image_jpeg, mock_jpeg_s3_keys, content_type="image/jpeg")
 
     # 2. Get and Verify
     retrieved_data = get_from_s3([mock_png_s3_keys, mock_jpeg_s3_keys])

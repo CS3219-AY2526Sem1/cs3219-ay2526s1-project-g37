@@ -15,9 +15,3 @@ CREATE TABLE questions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE TABLE question_images (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    question_id UUID REFERENCES questions(id) ON DELETE CASCADE,
-    s3_key TEXT NOT NULL
-);

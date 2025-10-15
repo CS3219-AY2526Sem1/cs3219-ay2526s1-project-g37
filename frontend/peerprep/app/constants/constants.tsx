@@ -1,6 +1,6 @@
 export const TOPICS = [
-  "Array",
-  "String",
+  "Arrays",
+  "Strings",
   "Dynamic Programming",
   "Backtracking",
   "Greedy",
