@@ -163,11 +163,6 @@ export default function App() {
         {isHeader() && <Header />}
 
         <Container fluid>{<Outlet />}</Container>      
-        {location.pathname === "/" && (
-            <div style={{ display: "flex", justifyContent: "center", marginTop: 15 }}>
-            <Button onClick={() => navigate("/collab")}>Go to Collab</Button>
-            </div>
-        )}
         </MantineProvider>
     </AuthProvider>
   );
