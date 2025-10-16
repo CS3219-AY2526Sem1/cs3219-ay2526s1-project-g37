@@ -18,6 +18,7 @@ import { DIFFICULTIES, DIFFICULTYCOLOR } from "~/constants/constants";
 import { CARDHEIGHT } from "~/constants/constants";
 import { useEffect, useState } from "react";
 import { type Labels, addQuestion, getLabels } from "~/services/QuestionService";
+import HtmlRender from "~/components/htmlrenderer/HtmlRender";
 
 export default function AddQuestionPage() {
   const [labels, setLabels] = useState<Labels>({ topics: [], difficulties: [] });
@@ -124,26 +125,12 @@ export default function AddQuestionPage() {
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6 }}>
             <Card style={{ height: CARDHEIGHT, overflowY: "auto" }} c={"white"}>
-              <Text size="xl" fw={700}>
-                {form.values.name}
-              </Text>
-              <Group mb="md" mt="md" gap={8}>
-                {form.values.topic && <Pill key={form.values.topic}>{form.values.topic}</Pill>}
-              </Group>
-              <Text
-                size="md"
-                fw={500}
-                  c={form.values.difficulty ? DIFFICULTYCOLOR[form.values.difficulty] : undefined}
-                mb="md"
-              >
-                {form.values.difficulty}
-              </Text>
-              {/* html from markdown is purified using DOMPurify to sanitise xss and other injections */}
-              <TypographyStylesProvider>
-                <div
-                  dangerouslySetInnerHTML={{ __html: form.values.description }}
-                />
-              </TypographyStylesProvider>
+              <HtmlRender 
+                name={form.values.name}
+                topic={form.values.topic}
+                difficulty={form.values.difficulty?? ""}
+                description={form.values.description}
+              />
             </Card>
           </Grid.Col>
         </Grid>
