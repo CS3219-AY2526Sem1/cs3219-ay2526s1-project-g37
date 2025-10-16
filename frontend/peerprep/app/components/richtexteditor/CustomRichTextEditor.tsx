@@ -3,6 +3,7 @@
 
 import { RichTextEditor, Link } from '@mantine/tiptap';
 import { useEditor } from "@tiptap/react";
+import { useEffect } from "react";
 import StarterKit from "@tiptap/starter-kit";
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
@@ -37,6 +38,20 @@ export default function CustomRichTextEditor({
       onChange(DOMPurify.sanitize(editor.getHTML()));
     },
   });
+
+  // Clears editor when form is reset
+  useEffect(() => {
+    if (!editor) return;
+    const sanitized = DOMPurify.sanitize(value || "");
+    try {
+      const current = editor.getHTML();
+      if (current !== sanitized) {
+        editor.commands.setContent(sanitized);
+      }
+    } catch (e) {
+      console.error("Error setting editor content:", e);
+    }
+  }, [value, editor]);
 
   return (
     <RichTextEditor editor={editor} mih={minheight}>

@@ -1,11 +1,16 @@
-type Question = {
+export type Question = {
     name: string;
     description: string;
     difficulty: string;
     topic: string;
 };
 
-const API_BASE_URL = `https://${import.meta.env.VITE_QUESTION_SERVICE_URL}`; // Replace with your actual API base URL
+export type Labels = {
+    topics: string[];
+    difficulties: string[];
+};
+
+const API_BASE_URL = `${import.meta.env.VITE_QUESTION_SERVICE_URL}`; // Replace with your actual API base URL
 
 export async function addQuestion(question: Question) {
     const response = await fetch(`${API_BASE_URL}/questions`, {
