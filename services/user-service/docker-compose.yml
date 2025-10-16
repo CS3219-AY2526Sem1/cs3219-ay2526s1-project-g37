@@ -12,10 +12,9 @@ services:
     volumes:
       - .:/app # Mount code for hot-reloading
       - /app/node_modules # Add this anonymous volume
-      - ../../serviceAccountKey.json:/app/serviceAccountKey.json:ro # Mount service account key
     environment:
       - PORT=${USER_PORT}
       - QUESTION_SERVICE_URL=${AUTH_QUESTION_SERVICE_URL}
       - MATCHING_SERVICE_URL=${AUTH_MATCHING_SERVICE_URL}
       - COLLAB_SERVICE_URL=${AUTH_COLLAB_SERVICE_URL}
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/serviceAccountKey.json
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}

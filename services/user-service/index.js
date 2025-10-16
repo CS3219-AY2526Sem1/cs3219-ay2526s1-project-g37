@@ -15,7 +15,10 @@ console.log("PORT:", process.env.PORT);
 console.log("QUESTION_SERVICE_URL:", process.env.QUESTION_SERVICE_URL);
 console.log("MATCHING_SERVICE_URL:", process.env.MATCHING_SERVICE_URL);
 console.log("COLLAB_SERVICE_URL:", process.env.COLLAB_SERVICE_URL);
-console.log("GOOGLE_APPLICATION_CREDENTIALS:", process.env.GOOGLE_APPLICATION_CREDENTIALS);
+console.log(
+    "GOOGLE_APPLICATION_CREDENTIALS:",
+    process.env.GOOGLE_APPLICATION_CREDENTIALS ? "Exists" : "Does not exist"
+);
 console.log("------------------------------------------");
 
 const verifyToken = async (req, res, next) => {
