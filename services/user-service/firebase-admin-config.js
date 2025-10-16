@@ -1,4 +1,3 @@
-require("dotenv").config();
 const admin = require("firebase-admin");
 
 const serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS;
