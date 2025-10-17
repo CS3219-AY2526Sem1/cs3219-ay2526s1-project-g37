@@ -24,3 +24,10 @@ export const DIFFICULTYCOLOR: Record<string, string> = {
 export const CARDHEIGHT = "calc(100vh - 95px)";
 
 export const COLLABCARDHEIGHT = "calc(100vh - 145px)";
+
+export const FIREBASE_AUTH_ERROR_CODES: Record<string, string> = {
+  "auth/email-already-in-use": "Email is already in use.",
+  "auth/invalid-email": "Invalid email address.",
+  "auth/invalid-password": "Invalid password.",
+};
+

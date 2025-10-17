@@ -17,6 +17,7 @@ import {
 import { useAuth } from "../context/authContext";
 import logo from "../assets/images/logo.svg";
 import { useState } from "react";
+import { FIREBASE_AUTH_ERROR_CODES } from "../constants/constants";
 
 export function meta() {
   return [
@@ -48,6 +49,8 @@ export default function Signup() {
         /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)
           ? null
           : "Invalid email",
+      username: (value) =>
+        value.length < 3 ? "Username must be at least 3 characters" : null,
       password: (value) =>
         value.length < 6 ? "Password must be at least 6 characters" : null,
       confirmPassword: (value, values) =>
@@ -63,7 +66,14 @@ export default function Signup() {
         await doUpdateUserProfile(values.username);
       } catch (error) {
         setIsRegistering(false);
-        setError(error instanceof Error ? error.message : String(error));
+        const errCode = (error as any)?.code;
+        if (typeof errCode === "string") {
+          setError(errCode);
+        } else if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError(String(error));
+        }
       }
     }
   };
@@ -110,7 +120,7 @@ export default function Signup() {
                 <Grid.Col span={12}>
                   <PasswordInput
                     label="Re-type Password"
-                    placeholder="Re-enter your password"
+                    placeholder="Re-type your password"
                     type="password"
                     key={form.key("confirmPassword")}
                     {...form.getInputProps("confirmPassword")}
@@ -129,7 +139,7 @@ export default function Signup() {
                     mt="md"
                     style={{ textAlign: "center" }}
                   >
-                    {error}
+                    {FIREBASE_AUTH_ERROR_CODES[error] || error}
                   </Text>
                 )}
               </form>
