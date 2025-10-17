@@ -27,6 +27,10 @@ export default function QueueModal() {
       topic: "",
       difficulty: "",
     },
+    validate: {
+      topic: (value) => (value ? null : "Topic is required"),
+      difficulty: (value) => (value ? null : "Difficulty is required"),
+    },
   });
 
   const getRequestBody = () => {

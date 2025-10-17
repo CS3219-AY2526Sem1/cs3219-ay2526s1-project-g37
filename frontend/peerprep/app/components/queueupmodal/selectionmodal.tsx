@@ -17,7 +17,7 @@ type SelectionModalProps = {
 
 export default function SelectionModal({ form, handleQueue }: SelectionModalProps) {
   return (
-        <form onSubmit={form.onSubmit((values) => handleQueue(values))}>
+        <form onSubmit={form.onSubmit((values) => handleQueue(values))} noValidate>
           <Grid>
             <Grid.Col span={12}>
               <Select
@@ -26,6 +26,7 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
                 data={TOPICS}
                 searchable
                 {...form.getInputProps("topic")}
+                required
               />
             </Grid.Col>
             <Grid.Col span={12}>
@@ -35,6 +36,7 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
                 data={DIFFICULTIES}
                 searchable
                 {...form.getInputProps("difficulty")}
+                required
               />
             </Grid.Col>
             <Grid.Col span={12}>
