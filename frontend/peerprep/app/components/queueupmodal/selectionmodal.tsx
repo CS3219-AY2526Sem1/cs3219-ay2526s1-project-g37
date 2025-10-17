@@ -1,6 +1,8 @@
 import { Button, Grid, Select } from "@mantine/core";
-import { DIFFICULTIES, LANGUAGES, TOPICS } from "~/constants/constants";
+import { LANGUAGES } from "~/constants/constants";
 import type { UseFormReturnType } from "@mantine/form";
+import { useEffect, useState } from "react";
+import { type Labels, getLabels } from "~/services/QuestionService";
 
 type SelectionModalProps = {
     form: UseFormReturnType<{
@@ -16,6 +18,12 @@ type SelectionModalProps = {
 };
 
 export default function SelectionModal({ form, handleQueue }: SelectionModalProps) {
+  const [labels, setLabels] = useState<Labels | null>(null);
+
+  useEffect(() => {
+    getLabels().then((data) => setLabels(data));
+  }, []);
+
   return (
         <form onSubmit={form.onSubmit((values) => handleQueue(values))} noValidate>
           <Grid>
@@ -23,7 +31,7 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
               <Select
                 label="Topic"
                 placeholder="Pick values"
-                data={TOPICS}
+                data={labels?.topics || []}
                 searchable
                 {...form.getInputProps("topic")}
                 required
@@ -33,7 +41,7 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
               <Select
                 label="Difficulty"
                 placeholder="Pick values"
-                data={DIFFICULTIES}
+                data={labels?.difficulties || []}
                 searchable
                 {...form.getInputProps("difficulty")}
                 required

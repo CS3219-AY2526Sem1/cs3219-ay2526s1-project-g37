@@ -2,35 +2,66 @@ import {
   Grid,
   Button,
   TextInput,
-  MultiSelect,
   Card,
   Select,
-  TypographyStylesProvider,
-  Textarea,
-  Text,
-  Pill,
-  Group,
 } from "@mantine/core";
 
 import { useForm } from "@mantine/form";
 import CustomRichTextEditor from "../components/richtexteditor/CustomRichTextEditor";
-import { DIFFICULTIES, TOPICS, DIFFICULTYCOLOR } from "~/constants/constants";
 import { CARDHEIGHT } from "~/constants/constants";
+import { useEffect, useState } from "react";
+import { type Labels, addQuestion, getLabels } from "~/services/QuestionService";
+import HtmlRender from "~/components/htmlrenderer/HtmlRender";
 
 export default function AddQuestionPage() {
-  const form = useForm({
+  const [labels, setLabels] = useState<Labels>({ topics: [], difficulties: [] });
+  const form = useForm<{
+    name: string;
+    description: string;
+    difficulty?: string | null;
+    topic?: string | null;
+  }>({
     initialValues: {
-      title: "",
-      topic: [],
-      difficulty: "",
-      problem: "",
-      testCases: "",
+      name: "",
+      description: "",
+      difficulty: null,
+      topic: null,
     },
   });
 
+  useEffect(() => {
+    getLabels().then((data) => setLabels(data));
+  }, []);
+
+  const handleSubmit = (values: {
+    name: string;
+    description: string;
+    difficulty?: string | null;
+    topic?: string | null;
+  }) => {
+    console.log(values);
+    const payload = {
+      name: values.name,
+      description: values.description,
+      difficulty: values.difficulty ?? "",
+      topic: values.topic ?? "",
+    };
+
+    addQuestion(payload)
+      .then((response) => {
+        console.log("Question added successfully:", response);
+        alert("Question added successfully!");
+        form.reset();
+      })
+      .catch((error) => {
+        console.error("Error adding question:", error);
+        alert("Failed to add question. Please try again.");
+      });
+  };
+
   return (
     <>
-      <form onSubmit={form.onSubmit((values) => console.log(values))}>
+      <form onSubmit={form.onSubmit(handleSubmit)}>
         <Grid>
           <Grid.Col span={{ base: 12, md: 6 }} style={{ height: "100%" }}>
             <Card style={{ height: CARDHEIGHT, overflowY: "auto" }}>
@@ -39,15 +70,15 @@ export default function AddQuestionPage() {
                   <TextInput
                     label="Question Title"
                     placeholder="Enter question title"
-                    {...form.getInputProps("title")}
+                    {...form.getInputProps("name")}
                     required
                   />
                 </Grid.Col>
                 <Grid.Col span={12}>
-                  <MultiSelect
+                  <Select
                     label="Topic"
-                    placeholder="Select topics"
-                    data={TOPICS}
+                    placeholder="Select topic"
+                    data={labels.topics}
                     searchable
                     required
                     {...form.getInputProps("topic")}
@@ -57,7 +88,7 @@ export default function AddQuestionPage() {
                   <Select
                     label="Difficulty"
                     placeholder="Select difficulty"
-                    data={DIFFICULTIES}
+                    data={labels.difficulties}
                     searchable
                     required
                     {...form.getInputProps("difficulty")}
@@ -65,17 +96,18 @@ export default function AddQuestionPage() {
                 </Grid.Col>
                 <Grid.Col span={12}>
                   <CustomRichTextEditor
-                    value={form.values.problem}
-                    onChange={(value) => form.setFieldValue("problem", value)}
+                    value={form.values.description}
+                    onChange={(value) => form.setFieldValue("description", value)}
                   />
                 </Grid.Col>
-                <Grid.Col span={12}>
+                {/* Future implementation */}
+                {/* <Grid.Col span={12}>
                   <Textarea
                     label="Test Cases"
                     placeholder="Enter test cases"
                     required
                   />
-                </Grid.Col>
+                </Grid.Col> */}
                 <Grid.Col span={12}>
                   <Button type="submit" fullWidth>
                     Submit
@@ -86,28 +118,12 @@ export default function AddQuestionPage() {
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6 }}>
             <Card style={{ height: CARDHEIGHT, overflowY: "auto" }} c={"white"}>
-              <Text size="xl" fw={700}>
-                {form.values.title}
-              </Text>
-              <Group mb="md" mt="md" gap={8}>
-                {form.values.topic.map((topic) => (
-                  <Pill key={topic}>{topic}</Pill>
-                ))}
-              </Group>
-              <Text
-                size="md"
-                fw={500}
-                c={DIFFICULTYCOLOR[form.values.difficulty]}
-                mb="md"
-              >
-                {form.values.difficulty}
-              </Text>
-              {/* html from markdown is purified using DOMPurify to sanitise xss and other injections */}
-              <TypographyStylesProvider>
-                <div
-                  dangerouslySetInnerHTML={{ __html: form.values.problem }}
-                />
-              </TypographyStylesProvider>
+              <HtmlRender 
+                name={form.values.name}
+                topic={form.values.topic ?? ""}
+                difficulty={form.values.difficulty ?? ""}
+                description={form.values.description}
+              />
             </Card>
           </Grid.Col>
         </Grid>
