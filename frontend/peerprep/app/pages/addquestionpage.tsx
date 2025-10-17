@@ -2,19 +2,12 @@ import {
   Grid,
   Button,
   TextInput,
-  MultiSelect,
   Card,
   Select,
-  TypographyStylesProvider,
-  Textarea,
-  Text,
-  Pill,
-  Group,
 } from "@mantine/core";
 
 import { useForm } from "@mantine/form";
 import CustomRichTextEditor from "../components/richtexteditor/CustomRichTextEditor";
-import { DIFFICULTIES, DIFFICULTYCOLOR } from "~/constants/constants";
 import { CARDHEIGHT } from "~/constants/constants";
 import { useEffect, useState } from "react";
 import { type Labels, addQuestion, getLabels } from "~/services/QuestionService";

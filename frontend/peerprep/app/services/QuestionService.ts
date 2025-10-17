@@ -49,8 +49,7 @@ export async function getLabels() {
 }
 
 export async function uploadImage(imageData: ArrayBuffer) {
-    let fileBlob: Blob;
-    fileBlob = new Blob([new Uint8Array(imageData)], { type: "application/octet-stream" });
+    const fileBlob = new Blob([new Uint8Array(imageData)], { type: "application/octet-stream" });
 
     const formData = new FormData();
     formData.append("file", fileBlob, "upload.png");
