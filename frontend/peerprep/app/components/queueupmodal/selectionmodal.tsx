@@ -21,7 +21,6 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
   const [labels, setLabels] = useState<Labels | null>(null);
 
   useEffect(() => {
-    console.log("Fetching labels...");
     getLabels().then((data) => setLabels(data));
   }, []);
 
