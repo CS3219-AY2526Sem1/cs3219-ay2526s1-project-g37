@@ -1,14 +1,14 @@
 import { Group, Pill, Text, TypographyStylesProvider } from '@mantine/core';
 import { DIFFICULTYCOLOR } from '~/constants/constants';
 
-export default function HtmlRender(props: { name: any; topic: any; difficulty: string; description: any }) {
+export default function HtmlRender(props: { name: string; topic: string; difficulty: string; description: string }) {
     return (
         <>
         <Text size="xl" fw={700}>
             {props.name}
         </Text>
         <Group mb="md" mt="md" gap={8}>
-            {props.topic && <Pill key={props.topic}>{props.topic}</Pill>}
+            {props.topic && <Pill>{props.topic}</Pill>}
         </Group>
         <Text
             size="md"
