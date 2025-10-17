@@ -120,8 +120,8 @@ export default function AddQuestionPage() {
             <Card style={{ height: CARDHEIGHT, overflowY: "auto" }} c={"white"}>
               <HtmlRender 
                 name={form.values.name}
-                topic={form.values.topic}
-                difficulty={form.values.difficulty?? ""}
+                topic={form.values.topic ?? ""}
+                difficulty={form.values.difficulty ?? ""}
                 description={form.values.description}
               />
             </Card>

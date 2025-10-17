@@ -1,4 +1,5 @@
 import { Group, Pill, Text, TypographyStylesProvider } from '@mantine/core';
+import DOMPurify from 'dompurify';
 import { DIFFICULTYCOLOR } from '~/constants/constants';
 
 export default function HtmlRender(props: { name: string; topic: string; difficulty: string; description: string }) {
@@ -21,7 +22,7 @@ export default function HtmlRender(props: { name: string; topic: string; difficu
         {/* html from markdown is purified using DOMPurify to sanitise xss and other injections */}
         <TypographyStylesProvider>
             <div
-            dangerouslySetInnerHTML={{ __html: props.description }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(props.description) }}
             />
         </TypographyStylesProvider>
         </>

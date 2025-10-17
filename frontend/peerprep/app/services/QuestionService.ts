@@ -28,11 +28,11 @@ export async function addQuestion(question: Question) {
     return response.json();
 }
 
-export async function getQuestions(id: string) {
+export async function getQuestion(id: string) {
     const response = await fetch(`${API_BASE_URL}/questions/${id}`);
 
     if (!response.ok) {
-        throw new Error("Failed to fetch questions");
+        throw new Error("Failed to fetch question");
     }
 
     return response.json();
@@ -48,23 +48,19 @@ export async function getLabels() {
     return response.json();
 }
 
-export async function uploadImage(imageData: ArrayBuffer) {
-    const fileBlob = new Blob([new Uint8Array(imageData)], { type: "application/octet-stream" });
-
+export async function uploadImage(imageData: File) {
     const formData = new FormData();
-    formData.append("file", fileBlob, "upload.png");
+    formData.append("file", imageData);
 
-    const res = await fetch(`${API_BASE_URL}/images/upload`, {
+    const response = await fetch(`${API_BASE_URL}/images/upload`, {
         method: "POST",
         body: formData,
     });
 
-    if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(`Failed to upload image: ${res.status} ${text}`);
+    if (!response.ok) {
+        throw new Error("Failed to upload image");
     }
-
-    const body = await res.json();
-    console.log("uploadImage response body:", body);
-    return { imageUrl: body.url || body.imageUrl || body };
+    
+    console.log("Image uploaded successfully");
+    return response.json();
 }

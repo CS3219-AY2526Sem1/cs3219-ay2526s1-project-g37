@@ -20,46 +20,42 @@ interface RichTextEditorProps {
 }
 
 const minheight = 200;
-const MAXFILESIZE = 5 * 1024; // 500KB
+const MAXFILESIZE = 500; // in KB (500 KB)
 
 const FileHandlerExtension = FileHandler.configure({
   allowedMimeTypes: ["image/png", "image/jpeg", "image/webp"],
   onDrop: (currentEditor, files, pos) => {
     files.forEach((file) => {
       if (file.size / 1024 > MAXFILESIZE) {
-        alert(`File size exceeds the limit of ${MAXFILESIZE / 1024}MB`);
+        alert(`File size exceeds the limit of ${MAXFILESIZE}KB`);
         return;
       }
-      const reader = new FileReader();
-      reader.readAsArrayBuffer(file);
 
       // upload to server
-      reader.onload = () => {
-        uploadImage(reader.result as ArrayBuffer)
-          .then((data) => {
-            console.log("Image uploaded successfully:", data);
-            currentEditor
-              .chain()
-              .insertContentAt(pos, {
-                type: "image",
-                attrs: {
-                  src: data.imageUrl,
-                },
-              })
-              .focus()
-              .run();
-          })
-          .catch((error) => {
-            console.error("Image upload failed:", error);
-            alert("Image upload failed. Please try again.");
-          });
-      };
+      uploadImage(file)
+        .then((data) => {
+          console.log("Image uploaded successfully:", data);
+          currentEditor
+            .chain()
+            .insertContentAt(pos, {
+              type: "image",
+              attrs: {
+                src: data.url,
+              },
+            })
+            .focus()
+            .run();
+        })
+        .catch((error) => {
+          console.error("Image upload failed:", error);
+          alert("Image upload failed. Please try again.");
+        });
     });
   },
   onPaste: (currentEditor, files, htmlContent) => {
     files.forEach((file) => {
       if (file.size / 1024 > MAXFILESIZE) {
-        alert(`File size exceeds the limit of ${MAXFILESIZE / 1024}MB`);
+        alert(`File size exceeds the limit of ${MAXFILESIZE}KB`);
         return;
       }
       if (htmlContent) {
@@ -67,29 +63,24 @@ const FileHandlerExtension = FileHandler.configure({
         return false;
       }
 
-      const reader = new FileReader();
-      reader.readAsArrayBuffer(file);
-      // upload to server
-      reader.onload = () => {
-        uploadImage(reader.result as ArrayBuffer)
-          .then((data) => {
-            console.log("Image uploaded successfully:", data);
-            currentEditor
-              .chain()
-                .insertContentAt(currentEditor.state.selection.anchor, {
-                  type: 'image',
-                  attrs: {
-                    src: data.imageUrl,
-                  },
-                })
-                .focus()
-                .run()
-          })
-          .catch((error) => {
-            console.error("Image upload failed:", error);
-            alert("Image upload failed. Please try again.");
-          });
-      };
+      uploadImage(file)
+        .then((data) => {
+          console.log("Image uploaded successfully:", data);
+          currentEditor
+            .chain()
+            .insertContentAt(currentEditor.state.selection.anchor, {
+              type: "image",
+              attrs: {
+                src: data.url,
+              },
+            })
+            .focus()
+            .run();
+        })
+        .catch((error) => {
+          console.error("Image upload failed:", error);
+          alert("Image upload failed. Please try again.");
+        });
     });
   },
 });
