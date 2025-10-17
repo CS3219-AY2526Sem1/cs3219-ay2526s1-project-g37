@@ -47,3 +47,25 @@ export async function getLabels() {
 
     return response.json();
 }
+
+export async function uploadImage(imageData: ArrayBuffer) {
+    let fileBlob: Blob;
+    fileBlob = new Blob([new Uint8Array(imageData)], { type: "application/octet-stream" });
+
+    const formData = new FormData();
+    formData.append("file", fileBlob, "upload.png");
+
+    const res = await fetch(`${API_BASE_URL}/images/upload`, {
+        method: "POST",
+        body: formData,
+    });
+
+    if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Failed to upload image: ${res.status} ${text}`);
+    }
+
+    const body = await res.json();
+    console.log("uploadImage response body:", body);
+    return { imageUrl: body.url || body.imageUrl || body };
+}

@@ -1,15 +1,18 @@
 // Implement using official Mantine documentation
 // https://mantine.dev/x/tiptap/#controlled
 
-import { RichTextEditor, Link } from '@mantine/tiptap';
+import { RichTextEditor, Link } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import { useEffect } from "react";
 import StarterKit from "@tiptap/starter-kit";
-import Highlight from '@tiptap/extension-highlight';
-import TextAlign from '@tiptap/extension-text-align';
-import Superscript from '@tiptap/extension-superscript';
-import SubScript from '@tiptap/extension-subscript';
-import DOMPurify from 'dompurify';
+import Highlight from "@tiptap/extension-highlight";
+import TextAlign from "@tiptap/extension-text-align";
+import Superscript from "@tiptap/extension-superscript";
+import SubScript from "@tiptap/extension-subscript";
+import DOMPurify from "dompurify";
+import Image from "@tiptap/extension-image";
+import FileHandler from "@tiptap/extension-file-handler";
+import { uploadImage } from "~/services/QuestionService";
 
 interface RichTextEditorProps {
   value: string;
@@ -17,6 +20,79 @@ interface RichTextEditorProps {
 }
 
 const minheight = 200;
+const MAXFILESIZE = 5 * 1024; // 500KB
+
+const FileHandlerExtension = FileHandler.configure({
+  allowedMimeTypes: ["image/png", "image/jpeg", "image/webp"],
+  onDrop: (currentEditor, files, pos) => {
+    files.forEach((file) => {
+      if (file.size / 1024 > MAXFILESIZE) {
+        alert(`File size exceeds the limit of ${MAXFILESIZE / 1024}MB`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+
+      // upload to server
+      reader.onload = () => {
+        uploadImage(reader.result as ArrayBuffer)
+          .then((data) => {
+            console.log("Image uploaded successfully:", data);
+            currentEditor
+              .chain()
+              .insertContentAt(pos, {
+                type: "image",
+                attrs: {
+                  src: data.imageUrl,
+                },
+              })
+              .focus()
+              .run();
+          })
+          .catch((error) => {
+            console.error("Image upload failed:", error);
+            alert("Image upload failed. Please try again.");
+          });
+      };
+    });
+  },
+  onPaste: (currentEditor, files, htmlContent) => {
+    files.forEach((file) => {
+      if (file.size / 1024 > MAXFILESIZE) {
+        alert(`File size exceeds the limit of ${MAXFILESIZE / 1024}MB`);
+        return;
+      }
+      if (htmlContent) {
+        console.log(htmlContent);
+        return false;
+      }
+
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+      // upload to server
+      reader.onload = () => {
+        uploadImage(reader.result as ArrayBuffer)
+          .then((data) => {
+            console.log("Image uploaded successfully:", data);
+            currentEditor
+              .chain()
+                .insertContentAt(currentEditor.state.selection.anchor, {
+                  type: 'image',
+                  attrs: {
+                    src: data.imageUrl,
+                  },
+                })
+                .focus()
+                .run()
+          })
+          .catch((error) => {
+            console.error("Image upload failed:", error);
+            alert("Image upload failed. Please try again.");
+          });
+      };
+    });
+  },
+});
 
 export default function CustomRichTextEditor({
   value,
@@ -31,7 +107,9 @@ export default function CustomRichTextEditor({
       Superscript,
       SubScript,
       Highlight,
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Image,
+      FileHandlerExtension,
     ],
     content: value,
     onUpdate: ({ editor }) => {
