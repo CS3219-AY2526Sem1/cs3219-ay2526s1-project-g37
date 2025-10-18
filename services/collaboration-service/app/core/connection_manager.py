@@ -9,6 +9,7 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, Dict[str, asyncio.Queue]] = {}
         self.questions: Dict[str, QuestionBase64Images] = {}
+        self.user_sessions: Dict[str, str] = {}
         self.condition = asyncio.Condition()
 
     def init_session(self, user_ids: list[str], question: QuestionBase64Images) -> str:
@@ -19,6 +20,7 @@ class ConnectionManager:
         self.active_connections[session_id] = {}
         self.questions[session_id] = question
         for user_id in user_ids:
+            self.user_sessions[user_id] = session_id
             if self.active_connections[session_id].get(user_id) is None:
                 self.active_connections[session_id][user_id] = None
         return session_id
@@ -65,7 +67,16 @@ class ConnectionManager:
             return None
         
         await collaborator_q.put(CollaboratorDisconnectMessage())
+    
+    async def on_session_ended(self, session_id: str):
+        if session_id not in self.active_connections:
+            raise SessionNotFoundError()
 
+        users = self.active_connections.pop(session_id, None)
+        self.questions.pop(session_id, None)
+        for user_id in users:
+            del self.user_sessions[user_id]
+        
     async def on_message(self, session_id: str, user_id: str, msg: Message):
         collaborator_q = self._get_collaborator_q(session_id, user_id)
 
@@ -83,6 +94,16 @@ class ConnectionManager:
         if session_id not in self.questions:
             raise SessionNotFoundError()
         return self.questions[session_id]
+    
+    def get_session_id(self, user_id: str) -> str:
+        if user_id not in self.user_sessions:
+            raise UserNotFoundError()
+        return self.user_sessions[user_id]
+    
+    def __str__(self):
+        return f"ConnectionManager(active_connections={self.active_connections}, questions={self.questions}, user_sessions={self.user_sessions})"
+
+
 
 
 connection_manager = ConnectionManager()
