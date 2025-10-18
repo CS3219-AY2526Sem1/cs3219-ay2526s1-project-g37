@@ -27,17 +27,6 @@ export default function Userpage() {
         },
     ]);
 
-    // example of getting tokenId
-    useEffect(() => {
-        async function logTokenId() {
-            if (currentUser) {
-                const tokenId = await currentUser.getIdToken();
-                console.log("tokenId", tokenId);
-            }
-        }
-        logTokenId();
-    }, [currentUser]);
-
     return (
         <Grid>
             <Grid.Col span={12}>
