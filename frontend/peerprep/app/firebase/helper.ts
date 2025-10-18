@@ -18,7 +18,7 @@ export interface AuthCredentials {
 
 export const doCreateUserWithEmailAndPassword = async (
     email: AuthCredentials["email"],
-    password: AuthCredentials["password"],
+    password: AuthCredentials["password"]
 ): Promise<import("firebase/auth").UserCredential> => {
     return createUserWithEmailAndPassword(auth, email, password);
 };
@@ -28,7 +28,7 @@ export const doUpdateUserProfile = async (displayName: string) => {
         throw new Error("No authenticated user found.");
     }
     return updateProfile(auth.currentUser, { displayName });
-}
+};
 
 export const doSignInWithEmailAndPassword = (
     email: AuthCredentials["email"],
@@ -65,4 +65,3 @@ export const doSendEmailVerification = () => {
         url: `${window.location.origin}/home`,
     });
 };
-

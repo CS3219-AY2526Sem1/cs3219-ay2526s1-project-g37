@@ -10,6 +10,7 @@ interface AuthContextType {
     currentUser: User | null;
     displayName: string | null;
     userId: string | null;
+    tokenId: string | null;
     setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
@@ -20,6 +21,7 @@ const AuthContext = React.createContext<AuthContextType>({
     currentUser: null,
     displayName: null,
     userId: null,
+    tokenId: null,
     setCurrentUser: () => {},
 });
 
@@ -34,6 +36,7 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
     const [isEmailUser, setIsEmailUser] = useState(false);
     const [isGoogleUser, setIsGoogleUser] = useState(false);
     const [displayName, setDisplayName] = useState<string | null>(null);
+    const [tokenId, setTokenId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -43,9 +46,13 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
 
     async function initializeUser(user: User | null) {
         if (user) {
-            setCurrentUser({ ...user });
+            setCurrentUser(user);
             setDisplayName(user.displayName);
             setUserId(user.uid);
+
+            const token = await user.getIdToken();
+            setTokenId(token);
+
             // check if provider is email and password login
             const isEmail = user.providerData.some((provider: UserInfo) => provider.providerId === "password");
             setIsEmailUser(isEmail);
@@ -74,6 +81,7 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
         currentUser,
         displayName,
         userId,
+        tokenId,
         setCurrentUser,
     };
 
