@@ -7,8 +7,6 @@ import QueueModal from "~/components/queueupmodal/queuemodal";
 
 import { useState } from "react";
 
-import { useAuth } from "../context/authContext";
-
 export function meta() {
     return [{ title: "PeerPrep - Homepage" }, { name: "description", content: "Welcome to PeerPrep!" }];
 }
