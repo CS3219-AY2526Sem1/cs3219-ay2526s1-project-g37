@@ -5,7 +5,7 @@ import HistoryTable from "../components/table/table";
 import type { InterviewHistory } from "../components/table/table";
 import QueueModal from "~/components/queueupmodal/queuemodal";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { useAuth } from "../context/authContext";
 
@@ -15,7 +15,6 @@ export function meta() {
 
 export default function Userpage() {
     const theme = useMantineTheme();
-    const { currentUser } = useAuth();
 
     const [data] = useState<InterviewHistory[]>([
         {
