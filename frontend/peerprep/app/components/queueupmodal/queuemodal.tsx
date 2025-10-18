@@ -44,7 +44,7 @@ export default function QueueModal() {
     });
   };
 
-  const sendQueueRequest = async () => {
+  const sendQueueRequest = () => {
     const matching_url = `${import.meta.env.VITE_AUTH_ROUTER_URL}/matching`;
     fetch(`${matching_url}/match/request`, {
       method: "POST",
