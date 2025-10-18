@@ -37,8 +37,9 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, user_id: str = Quer
                 json_msg = json.loads(msg)
                 if json_msg.get("type") == "collaborator_ended":
                     payload = CollaboratorEndedMessage()
-
-                await connection_manager.on_message(session_id, user_id, payload)
+                    await connection_manager.on_message(session_id, user_id, payload)
+                    await connection_manager.on_session_ended(session_id)
+                
         except WebSocketDisconnect:
             try:
                 await connection_manager.on_disconnect(session_id, user_id)
