@@ -1,25 +1,30 @@
 import {
   Grid,
   useMantineTheme,
+  Loader,
+  Center,
+  Text,
 } from "@mantine/core";
 
 import StatsCard from "../components/statscard";
 import HistoryTable from "../components/table/table";
-import type {InterviewHistory} from "../components/table/table";
+import type { InterviewHistory } from "../components/table/table";
 import QueueModal from "~/components/queueupmodal/queuemodal";
 
-import { useState } from "react";
+import { useAuth } from "~/context/authContext";
+import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 
 export function meta() {
-  return [
-    { title: "PeerPrep - Homepage" },
-    { name: "description", content: "Welcome to PeerPrep!" },
-  ];
+    return [{ title: "PeerPrep - Homepage" }, { name: "description", content: "Welcome to PeerPrep!" }];
 }
 
 export default function Userpage() {
   const theme = useMantineTheme();
+  const { userId } = useAuth();
+  const navigate = useNavigate();
 
+  const [loading, setLoading] = useState<boolean>(true);
   const [data, ] = useState<InterviewHistory[]>([
     {
       question: "Two Sum",
@@ -30,6 +35,36 @@ export default function Userpage() {
     },
   ]);
 
+  useEffect(() => {
+    const checkUserSession = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_COLLAB_SERVICE_URL}/sessions?user_id=${userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          const sessionId = data.session_id;
+          if (sessionId) {
+            navigate(`/collab/${sessionId}`);
+            return; // stop and let navigation happen
+          }
+        } 
+      } catch (error) {
+        console.error("Error checking user session:", error);
+      }
+      // no session found — stop loading and render page
+      setLoading(false);
+    };
+    checkUserSession();
+  }, [userId]);
+  
+  if (loading) {
+    return (
+      <Center style={{ minHeight: "100vh" }}>
+        <Loader />
+        <Text ml="md">Checking session...</Text>
+      </Center>
+    );
+  }
+  
   return (
     <Grid>
       <Grid.Col span={12}>
