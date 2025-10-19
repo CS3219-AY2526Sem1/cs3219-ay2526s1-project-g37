@@ -13,6 +13,7 @@ import DOMPurify from "dompurify";
 import Image from "@tiptap/extension-image";
 import FileHandler from "@tiptap/extension-file-handler";
 import { uploadImage } from "~/services/QuestionService";
+import { useAuth } from "~/context/authContext";
 
 interface RichTextEditorProps {
   value: string;
@@ -22,73 +23,77 @@ interface RichTextEditorProps {
 const minheight = 200;
 const MAXFILESIZE = 500; // in KB (500 KB)
 
-const FileHandlerExtension = FileHandler.configure({
-  allowedMimeTypes: ["image/png", "image/jpeg", "image/webp"],
-  onDrop: (currentEditor, files, pos) => {
-    files.forEach((file) => {
-      if (file.size / 1024 > MAXFILESIZE) {
-        alert(`File size exceeds the limit of ${MAXFILESIZE}KB`);
-        return;
-      }
+function createFileHandlerExtension(tokenId: string | null) {
+  return FileHandler.configure({
+    allowedMimeTypes: ["image/png", "image/jpeg", "image/webp"],
+    onDrop: (currentEditor, files, pos) => {
+      files.forEach((file) => {
+        if (file.size / 1024 > MAXFILESIZE) {
+          alert(`File size exceeds the limit of ${MAXFILESIZE}KB`);
+          return;
+        }
 
-      // upload to server
-      uploadImage(file)
-        .then((data) => {
-          console.log("Image uploaded successfully:", data);
-          currentEditor
-            .chain()
-            .insertContentAt(pos, {
-              type: "image",
-              attrs: {
-                src: data.url,
-              },
-            })
-            .focus()
-            .run();
-        })
-        .catch((error) => {
-          console.error("Image upload failed:", error);
-          alert("Image upload failed. Please try again.");
-        });
-    });
-  },
-  onPaste: (currentEditor, files, htmlContent) => {
-    files.forEach((file) => {
-      if (file.size / 1024 > MAXFILESIZE) {
-        alert(`File size exceeds the limit of ${MAXFILESIZE}KB`);
-        return;
-      }
-      if (htmlContent) {
-        console.log(htmlContent);
-        return false;
-      }
+        // upload to server
+        uploadImage(file, tokenId)
+          .then((data) => {
+            console.log("Image uploaded successfully:", data);
+            currentEditor
+              .chain()
+              .insertContentAt(pos, {
+                type: "image",
+                attrs: {
+                  src: data.url,
+                },
+              })
+              .focus()
+              .run();
+          })
+          .catch((error) => {
+            console.error("Image upload failed:", error);
+            alert("Image upload failed. Please try again.");
+          });
+      });
+    },
+    onPaste: (currentEditor, files, htmlContent) => {
+      files.forEach((file) => {
+        if (file.size / 1024 > MAXFILESIZE) {
+          alert(`File size exceeds the limit of ${MAXFILESIZE}KB`);
+          return;
+        }
+        if (htmlContent) {
+          console.log(htmlContent);
+          return false;
+        }
 
-      uploadImage(file)
-        .then((data) => {
-          console.log("Image uploaded successfully:", data);
-          currentEditor
-            .chain()
-            .insertContentAt(currentEditor.state.selection.anchor, {
-              type: "image",
-              attrs: {
-                src: data.url,
-              },
-            })
-            .focus()
-            .run();
-        })
-        .catch((error) => {
-          console.error("Image upload failed:", error);
-          alert("Image upload failed. Please try again.");
-        });
-    });
-  },
-});
+        uploadImage(file, tokenId)
+          .then((data) => {
+            console.log("Image uploaded successfully:", data);
+            currentEditor
+              .chain()
+              .insertContentAt(currentEditor.state.selection.anchor, {
+                type: "image",
+                attrs: {
+                  src: data.url,
+                },
+              })
+              .focus()
+              .run();
+          })
+          .catch((error) => {
+            console.error("Image upload failed:", error);
+            alert("Image upload failed. Please try again.");
+          });
+      });
+    },
+  });
+}
 
 export default function CustomRichTextEditor({
   value,
   onChange,
 }: RichTextEditorProps) {
+  const { tokenId } = useAuth();
+
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
@@ -100,7 +105,7 @@ export default function CustomRichTextEditor({
       Highlight,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Image,
-      FileHandlerExtension,
+      createFileHandlerExtension(tokenId), 
     ],
     content: value,
     onUpdate: ({ editor }) => {
