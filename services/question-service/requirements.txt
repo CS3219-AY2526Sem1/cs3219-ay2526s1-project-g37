@@ -1,0 +1,6 @@
+fastapi[standard]
+psycopg[binary]
+boto3
+pytest
+pytest-asyncio
+moto[s3]

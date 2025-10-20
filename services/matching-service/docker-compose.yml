@@ -1,0 +1,57 @@
+services:
+  # ----------------------------------------------------------------------
+  # Production Matching Service (Profile: prod)
+  # ----------------------------------------------------------------------
+  matching-service-prod:
+    # Activates only with --profile prod
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: matching-service-prod
+    ports:
+      - "${MATCHING_PORT}:${MATCHING_PORT}"
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - QUESTION_SERVICE_URL=${QUESTION_SERVICE_URL}
+      - COLLAB_SERVICE_URL=${COLLAB_SERVICE_URL}
+    command: uvicorn app.main:app --host 0.0.0.0 --port ${MATCHING_PORT}
+    depends_on:
+      redis-service:
+        condition: service_started
+
+  # ----------------------------------------------------------------------
+  # Development Matching Service (Profile: dev)
+  # ----------------------------------------------------------------------
+  matching-service-dev:
+    # Activates only with --profile dev
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: matching-service-dev
+    ports:
+      - "${MATCHING_PORT}:${MATCHING_PORT}"
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - QUESTION_SERVICE_URL=${QUESTION_SERVICE_URL}
+      - COLLAB_SERVICE_URL=${COLLAB_SERVICE_URL}
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port ${MATCHING_PORT} --reload
+    depends_on:
+      redis-service:
+        condition: service_started
+
+  # ----------------------------------------------------------------------
+  # Redis Service (Shared - No Profile)
+  #    This service runs in both dev and prod environments by default.
+  # ----------------------------------------------------------------------
+  redis-service:
+    image: redis:latest
+    container_name: redis-service
+    ports:
+      - "${REDIS_PORT}:6379"
+    command: ["redis-server"]
