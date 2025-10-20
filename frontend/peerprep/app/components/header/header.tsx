@@ -29,7 +29,7 @@ export default function Header() {
           />
         </Group>
         <Group gap={5}>
-          <Text>{displayName ? <>{displayName}</> : <>Empty Name</>}</Text>
+          <Text>{displayName || "Empty Name"}</Text>
           <Button 
             type="button"
             style={{
