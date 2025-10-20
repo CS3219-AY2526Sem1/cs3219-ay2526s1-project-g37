@@ -26,10 +26,12 @@ export default function QueueModal() {
     initialValues: {
       topic: "",
       difficulty: "",
+      language: "",
     },
     validate: {
       topic: (value) => (value ? null : "Topic is required"),
       difficulty: (value) => (value ? null : "Difficulty is required"),
+      language: (value) => (value ? null : "Language is required"),
     },
   });
 
@@ -38,13 +40,13 @@ export default function QueueModal() {
       user_id: userId,
       difficulty: form.values.difficulty,
       topic: form.values.topic,
-      language: "python",
+      language: form.values.language,
     });
     return JSON.stringify({
       user_id: userId,
       difficulty: form.values.difficulty,
       topic: form.values.topic,
-      language: "python",
+      language: form.values.language,
     });
   };
 

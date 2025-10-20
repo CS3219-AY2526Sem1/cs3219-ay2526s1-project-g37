@@ -8,12 +8,12 @@ type SelectionModalProps = {
     form: UseFormReturnType<{
         topic: string;
         difficulty: string;
-        language?: string;
+        language: string;
     }>;
     handleQueue: (values: {
         topic: string;
         difficulty: string;
-        language?: string | undefined;
+        language: string;
     }) => void;
 };
 
@@ -54,6 +54,7 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
                 data={LANGUAGES}
                 searchable
                 {...form.getInputProps("language")}
+                required
               />
             </Grid.Col>
             <Grid.Col span={12}>
