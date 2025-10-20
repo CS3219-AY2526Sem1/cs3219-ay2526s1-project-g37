@@ -1,5 +1,6 @@
 import { Text, Button } from "@mantine/core";
 import { useCollabProvider } from "~/context/CollabProvider";
+import { modals } from "@mantine/modals";
 
 export default function SessionControlBar(props: {user: string | null, onEndSession?: () => void}) {
   const { user, onEndSession } = props;
@@ -14,6 +15,20 @@ export default function SessionControlBar(props: {user: string | null, onEndSess
     }
   };
 
+  const openConfirmModal = () => {
+    modals.openConfirmModal({
+      title: "End Session",
+      children: (
+        <Text size="sm">
+          Are you sure you want to end this session? This action cannot be undone.
+        </Text>
+      ),
+      labels: { confirm: "End Session", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      onConfirm: handleEndSession,
+    });
+  };
+
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "center" }}>
       <Text fw={700}>
@@ -25,7 +40,7 @@ export default function SessionControlBar(props: {user: string | null, onEndSess
         c="white"
         size="compact-md"
         autoContrast
-        onClick={handleEndSession}
+        onClick={openConfirmModal}
         aria-label="End session"
       >
         End Session

@@ -13,6 +13,7 @@ import "@mantine/core/styles.css";
 import "@mantine/tiptap/styles.css";
 
 import { createTheme, MantineProvider, Container, Button, Input } from "@mantine/core";
+import { ModalsProvider } from "@mantine/modals";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -160,6 +161,7 @@ export default function App() {
   return (
     <AuthProvider>
         <MantineProvider theme={theme} defaultColorScheme="dark">
+        <ModalsProvider>
         {isHeader() && <Header />}
 
         <Container fluid>{<Outlet />}</Container>      
@@ -168,6 +170,7 @@ export default function App() {
             <Button onClick={() => navigate("/collab")}>Go to Collab</Button>
             </div>
         )}
+        </ModalsProvider>
         </MantineProvider>
     </AuthProvider>
   );
