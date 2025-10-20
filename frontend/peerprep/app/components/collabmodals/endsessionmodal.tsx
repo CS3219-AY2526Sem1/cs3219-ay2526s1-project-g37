@@ -7,11 +7,7 @@ export default function EndSessionModal({ onEndSession }: { onEndSession: () => 
 
   return (
     <>
-        <Modal opened={opened} onClose={close} centered>
-
-        <Text size="xl" fw="700">
-            End Session
-        </Text>
+        <Modal opened={opened} onClose={close} centered title="End Session">
         <Text style={{ marginTop: '10px' }}>
             Are you sure you want to end this session? This action cannot be undone.
         </Text>
