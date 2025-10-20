@@ -3,6 +3,7 @@ import { LANGUAGES } from "~/constants/constants";
 import type { UseFormReturnType } from "@mantine/form";
 import { useEffect, useState } from "react";
 import { type Labels, getLabels } from "~/services/QuestionService";
+import { useAuth } from "~/context/authContext";
 
 type SelectionModalProps = {
     form: UseFormReturnType<{
@@ -19,9 +20,14 @@ type SelectionModalProps = {
 
 export default function SelectionModal({ form, handleQueue }: SelectionModalProps) {
   const [labels, setLabels] = useState<Labels | null>(null);
+  const { tokenId } = useAuth();
 
   useEffect(() => {
-    getLabels().then((data) => setLabels(data));
+    getLabels(tokenId)
+    .then((data) => setLabels(data))
+    .catch((error) => {
+        console.error("Error fetching labels:", error);
+    });
   }, []);
 
   return (
