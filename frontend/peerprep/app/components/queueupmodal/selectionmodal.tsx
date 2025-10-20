@@ -28,7 +28,7 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
     .catch((error) => {
         console.error("Error fetching labels:", error);
     });
-  }, []);
+  }, [tokenId]);
 
   return (
         <form onSubmit={form.onSubmit((values) => handleQueue(values))}>
