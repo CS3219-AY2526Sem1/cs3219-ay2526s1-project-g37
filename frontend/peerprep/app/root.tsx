@@ -6,7 +6,6 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
-  useNavigate,
 } from "react-router";
 
 import "@mantine/core/styles.css";
