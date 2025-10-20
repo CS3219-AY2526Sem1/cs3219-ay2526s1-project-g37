@@ -8,35 +8,20 @@ import { CollabProvider } from "~/context/CollabProvider";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../context/authContext";
+import type { Question } from "~/services/QuestionService";
+import HtmlRender from "~/components/htmlrenderer/HtmlRender";
 
-type Question = {
-  name: string;
-  description: string;
-};
-
-// TODO: Remove this hardcoded question and fetch from backend instead
-const TEST_QUESTION = {
-  name: "Sample Question Title",
-  description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at ultrices orci, quis volutpat dui. Morbi in velit porttitor, dictum augue ac, sodales tellus. Duis fermentum justo at sodales scelerisque. Sed et elit euismod, sodales libero at, porttitor nisl. Aliquam ac sapien id nulla cursus accumsan. Cras sit amet metus ipsum. Pellentesque lacinia hendrerit nulla in tincidunt. Nulla sit amet porttitor mauris, id placerat augue. Praesent scelerisque volutpat tortor a consectetur. Etiam fringilla tellus felis, a mattis risus dapibus id. Nulla eget tellus vitae ante porttitor rutrum. Cras a maximus neque, et tempus nisl. Mauris turpis lacus, congue vitae tempor non, facilisis at lacus.\n
-Donec felis eros, mollis in tellus vel, tristique bibendum nisl. Vivamus tellus eros, mollis at arcu non, posuere sollicitudin nisi. Curabitur id nunc mollis est laoreet suscipit in sed risus. Nunc sit amet lacinia velit. Quisque facilisis est sapien, blandit cursus tellus venenatis id. In luctus porttitor odio, vel aliquam erat egestas ut. Nam finibus scelerisque odio non vestibulum. Sed posuere aliquam vestibulum. In fermentum mollis dolor at volutpat. \n
-Vivamus efficitur consequat ultricies. Sed neque sem, dictum ac nulla eget, faucibus fermentum leo. Nam sit amet venenatis purus, ut dictum purus. Vivamus ultrices cursus efficitur. Duis eu libero lacus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec efficitur sit amet nibh ut euismod. `,
-};
 
 export default function CollabPage() {
   // TODO: retrieve details from matching page
   const params = useParams();
   const { sessionId } = params;
-  const [question, setQuestion] = useState(TEST_QUESTION);
+  const [question, setQuestion] = useState<Question | null>(null);
   const collabRef = useRef<{ destroySession: () => void }>(null);
-  const { userId } = useAuth();
-
-  const VITE_COLLAB_SERVICE_WS_URL = import.meta.env.VITE_COLLAB_SERVICE_URL.replace(
-    /^http/,
-    "ws"
-  );
+  const { userId, tokenId } = useAuth();
 
   const { sendJsonMessage, lastMessage, readyState, getWebSocket } =
-    useWebSocket(`${VITE_COLLAB_SERVICE_WS_URL}/ws/sessions/${sessionId}?user_id=${userId}`, { shouldReconnect: () => true });
+    useWebSocket(`${import.meta.env.VITE_COLLAB_SERVICE_WS_URL}/ws/sessions/${sessionId}?user_id=${userId}`, { shouldReconnect: () => true });
 
   const navigate = useNavigate();
 
@@ -63,10 +48,20 @@ export default function CollabPage() {
   }, [lastMessage]);
 
   const fetchQuestionDetails = async () => {
-    const url = `${import.meta.env.VITE_COLLAB_SERVICE_URL}/sessions/${sessionId}/question`;
+    const collabUrl = `${import.meta.env.VITE_AUTH_ROUTER_URL}/collaboration`;
+
+    const url = `${collabUrl}/sessions/${sessionId}/question`;
 
     try {
-      const response = await fetch(url);
+      const response = await fetch(url,
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${tokenId}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -125,10 +120,12 @@ export default function CollabPage() {
             style={{ height: COLLABCARDHEIGHT, overflowY: "auto" }}
             c={"white"}
           >
-            <Text size="xl">{question.name}</Text>
-            <Text size="sm" style={{ whiteSpace: "pre-line" }}>
-              {question.description}
-            </Text>
+            {question ? <HtmlRender
+              name={question.name}
+              topic={question.topic}
+              difficulty={question.difficulty}
+              description={question.description}
+            /> : <Text>Loading...</Text>}
           </Card>
         </Grid.Col>
         <Grid.Col
@@ -171,3 +168,5 @@ export default function CollabPage() {
     </CollabProvider>
   );
 }
+
+

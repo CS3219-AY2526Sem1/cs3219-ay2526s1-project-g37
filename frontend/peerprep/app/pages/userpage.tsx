@@ -8,7 +8,7 @@ import {
 
 import StatsCard from "../components/statscard";
 import HistoryTable from "../components/table/table";
-import type {InterviewHistory} from "../components/table/table";
+import type { InterviewHistory } from "../components/table/table";
 import QueueModal from "~/components/queueupmodal/queuemodal";
 
 import { useAuth } from "~/context/authContext";
@@ -16,15 +16,12 @@ import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 
 export function meta() {
-  return [
-    { title: "PeerPrep - Homepage" },
-    { name: "description", content: "Welcome to PeerPrep!" },
-  ];
+    return [{ title: "PeerPrep - Homepage" }, { name: "description", content: "Welcome to PeerPrep!" }];
 }
 
 export default function Userpage() {
   const theme = useMantineTheme();
-  const { userId } = useAuth();
+  const { userId, tokenId } = useAuth();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState<boolean>(true);
@@ -40,8 +37,14 @@ export default function Userpage() {
 
   useEffect(() => {
     const checkUserSession = async () => {
+      const collabUrl = `${import.meta.env.VITE_AUTH_ROUTER_URL}/collaboration`;
       try {
-        const response = await fetch(`${import.meta.env.VITE_COLLAB_SERVICE_URL}/sessions?user_id=${userId}`);
+        const response = await fetch(`${collabUrl}/sessions?user_id=${userId}`, {
+          headers: {
+            "Authorization": `Bearer ${tokenId}`,
+            "Content-Type": "application/json",
+          }
+        });
         if (response.ok) {
           const data = await response.json();
           const sessionId = data.session_id;
