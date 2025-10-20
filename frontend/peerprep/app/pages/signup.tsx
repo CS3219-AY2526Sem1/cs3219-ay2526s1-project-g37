@@ -66,7 +66,7 @@ export default function Signup() {
         await doUpdateUserProfile(values.username);
       } catch (error) {
         setIsRegistering(false);
-        const errCode = (error as any)?.code;
+        const errCode = (error as { code?: string })?.code;
         if (typeof errCode === "string") {
           setError(errCode);
         } else if (error instanceof Error) {
