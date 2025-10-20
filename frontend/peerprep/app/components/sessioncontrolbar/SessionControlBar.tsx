@@ -1,4 +1,4 @@
-import { Text, Button } from "@mantine/core";
+import { Text } from "@mantine/core";
 import { useCollabProvider } from "~/context/CollabProvider";
 import EndSessionModal from "../collabmodals/endsessionmodal";
 
