@@ -19,7 +19,7 @@ export default function QueueModal() {
   const [redirectCountdown, setRedirectCountdown] = useState(3);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { userId } = useAuth();
+  const { userId, tokenId } = useAuth();
   const [shouldNavigate, setShouldNavigate] = useState(false);
 
   const form = useForm({
@@ -51,9 +51,11 @@ export default function QueueModal() {
   };
 
   const sendQueueRequest = () => {
-    fetch(`${import.meta.env.VITE_MATCHING_SERVICE_URL}/match/request`, {
+    const matching_url = `${import.meta.env.VITE_AUTH_ROUTER_URL}/matching`;
+    fetch(`${matching_url}/match/request`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${tokenId}`,
         "Content-Type": "application/json",
       },
       body: getRequestBody(),
@@ -63,9 +65,11 @@ export default function QueueModal() {
   };
 
   const sendLeaveRequest = () => {
-    fetch(`${import.meta.env.VITE_MATCHING_SERVICE_URL}/match/cancel`, {
+    const matching_url = `${import.meta.env.VITE_AUTH_ROUTER_URL}/matching`;
+    fetch(`${matching_url}/match/cancel`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${tokenId}`,
         "Content-Type": "application/json",
       },
       body: getRequestBody(),
@@ -94,15 +98,10 @@ export default function QueueModal() {
   const handleQueue = (values: typeof form.values) => {
     setQueueStatus("searching");
 
-    const VITE_MATCHING_SERVICE_WS_URL = import.meta.env.VITE_MATCHING_SERVICE_URL.replace(
-      /^http/,
-      "ws"
-    );
-
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       console.log("User ID from URL:", userId);
       const newSocket = new WebSocket(
-        `${VITE_MATCHING_SERVICE_WS_URL}/match/ws/${userId}`
+        `${import.meta.env.VITE_MATCHING_SERVICE_WS_URL}/match/ws/${userId}`
       );
 
       setSocket(newSocket);

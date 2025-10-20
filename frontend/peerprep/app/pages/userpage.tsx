@@ -8,7 +8,7 @@ import {
 
 import StatsCard from "../components/statscard";
 import HistoryTable from "../components/table/table";
-import type {InterviewHistory} from "../components/table/table";
+import type { InterviewHistory } from "../components/table/table";
 import QueueModal from "~/components/queueupmodal/queuemodal";
 
 import { useAuth } from "~/context/authContext";
@@ -16,10 +16,7 @@ import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 
 export function meta() {
-  return [
-    { title: "PeerPrep - Homepage" },
-    { name: "description", content: "Welcome to PeerPrep!" },
-  ];
+    return [{ title: "PeerPrep - Homepage" }, { name: "description", content: "Welcome to PeerPrep!" }];
 }
 
 export default function Userpage() {
