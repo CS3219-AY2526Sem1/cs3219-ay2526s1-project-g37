@@ -11,11 +11,7 @@ type SelectionModalProps = {
         difficulty: string;
         language: string;
     }>;
-    handleQueue: (values: {
-        topic: string;
-        difficulty: string;
-        language: string;
-    }) => void;
+    handleQueue: () => void;
 };
 
 export default function SelectionModal({ form, handleQueue }: SelectionModalProps) {
@@ -42,11 +38,7 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
     const res = await isValidQuestion(form.values.difficulty, form.values.topic);
     if (res) {
         setError(null);
-        handleQueue({
-            topic: form.values.topic,
-            difficulty: form.values.difficulty,
-            language: form.values.language,
-        });
+        handleQueue();
     } else {
         setError("No questions available for the selected topic and difficulty. Please choose different options.");
     }
