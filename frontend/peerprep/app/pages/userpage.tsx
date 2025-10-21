@@ -60,7 +60,7 @@ export default function Userpage() {
       setLoading(false);
     };
     checkUserSession();
-  }, []);
+  }, [userId, tokenId, navigate]);
   
   if (loading) {
     return (
