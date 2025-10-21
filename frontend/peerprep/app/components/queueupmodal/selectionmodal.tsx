@@ -2,8 +2,8 @@ import { Button, Grid, Select } from "@mantine/core";
 import { LANGUAGES } from "~/constants/constants";
 import type { UseFormReturnType } from "@mantine/form";
 import { useEffect, useState } from "react";
-import { type Labels, getLabels } from "~/services/QuestionService";
-import { useAuth } from "~/context/authContext";
+import { type Labels } from "~/services/QuestionService";
+import { useQuestionService } from "~/services/QuestionService";
 
 type SelectionModalProps = {
     form: UseFormReturnType<{
@@ -20,15 +20,15 @@ type SelectionModalProps = {
 
 export default function SelectionModal({ form, handleQueue }: SelectionModalProps) {
   const [labels, setLabels] = useState<Labels | null>(null);
-  const { tokenId } = useAuth();
+  const { getLabels } = useQuestionService();
 
   useEffect(() => {
-    getLabels(tokenId)
+    getLabels()
     .then((data) => setLabels(data))
     .catch((error) => {
         console.error("Error fetching labels:", error);
     });
-  }, [tokenId]);
+  }, []);
 
   return (
         <form onSubmit={form.onSubmit((values) => handleQueue(values))} noValidate>

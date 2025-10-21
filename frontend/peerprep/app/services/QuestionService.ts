@@ -1,3 +1,5 @@
+import { useAuth } from "~/context/authContext";
+
 export type Question = {
     name: string;
     description: string;
@@ -12,7 +14,7 @@ export type Labels = {
 
 const API_BASE_URL = `${import.meta.env.VITE_AUTH_ROUTER_URL}/questions`;
 
-export async function addQuestion(question: Question, tokenId: string | null) {
+async function addQuestion(question: Question, tokenId: string | null) {
     const response = await fetch(`${API_BASE_URL}/questions`, {
         method: "POST",
         headers: {
@@ -29,7 +31,7 @@ export async function addQuestion(question: Question, tokenId: string | null) {
     return response.json();
 }
 
-export async function getQuestion(id: string, tokenId: string) {
+async function getQuestion(id: string, tokenId: string | null) {
     const response = await fetch(`${API_BASE_URL}/questions/${id}`, {
         headers: {
             "Authorization": `Bearer ${tokenId}`,
@@ -43,7 +45,7 @@ export async function getQuestion(id: string, tokenId: string) {
     return response.json();
 }
 
-export async function getLabels(tokenId: string | null) {
+async function getLabels(tokenId: string | null) {
     const response = await fetch(`${API_BASE_URL}/labels`, {
         headers: {
             "Authorization": `Bearer ${tokenId}`,
@@ -57,7 +59,7 @@ export async function getLabels(tokenId: string | null) {
     return response.json();
 }
 
-export async function uploadImage(imageData: File, tokenId: string | null) {
+async function uploadImage(imageData: File, tokenId: string | null) {
     const formData = new FormData();
     formData.append("file", imageData);
 
@@ -75,4 +77,15 @@ export async function uploadImage(imageData: File, tokenId: string | null) {
     
     console.log("Image uploaded successfully");
     return response.json();
+}
+
+export function useQuestionService() {
+    const { tokenId } = useAuth();
+
+    return {
+        addQuestion: (question: Question) => addQuestion(question, tokenId),
+        getQuestion: (id: string) => getQuestion(id, tokenId),
+        getLabels: () => getLabels(tokenId),
+        uploadImage: (imageData: File) => uploadImage(imageData, tokenId),
+    };
 }

@@ -10,13 +10,13 @@ import { useForm } from "@mantine/form";
 import CustomRichTextEditor from "../components/richtexteditor/CustomRichTextEditor";
 import { CARDHEIGHT } from "~/constants/constants";
 import { useEffect, useState } from "react";
-import { type Labels, addQuestion, getLabels } from "~/services/QuestionService";
+import { type Labels, useQuestionService } from "~/services/QuestionService";
 import HtmlRender from "~/components/htmlrenderer/HtmlRender";
-import { useAuth } from "~/context/authContext";
 
 export default function AddQuestionPage() {
-  const { tokenId } = useAuth();
   const [labels, setLabels] = useState<Labels>({ topics: [], difficulties: [] });
+  const { addQuestion, getLabels } = useQuestionService();
+  
   const form = useForm<{
     name: string;
     description: string;
@@ -32,7 +32,7 @@ export default function AddQuestionPage() {
   });
 
   useEffect(() => {
-    getLabels(tokenId).then((data) => setLabels(data));
+    getLabels().then((data) => setLabels(data));
   }, []);
 
   const handleSubmit = (values: {
@@ -49,7 +49,7 @@ export default function AddQuestionPage() {
       topic: values.topic ?? "",
     };
 
-    addQuestion(payload, tokenId)
+    addQuestion(payload)
       .then((response) => {
         console.log("Question added successfully:", response);
         alert("Question added successfully!");

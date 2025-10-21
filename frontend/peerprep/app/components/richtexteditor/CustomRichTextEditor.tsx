@@ -12,8 +12,7 @@ import SubScript from "@tiptap/extension-subscript";
 import DOMPurify from "dompurify";
 import Image from "@tiptap/extension-image";
 import FileHandler from "@tiptap/extension-file-handler";
-import { uploadImage } from "~/services/QuestionService";
-import { useAuth } from "~/context/authContext";
+import { useQuestionService } from "~/services/QuestionService";
 
 interface RichTextEditorProps {
   value: string;
@@ -23,7 +22,8 @@ interface RichTextEditorProps {
 const minheight = 200;
 const MAXFILESIZE = 500; // in KB (500 KB)
 
-function createFileHandlerExtension(tokenId: string | null) {
+function createFileHandlerExtension() {
+  const { uploadImage } = useQuestionService();
   return FileHandler.configure({
     allowedMimeTypes: ["image/png", "image/jpeg", "image/webp"],
     onDrop: (currentEditor, files, pos) => {
@@ -34,8 +34,8 @@ function createFileHandlerExtension(tokenId: string | null) {
         }
 
         // upload to server
-        uploadImage(file, tokenId)
-          .then((data) => {
+        uploadImage(file)
+          .then((data: { url: any; }) => {
             console.log("Image uploaded successfully:", data);
             currentEditor
               .chain()
@@ -65,7 +65,7 @@ function createFileHandlerExtension(tokenId: string | null) {
           return false;
         }
 
-        uploadImage(file, tokenId)
+        uploadImage(file)
           .then((data) => {
             console.log("Image uploaded successfully:", data);
             currentEditor
@@ -92,8 +92,6 @@ export default function CustomRichTextEditor({
   value,
   onChange,
 }: RichTextEditorProps) {
-  const { tokenId } = useAuth();
-
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
@@ -105,7 +103,7 @@ export default function CustomRichTextEditor({
       Highlight,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Image,
-      createFileHandlerExtension(tokenId), 
+      createFileHandlerExtension(), 
     ],
     content: value,
     onUpdate: ({ editor }) => {
