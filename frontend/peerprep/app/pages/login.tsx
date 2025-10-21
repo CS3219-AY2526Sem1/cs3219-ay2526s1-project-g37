@@ -19,6 +19,7 @@ import { FirebaseError } from "firebase/app";
 import { useAuth } from "../context/authContext";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import logo from "../assets/images/logo.svg";
+import { EMAIL_REGEX } from "~/constants/constants";
 
 const INVALID_CREDENTIALS = "Invalid email/password, Please try again.";
 
@@ -40,17 +41,13 @@ export default function Login() {
     },
 
     validate: {
-      email: (value) => (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value) ? null : "Invalid email"),
+      email: (value) => (EMAIL_REGEX.test(value) ? null : "Invalid email"),
       password: (value) =>
         value.length < 6 ? "Password must be at least 6 characters" : null,
     },
   });
 
   const handleSubmit = async (values: typeof form.values) => {
-    if (form.isValid() === false) {
-        form.validate();
-      return;
-    }
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
