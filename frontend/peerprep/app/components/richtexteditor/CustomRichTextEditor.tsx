@@ -35,7 +35,7 @@ function createFileHandlerExtension() {
 
         // upload to server
         uploadImage(file)
-          .then((data: { url: any; }) => {
+          .then((data) => {
             console.log("Image uploaded successfully:", data);
             currentEditor
               .chain()
