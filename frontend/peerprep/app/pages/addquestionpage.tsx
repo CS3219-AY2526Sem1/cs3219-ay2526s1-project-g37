@@ -12,8 +12,10 @@ import { CARDHEIGHT } from "~/constants/constants";
 import { useEffect, useState } from "react";
 import { type Labels, addQuestion, getLabels } from "~/services/QuestionService";
 import HtmlRender from "~/components/htmlrenderer/HtmlRender";
+import { useAuth } from "~/context/authContext";
 
 export default function AddQuestionPage() {
+  const { tokenId } = useAuth();
   const [labels, setLabels] = useState<Labels>({ topics: [], difficulties: [] });
   const form = useForm<{
     name: string;
@@ -30,7 +32,7 @@ export default function AddQuestionPage() {
   });
 
   useEffect(() => {
-    getLabels().then((data) => setLabels(data));
+    getLabels(tokenId).then((data) => setLabels(data));
   }, []);
 
   const handleSubmit = (values: {
@@ -47,7 +49,7 @@ export default function AddQuestionPage() {
       topic: values.topic ?? "",
     };
 
-    addQuestion(payload)
+    addQuestion(payload, tokenId)
       .then((response) => {
         console.log("Question added successfully:", response);
         alert("Question added successfully!");

@@ -23,7 +23,7 @@ def get_session_question(session_id: str):
         raise HTTPException(status_code=404, detail=err.msg)
 
 ## add query ?user_id={user_id}
-@router.get("/")
+@router.get("")
 def get_sessions_by_user(
     user_id: str = Query(..., description="The user ID whose session_id we are looking for")
 ):
