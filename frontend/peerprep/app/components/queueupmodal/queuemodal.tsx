@@ -55,7 +55,7 @@ export default function QueueModal() {
     fetch(`${matching_url}/match/request`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${tokenId}`,
+        Authorization: `Bearer ${tokenId}`,
         "Content-Type": "application/json",
       },
       body: getRequestBody(),
@@ -69,7 +69,7 @@ export default function QueueModal() {
     fetch(`${matching_url}/match/cancel`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${tokenId}`,
+        Authorization: `Bearer ${tokenId}`,
         "Content-Type": "application/json",
       },
       body: getRequestBody(),
@@ -203,9 +203,19 @@ export default function QueueModal() {
     }
   };
 
+  const unloadModal = () => {
+    close();
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      sendLeaveRequest();
+      socket.close();
+    }
+    form.reset();
+    setQueueStatus("idle");
+  };
+
   return (
     <>
-      <Modal opened={opened} onClose={close} c="white" title={getTitle()}>
+      <Modal opened={opened} onClose={unloadModal} c="white" title={getTitle()}>
         {queueStatus === "idle" && (
           <SelectionModal form={form} handleQueue={handleQueue} />
         )}
