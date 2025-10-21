@@ -17,7 +17,7 @@ import {
 import { useAuth } from "../context/authContext";
 import logo from "../assets/images/logo.svg";
 import { useState } from "react";
-import { FIREBASE_AUTH_ERROR_CODES } from "../constants/constants";
+import { FIREBASE_AUTH_ERROR_CODES, EMAIL_REGEX } from "../constants/constants";
 
 export function meta() {
   return [
@@ -46,7 +46,7 @@ export default function Signup() {
 
     validate: {
       email: (value) =>
-        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)
+        EMAIL_REGEX.test(value)
           ? null
           : "Invalid email",
       username: (value) =>
@@ -86,6 +86,7 @@ export default function Signup() {
           <Grid justify="center" gutter={"xs"} mt={{ base: 20, md: 200 }}>
             <Grid.Col span={{ base: 12, md: 4 }}>
               <Image src={logo} alt="PeerPrep Logo" />
+              {/* Disable browser's built-in HTML5 validation in favor of Mantine's custom form validation */}
               <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
                 <Grid.Col span={12}>
                   <TextInput

@@ -22,8 +22,7 @@ interface RichTextEditorProps {
 const minheight = 200;
 const MAXFILESIZE = 500; // in KB (500 KB)
 
-function createFileHandlerExtension() {
-  const { uploadImage } = useQuestionService();
+function createFileHandlerExtension(uploadImage: (file: File) => Promise<{ url: string }>) {
   return FileHandler.configure({
     allowedMimeTypes: ["image/png", "image/jpeg", "image/webp"],
     onDrop: (currentEditor, files, pos) => {
@@ -92,6 +91,8 @@ export default function CustomRichTextEditor({
   value,
   onChange,
 }: RichTextEditorProps) {
+    const { uploadImage } = useQuestionService();
+
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
@@ -103,7 +104,7 @@ export default function CustomRichTextEditor({
       Highlight,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Image,
-      createFileHandlerExtension(), 
+      createFileHandlerExtension(uploadImage),
     ],
     content: value,
     onUpdate: ({ editor }) => {

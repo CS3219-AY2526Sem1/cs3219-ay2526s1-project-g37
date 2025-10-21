@@ -29,9 +29,9 @@ export default function QueueModal() {
       language: "",
     },
     validate: {
-      topic: (value) => (value ? null : "Topic is required"),
-      difficulty: (value) => (value ? null : "Difficulty is required"),
-      language: (value) => (value ? null : "Language is required"),
+      topic: (value) => (value.trim().length > 0 ? null : "Topic is required"),
+      difficulty: (value) => (value.trim().length > 0 ? null : "Difficulty is required"),
+      language: (value) => (value.trim().length > 0 ? null : "Language is required"),
     },
   });
 

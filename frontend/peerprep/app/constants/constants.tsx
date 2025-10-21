@@ -31,3 +31,5 @@ export const FIREBASE_AUTH_ERROR_CODES: Record<string, string> = {
   "auth/invalid-password": "Invalid password.",
 };
 
+export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
