@@ -1,6 +1,9 @@
 import { Button, Grid, Select } from "@mantine/core";
-import { DIFFICULTIES, LANGUAGES, TOPICS } from "~/constants/constants";
+import { LANGUAGES } from "~/constants/constants";
 import type { UseFormReturnType } from "@mantine/form";
+import { useEffect, useState } from "react";
+import { type Labels, getLabels } from "~/services/QuestionService";
+import { useAuth } from "~/context/authContext";
 
 type SelectionModalProps = {
     form: UseFormReturnType<{
@@ -16,6 +19,17 @@ type SelectionModalProps = {
 };
 
 export default function SelectionModal({ form, handleQueue }: SelectionModalProps) {
+  const [labels, setLabels] = useState<Labels | null>(null);
+  const { tokenId } = useAuth();
+
+  useEffect(() => {
+    getLabels(tokenId)
+    .then((data) => setLabels(data))
+    .catch((error) => {
+        console.error("Error fetching labels:", error);
+    });
+  }, [tokenId]);
+
   return (
         <form onSubmit={form.onSubmit((values) => handleQueue(values))}>
           <Grid>
@@ -23,7 +37,7 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
               <Select
                 label="Topic"
                 placeholder="Pick values"
-                data={TOPICS}
+                data={labels?.topics || []}
                 searchable
                 {...form.getInputProps("topic")}
               />
@@ -32,7 +46,7 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
               <Select
                 label="Difficulty"
                 placeholder="Pick values"
-                data={DIFFICULTIES}
+                data={labels?.difficulties || []}
                 searchable
                 {...form.getInputProps("difficulty")}
               />
