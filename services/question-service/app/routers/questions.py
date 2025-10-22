@@ -72,7 +72,7 @@ def get_questions_stats_endpoint():
     try:
         stats = get_questions_stats()
     except Exception as e:
-        raise HTTPException(status_code=499, detail="Failed to retrieve questions statistics")
+        raise HTTPException(status_code=500, detail="Failed to retrieve questions statistics")
     return stats
 
 @router.get("/{qid}", response_model=Question)
