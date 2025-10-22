@@ -26,6 +26,7 @@ export default function Adminpage() {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [data, setData] = useState<QuestionHistory[]>([    
     {
+        id: "test-id-1",
         name: "Two Sum",
         dateAdded: "2024-10-01",
         lastEdited: "2024-10-01",
@@ -57,10 +58,12 @@ export default function Adminpage() {
         if (!response.ok) {
           throw new Error("Failed to fetch questions");
         }
+        
         const data = await response.json();
         const questionsList: QuestionHistory[] = data.questions;
         console.log("Fetched questions:", questionsList);
         setData(questionsList);
+
         const totalCount: number = data.total_count;
         const totalPages = Math.ceil(totalCount / PAGE_SIZE);
         setTotalPages(totalPages);

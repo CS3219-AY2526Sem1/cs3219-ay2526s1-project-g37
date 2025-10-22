@@ -2,6 +2,7 @@ import { Button, Card, Divider, Table, Text, Pagination, Group, Input } from "@m
 import classes from "./table.module.css";
 
 export type QuestionHistory = {
+  id: string;
   name: string;
   dateAdded: string;
   lastEdited: string;
