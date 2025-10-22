@@ -2,10 +2,7 @@ import { Grid, useMantineTheme } from "@mantine/core";
 import StatsCard from "../statscard";
 import { useEffect, useState } from "react";
 import { useAuth } from "~/context/authContext";
-
-const EASY_LABEL = "Easy";
-const MEDIUM_LABEL = "Medium";
-const HARD_LABEL = "Hard";
+import { DIFFICULTYCOLOR } from "~/constants/constants";
 
 export default function DifficultyCards() {
     const theme = useMantineTheme();
@@ -34,8 +31,16 @@ export default function DifficultyCards() {
 
             const data = await response.json();
             console.log("Fetched question stats:", data);
-            setQuestionStats(data);
             
+            //set default values for difficulties with zero questions
+            const difficulties = ["Easy", "Medium", "Hard"];
+            const updatedStats: { [key: string]: number } = { ...data };
+            difficulties.forEach((level) => {
+                if (!updatedStats[level]) {
+                    updatedStats[level] = 0;
+                }
+            });
+            setQuestionStats(updatedStats);
         } catch (error) {
             console.error("Error fetching total questions count:", error);
         }};
@@ -51,27 +56,15 @@ export default function DifficultyCards() {
               color={theme.colors.gray[0]}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 6, md: 2 }}>
-            <StatsCard
-              title="Easy"
-              stat={questionStats[EASY_LABEL]?.toString() || "0"}
-              color={theme.colors.green[5]}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 6, md: 2 }}>
-            <StatsCard
-              title="Medium"
-              stat={questionStats[MEDIUM_LABEL]?.toString() || "0"}
-              color={theme.colors.yellow[5]}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 6, md: 2 }}>
-            <StatsCard 
-              title="Hard" 
-              stat={questionStats[HARD_LABEL]?.toString() || "0"} 
-              color={theme.colors.red[5]} 
-            />
-          </Grid.Col>
+          { questionStats && Object.keys(questionStats).map((level) => (
+            <Grid.Col span={{ base: 6, md: 2 }} key={level}>
+              <StatsCard 
+                title={level}
+                stat={questionStats[level]?.toString() || "0"}
+                color={DIFFICULTYCOLOR[level]} 
+              />
+            </Grid.Col>
+          ))}
         </>
     );
 }
