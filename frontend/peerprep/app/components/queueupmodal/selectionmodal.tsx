@@ -1,4 +1,4 @@
-import { Button, Grid, Select } from "@mantine/core";
+import { Button, Grid, Select, Text } from "@mantine/core";
 import { LANGUAGES } from "~/constants/constants";
 import type { UseFormReturnType } from "@mantine/form";
 import { useEffect, useState } from "react";
@@ -20,7 +20,8 @@ type SelectionModalProps = {
 
 export default function SelectionModal({ form, handleQueue }: SelectionModalProps) {
   const [labels, setLabels] = useState<Labels | null>(null);
-  const { getLabels } = useQuestionService();
+  const [error, setError] = useState<string | null>(null);
+  const { getLabels, isValidQuestion } = useQuestionService();
 
   useEffect(() => {
     getLabels()
@@ -30,8 +31,29 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
     });
   }, []);
 
+  const joinQueue = async (event: React.FormEvent<HTMLFormElement>) => {
+    // prevent form submission reload
+    event.preventDefault();
+    // only continue if form is filled
+    if (!form.isValid()) {
+      form.validate();
+      return;
+    }
+    const res = await isValidQuestion(form.values.difficulty, form.values.topic);
+    if (res) {
+        setError(null);
+        handleQueue({
+            topic: form.values.topic,
+            difficulty: form.values.difficulty,
+            language: form.values.language,
+        });
+    } else {
+        setError("No questions available for the selected topic and difficulty. Please choose different options.");
+    }
+  };
+
   return (
-        <form onSubmit={form.onSubmit((values) => handleQueue(values))} noValidate>
+        <form onSubmit={joinQueue} noValidate>
           <Grid>
             <Grid.Col span={12}>
               <Select
@@ -63,6 +85,11 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
                 required
               />
             </Grid.Col>
+            {error && (
+              <Grid.Col span={12}>
+                <Text c="red" ta="center">{error}</Text>
+              </Grid.Col>
+            )}
             <Grid.Col span={12}>
               <Button fullWidth type="submit" mt="md">
                 Confirm

@@ -79,6 +79,23 @@ async function uploadImage(imageData: File, tokenId: string | null) {
     return response.json();
 }
 
+async function isValidQuestion(difficulties: string, topics: string, tokenId: string | null) {
+    const params = new URLSearchParams();
+    params.append("difficulties", difficulties);
+    params.append("topics", topics);
+
+    const response = await fetch(`${API_BASE_URL}/questions/valid-config?${params.toString()}`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${tokenId}`,
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Failed to validate question");
+    }
+    return response.json();
+}
+
 export function useQuestionService() {
     const { tokenId } = useAuth();
 
@@ -87,5 +104,6 @@ export function useQuestionService() {
         getQuestion: (id: string) => getQuestion(id, tokenId),
         getLabels: () => getLabels(tokenId),
         uploadImage: (imageData: File) => uploadImage(imageData, tokenId),
+        isValidQuestion: (difficulties: string, topics: string) => isValidQuestion(difficulties, topics, tokenId),
     };
 }
