@@ -11,11 +11,7 @@ type SelectionModalProps = {
         difficulty: string;
         language: string;
     }>;
-    handleQueue: (values: {
-        topic: string;
-        difficulty: string;
-        language: string;
-    }) => void;
+    handleQueue: () => void;
 };
 
 export default function SelectionModal({ form, handleQueue }: SelectionModalProps) {
@@ -31,26 +27,15 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
     });
   }, []);
 
-  const joinQueue = async (event: React.FormEvent<HTMLFormElement>) => {
-    // prevent form submission reload
-    event.preventDefault();
-    // only continue if form is filled
-    if (!form.isValid()) {
-      form.validate();
-      return;
-    }
-    const res = await isValidQuestion(form.values.difficulty, form.values.topic);
+  const joinQueue = form.onSubmit(async (values) => {
+    const res = await isValidQuestion(values.difficulty, values.topic);
     if (res) {
         setError(null);
-        handleQueue({
-            topic: form.values.topic,
-            difficulty: form.values.difficulty,
-            language: form.values.language,
-        });
+        handleQueue();
     } else {
         setError("No questions available for the selected topic and difficulty. Please choose different options.");
     }
-  };
+  });
 
   return (
         <form onSubmit={joinQueue} noValidate>

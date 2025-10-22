@@ -55,7 +55,7 @@ export default function QueueModal() {
     fetch(`${matching_url}/match/request`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${tokenId}`,
+        Authorization: `Bearer ${tokenId}`,
         "Content-Type": "application/json",
       },
       body: getRequestBody(),
@@ -69,7 +69,7 @@ export default function QueueModal() {
     fetch(`${matching_url}/match/cancel`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${tokenId}`,
+        Authorization: `Bearer ${tokenId}`,
         "Content-Type": "application/json",
       },
       body: getRequestBody(),
@@ -95,7 +95,7 @@ export default function QueueModal() {
       .catch((error) => console.error("Error:", error));
   };
 
-  const handleQueue = (values: typeof form.values) => {
+  const handleQueue = () => {
     setQueueStatus("searching");
 
     if (!socket || socket.readyState !== WebSocket.OPEN) {
@@ -122,7 +122,7 @@ export default function QueueModal() {
       });
 
       newSocket.addEventListener("open", () => {
-        newSocket.send(JSON.stringify({ type: "join", ...values }));
+        newSocket.send(JSON.stringify({ type: "join", ...form.values }));
         sendQueueRequest();
       });
     } else {
@@ -203,9 +203,19 @@ export default function QueueModal() {
     }
   };
 
+  const unloadModal = () => {
+    close();
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      sendLeaveRequest();
+      socket.close();
+    }
+    form.reset();
+    setQueueStatus("idle");
+  };
+
   return (
     <>
-      <Modal opened={opened} onClose={close} c="white" title={getTitle()}>
+      <Modal opened={opened} onClose={unloadModal} c="white" title={getTitle()}>
         {queueStatus === "idle" && (
           <SelectionModal form={form} handleQueue={handleQueue} />
         )}
@@ -213,7 +223,7 @@ export default function QueueModal() {
           <SearchingModal elapsedTime={elapsedTime} leaveQueue={leaveQueue} />
         )}
         {queueStatus === "timeout" && (
-          <TimeoutModal setQueueStatus={setQueueStatus} />
+          <TimeoutModal handleQueue={handleQueue} />
         )}
         {queueStatus === "found" && (
           <FoundModal redirectCountdown={redirectCountdown} />

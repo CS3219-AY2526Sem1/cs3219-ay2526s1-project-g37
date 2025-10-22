@@ -1,10 +1,10 @@
 import { Button, Grid, Text } from "@mantine/core";
 
 type TimeoutModalProps = {
-    setQueueStatus: (status: "idle" | "searching" | "timeout" | "found") => void;
+    handleQueue: () => void;
 };
 
-export default function TimeoutModal({ setQueueStatus }: TimeoutModalProps) {
+export default function TimeoutModal({ handleQueue }: TimeoutModalProps) {
   return (
       <Grid justify="center" align="center">
         <Grid.Col span={12} ta="center">
@@ -13,7 +13,7 @@ export default function TimeoutModal({ setQueueStatus }: TimeoutModalProps) {
           </Text>
         </Grid.Col>
         <Grid.Col span={12}>
-          <Button fullWidth onClick={() => setQueueStatus("idle")}>
+          <Button fullWidth onClick={handleQueue}>
             Retry
           </Button>
         </Grid.Col>
