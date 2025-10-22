@@ -2,19 +2,27 @@ import { Button, Card, Divider, Table, Text, Pagination, Group, Input } from "@m
 import classes from "./table.module.css";
 
 export type QuestionHistory = {
-  question: string;
+  name: string;
   dateAdded: string;
   lastEdited: string;
   difficulty: string;
   topic: string;
 };
 
-export default function QuestionsTable({ data }: { data: QuestionHistory[] }) {
+interface QuestionsTableProps {
+  data: QuestionHistory[];
+  totalPages: number;
+  onSearchQueryChange: (query: string) => void;
+  onPageChange: (page: number) => void;
+}
+
+export default function QuestionsTable({ data, totalPages, onSearchQueryChange, onPageChange }: QuestionsTableProps) {
+
   const rows = data.map((row) => (
-    <Table.Tr key={row.question}>
-      <Table.Td>{row.question}</Table.Td>
-      <Table.Td ta="right">{row.dateAdded}</Table.Td>
-      <Table.Td ta="right">{row.lastEdited}</Table.Td>
+    <Table.Tr key={row.name}>
+      <Table.Td>{row.name}</Table.Td>
+      {/* <Table.Td ta="right">{row.dateAdded}</Table.Td>
+      <Table.Td ta="right">{row.lastEdited}</Table.Td> */}
       <Table.Td ta="right">{row.difficulty}</Table.Td>
       <Table.Td ta="right">{row.topic}</Table.Td>
       <Table.Td ta="right" style={{ width: 50 }}>
@@ -31,7 +39,7 @@ export default function QuestionsTable({ data }: { data: QuestionHistory[] }) {
         <Text fw={1000} size="xl" c="white" mb={"xs"}>
           Questions
         </Text>
-        <Input placeholder="Search" />
+        <Input placeholder="Search" onChange={(e) => onSearchQueryChange(e.currentTarget.value)} />
       </Group>
       
       <Divider />
@@ -40,8 +48,8 @@ export default function QuestionsTable({ data }: { data: QuestionHistory[] }) {
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Question</Table.Th>
-              <Table.Th className={classes.cell}>Date Added</Table.Th>
-              <Table.Th className={classes.cell}>Last Edited</Table.Th>
+              {/* <Table.Th className={classes.cell}>Date Added</Table.Th>
+              <Table.Th className={classes.cell}>Last Edited</Table.Th> */}
               <Table.Th className={classes.cell}>Difficulty</Table.Th>
               <Table.Th className={classes.cell}>Topic</Table.Th>
               <Table.Th className={classes.cell} style={{ width: 50 }}></Table.Th>
@@ -52,7 +60,7 @@ export default function QuestionsTable({ data }: { data: QuestionHistory[] }) {
         </Table>
       </Table.ScrollContainer>
       <Group justify="center">
-      <Pagination total={5} siblings={3} defaultValue={1} />
+      <Pagination total={totalPages} siblings={3} defaultValue={1} onChange={onPageChange} />
 
       </Group>
     </Card>
