@@ -157,7 +157,7 @@ def get_questions_list(page, size, search):
                 "topic": row[3],
             })
         
-        ## get total count for pagination (optional)
+        # get total count for pagination (optional)
         cur.execute(
             """
             SELECT COUNT(*)
