@@ -3,7 +3,6 @@ import StatsCard from "../statscard";
 import { useEffect, useState } from "react";
 import { useAuth } from "~/context/authContext";
 
-const TOTAL_QUESTIONS_LABEL = "Total Questions";
 const EASY_LABEL = "Easy";
 const MEDIUM_LABEL = "Medium";
 const HARD_LABEL = "Hard";
@@ -12,6 +11,10 @@ export default function DifficultyCards() {
     const theme = useMantineTheme();
     const { tokenId } = useAuth();
     const [questionStats, setQuestionStats] = useState<{ [key: string]: number }>({});
+
+    const getTotalQuestions = () => {
+        return Object.values(questionStats).reduce((acc, curr) => acc + curr, 0);
+    }
 
     useEffect(() => {
         // get total questions count for each difficulty
@@ -31,8 +34,8 @@ export default function DifficultyCards() {
 
             const data = await response.json();
             console.log("Fetched question stats:", data);
-            data[TOTAL_QUESTIONS_LABEL] = Object.values(data).reduce((acc: number, val: any) => acc + Number(val), 0);
             setQuestionStats(data);
+            
         } catch (error) {
             console.error("Error fetching total questions count:", error);
         }};
@@ -44,7 +47,7 @@ export default function DifficultyCards() {
           <Grid.Col span={{ base: 6, md: 2 }}>
             <StatsCard
               title="Total Questions"
-              stat={questionStats[TOTAL_QUESTIONS_LABEL]?.toString() || "0"}
+              stat={getTotalQuestions().toString() || "0"}
               color={theme.colors.gray[0]}
             />
           </Grid.Col>

@@ -1,12 +1,10 @@
 import {
   Grid,
-  useMantineTheme,
   Loader,
   Center,
   Text,
 } from "@mantine/core";
 
-import StatsCard from "../components/statscard";
 import HistoryTable from "../components/table/table";
 import type { InterviewHistory } from "../components/table/table";
 import QueueModal from "~/components/queueupmodal/queuemodal";
@@ -21,7 +19,6 @@ export function meta() {
 }
 
 export default function Userpage() {
-  const theme = useMantineTheme();
   const { userId, tokenId } = useAuth();
   const navigate = useNavigate();
 

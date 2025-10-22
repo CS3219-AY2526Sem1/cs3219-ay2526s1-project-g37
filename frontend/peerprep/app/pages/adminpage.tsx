@@ -1,12 +1,10 @@
 import {
   Grid,
-  useMantineTheme,
   Button
 } from "@mantine/core";
 
 import { Link } from "react-router";
 
-import StatsCard from "../components/statscard";
 import QuestionsTable from "~/components/table/questionstable";
 import type {QuestionHistory} from "../components/table/questionstable";
 
