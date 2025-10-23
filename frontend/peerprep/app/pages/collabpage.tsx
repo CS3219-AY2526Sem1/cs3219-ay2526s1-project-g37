@@ -10,20 +10,21 @@ import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../context/authContext";
 import type { Question } from "~/services/QuestionService";
 import HtmlRender from "~/components/htmlrenderer/HtmlRender";
-
+import { useCollabService } from "~/services/CollabService";
 
 export default function CollabPage() {
   // TODO: retrieve details from matching page
   const params = useParams();
   const { sessionId } = params;
+  const { getSessionQuestion } = useCollabService();
   const [question, setQuestion] = useState<Question | null>(null);
   const collabRef = useRef<{ destroySession: () => void }>(null);
-  const { userId, tokenId } = useAuth();
+  const { userId } = useAuth();
+  const navigate = useNavigate();
 
   const { sendJsonMessage, lastMessage, readyState, getWebSocket } =
     useWebSocket(`${import.meta.env.VITE_COLLAB_SERVICE_WS_URL}/ws/sessions/${sessionId}?user_id=${userId}`, { shouldReconnect: () => true });
 
-  const navigate = useNavigate();
 
   useEffect(() => {
     console.log("py-collab: websocket state changed:", readyState);
@@ -48,26 +49,8 @@ export default function CollabPage() {
   }, [lastMessage]);
 
   const fetchQuestionDetails = async () => {
-    const collabUrl = `${import.meta.env.VITE_AUTH_ROUTER_URL}/collaboration`;
-
-    const url = `${collabUrl}/sessions/${sessionId}/question`;
-
     try {
-      const response = await fetch(url,
-        {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${tokenId}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: Question = await response.json();
+      const data = await getSessionQuestion(sessionId!);
       setQuestion(data);
       console.log("Fetched question successfully:", data.name);
     } catch (error) {
@@ -76,19 +59,21 @@ export default function CollabPage() {
     }
   };
 
-  const handleEndSession = () => {
-    // send end session signal to server
-    console.log("End session signal sent.");
-
-    //send collaborator_ended message
+  const endWebSocket = () => {
     if (readyState === ReadyState.OPEN) {
       sendJsonMessage({ type: "collaborator_ended" });
     }
-
     const socket = getWebSocket();
     if (socket) {
       socket.close();
     }
+  };
+
+  const handleEndSession = () => {
+    // send end session signal to server
+    console.log("End session signal sent.");
+
+    endWebSocket();
 
     console.log("Clearing collab session...");
     if (collabRef.current) {
@@ -97,9 +82,6 @@ export default function CollabPage() {
 
     sessionStorage.setItem('sessionEnded', 'true');
     navigate('/user', { replace: true });
-
-    // TODO: redirect to next page
-    console.log("Redirecting to next page...");
   };
 
   if (!sessionId) {
