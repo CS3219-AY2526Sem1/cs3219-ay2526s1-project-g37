@@ -10,7 +10,6 @@ export function meta() {
     return [{ title: "PeerPrep - Signup" }, { name: "description", content: "Welcome to PeerPrep!" }];
 }
 
-
 export default function Signup() {
     const { userLoggedIn } = useAuth();
     const [isRegistering, setIsRegistering] = useState(false);
@@ -33,7 +32,7 @@ export default function Signup() {
         if (!isRegistering) {
             setIsRegistering(true);
             try {
-                await doCreateUserWithEmailAndPassword(values.email, values.password);
+                await doCreateUserWithEmailAndPassword(values.email, values.password, values.username);
                 await doUpdateUserProfile(values.username);
             } catch (error) {
                 setIsRegistering(false);
@@ -83,7 +82,7 @@ export default function Signup() {
                                 </Grid.Col>
                                 <Grid.Col span={12} mt="md">
                                     <Button type="submit" fullWidth autoContrast>
-                                        Sign Up 
+                                        Sign Up
                                     </Button>
                                 </Grid.Col>
                             </form>

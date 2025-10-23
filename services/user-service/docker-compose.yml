@@ -1,18 +1,60 @@
 services:
-  user-service-dev:
+  # 1. POSTGRES SERVICE
+  postgres-service-dev:
+    image: postgres:latest
+    profiles: ["dev"]
+    container_name: postgres-service-dev
+    restart: always
+    ports:
+      - "${USER_DB_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${USER_DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      interval: 2s
+      retries: 10
+
+  # 2. MIDDLEWARE SERVICE
+  middleware-service-dev:
     profiles: ["dev"]
     build:
-      context: . # Build using the Dockerfile in the current folder
-      dockerfile: Dockerfile
-    container_name: user-service-dev
+      context: .
+      dockerfile: Dockerfile.middleware
+    container_name: middleware-service-dev
     ports:
       - "4000:4000"
     volumes:
-      - .:/app # Mount code for hot-reloading
-      - /app/node_modules # Add this anonymous volume
+      - .:/app
+      - /app/node_modules
     environment:
-      - PORT=${USER_PORT}
+      - MIDDLEWARE_PORT=${MIDDLEWARE_PORT}
       - QUESTION_SERVICE_URL=${AUTH_QUESTION_SERVICE_URL}
       - MATCHING_SERVICE_URL=${AUTH_MATCHING_SERVICE_URL}
       - COLLAB_SERVICE_URL=${AUTH_COLLAB_SERVICE_URL}
+      - USER_SERVICE_URL=${AUTH_USER_SERVICE_URL}
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+
+  # 3. USER SERVICE
+  user-service-dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: Dockerfile.user
+    container_name: user-service-dev
+    ports:
+      - "${USER_PORT}:8003"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      postgres-service-dev:
+        condition: service_healthy
+    environment:
+      - USER_PORT=8003
+      - POSTGRES_HOST=postgres-service-dev
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${USER_DB_NAME}
+      - POSTGRES_PORT=5432

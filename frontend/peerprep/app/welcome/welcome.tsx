@@ -6,7 +6,7 @@ import { useAuth } from "../context/authContext";
 import { useNavigate } from "react-router";
 
 export function Welcome() {
-    const { userLoggedIn } = useAuth();
+    const { currentUser, userLoggedIn } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,15 +17,15 @@ export function Welcome() {
     }, [userLoggedIn, navigate]);
 
     // example of getting tokenId
-    // useEffect(() => {
-    //     async function logTokenId() {
-    //         if (currentUser) {
-    //             const tokenId = await currentUser.getIdToken();
-    //             console.log("tokenId", tokenId);
-    //         }
-    //     }
-    //     logTokenId();
-    // }, [currentUser]);
+    useEffect(() => {
+        async function logTokenId() {
+            if (currentUser) {
+                const tokenId = await currentUser.getIdToken();
+                console.log("tokenId", tokenId);
+            }
+        }
+        logTokenId();
+    }, [currentUser]);
 
     return (
         <main className="flex items-center justify-center pt-16 pb-4">

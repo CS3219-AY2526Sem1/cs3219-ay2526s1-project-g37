@@ -1,83 +1,42 @@
 const express = require("express");
-const cors = require("cors");
-const { createProxyMiddleware } = require("http-proxy-middleware");
-const { admin } = require("./firebase-admin-config");
-
+const { pool } = require("./db-config");
 const app = express();
-app.use(cors());
-
-const MATCHING_SERVICE_URL = process.env.MATCHING_SERVICE_URL || "http://localhost:8001";
-const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL || "http://localhost:8002";
-const COLLAB_SERVICE_URL = process.env.COLLAB_SERVICE_URL || "http://localhost:8000";
-
-console.log("--- USER-SERVICE ENVIRONMENT VARIABLES ---");
-console.log("PORT:", process.env.PORT);
-console.log("QUESTION_SERVICE_URL:", process.env.QUESTION_SERVICE_URL);
-console.log("MATCHING_SERVICE_URL:", process.env.MATCHING_SERVICE_URL);
-console.log("COLLAB_SERVICE_URL:", process.env.COLLAB_SERVICE_URL);
-console.log(
-    "GOOGLE_APPLICATION_CREDENTIALS:",
-    process.env.GOOGLE_APPLICATION_CREDENTIALS ? "Exists" : "Does not exist"
-);
-console.log("------------------------------------------");
-
-const verifyToken = async (req, res, next) => {
-    const header = req.headers.authorization;
-    if (!header || !header.startsWith("Bearer ")) {
-        return res.status(401).json({ message: "Unauthorized" });
-    }
-    const token = header.split(" ")[1];
+app.use(express.json());
+const dotenv = require("dotenv");
+dotenv.config();
+app.get("/:uuid", async (req, res) => {
     try {
-        const decodedToken = await admin.auth().verifyIdToken(token);
-        req.user = decodedToken;
-        next();
+        const { uuid } = req.params;
+        const client = await pool.connect();
+        const result = await client.query("SELECT * FROM users where uuid = $1;", [uuid]);
+        client.release();
+        res.status(200).json(result.rows);
     } catch (error) {
-        return res.status(401).json({ message: "Unauthorized" });
+        console.error("Error fetching users:", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
-};
+});
 
-const onProxyReq = (proxyReq, req, res) => {
-    if (req.user) {
-        proxyReq.setHeader("x-user-id", req.user.uid);
-        proxyReq.setHeader("x-user-email", req.user.email);
+app.post("/register", async (req, res) => {
+    const { uuid, username, role } = req.body;
+    try {
+        const client = await pool.connect();
+        const insertQuery = "INSERT INTO users (uuid, username, role) VALUES ($1, $2, $3) RETURNING *;";
+        const values = [uuid, username, role || 0];
+        const result = await client.query(insertQuery, values);
+        client.release();
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error("Error creating user:", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
-};
+});
 
-app.use(
-    "/matching",
-    verifyToken,
-    createProxyMiddleware({
-        target: MATCHING_SERVICE_URL,
-        changeOrigin: true,
-        onProxyReq,
-    })
-);
-
-app.use(
-    "/questions",
-    verifyToken,
-    createProxyMiddleware({
-        target: QUESTION_SERVICE_URL,
-        changeOrigin: true,
-        onProxyReq,
-    })
-);
-
-app.use(
-    "/collaboration",
-    verifyToken,
-    createProxyMiddleware({
-        target: COLLAB_SERVICE_URL,
-        changeOrigin: true,
-        onProxyReq,
-    })
-);
+const PORT = process.env.USER_PORT || 8003;
+app.listen(PORT, () => {
+    console.log(`User Service is running on port ${PORT}`);
+});
 
 app.get("/health", (req, res) => {
     res.send("User Service is healthy");
-});
-
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-    console.log(`User Service listening on port ${PORT}`);
 });

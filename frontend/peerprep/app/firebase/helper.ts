@@ -18,9 +18,24 @@ export interface AuthCredentials {
 
 export const doCreateUserWithEmailAndPassword = async (
     email: AuthCredentials["email"],
-    password: AuthCredentials["password"]
+    password: AuthCredentials["password"],
+    username: string
 ): Promise<import("firebase/auth").UserCredential> => {
-    return createUserWithEmailAndPassword(auth, email, password);
+    return createUserWithEmailAndPassword(auth, email, password)
+        .then(async (userCredential) => {
+            await fetch("http://localhost:4000/users/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${await auth?.currentUser?.getIdToken()}`,
+                },
+                body: JSON.stringify({ uuid: auth?.currentUser?.uid, username: username }),
+            });
+            return userCredential;
+        })
+        .catch((error) => {
+            throw error;
+        });
 };
 
 export const doUpdateUserProfile = async (displayName: string) => {
