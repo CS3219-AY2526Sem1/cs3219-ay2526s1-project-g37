@@ -16,15 +16,29 @@ export default function CollabPage() {
   // TODO: retrieve details from matching page
   const params = useParams();
   const { sessionId } = params;
-  const { getSessionQuestion } = useCollabService();
+  const { getSessionQuestion, getSessionByUser } = useCollabService();
   const [question, setQuestion] = useState<Question | null>(null);
   const collabRef = useRef<{ destroySession: () => void }>(null);
   const { userId } = useAuth();
   const navigate = useNavigate();
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  // check user belongs to sessionId
+  useEffect(() => {
+    getSessionByUser().then((responseData) => {
+      if (responseData.session_id !== sessionId) {
+        navigate("/user", { replace: true });
+      } else {
+        setCheckingSession(false);
+      }
+    });
+  }, []);
 
   const { sendJsonMessage, lastMessage, readyState, getWebSocket } =
-    useWebSocket(`${import.meta.env.VITE_COLLAB_SERVICE_WS_URL}/ws/sessions/${sessionId}?user_id=${userId}`, { shouldReconnect: () => true });
-
+    useWebSocket(
+      `${import.meta.env.VITE_COLLAB_SERVICE_WS_URL}/ws/sessions/${sessionId}?user_id=${userId}`,
+      { shouldReconnect: () => true }
+    );
 
   useEffect(() => {
     console.log("py-collab: websocket state changed:", readyState);
@@ -80,8 +94,8 @@ export default function CollabPage() {
       collabRef.current.destroySession();
     }
 
-    sessionStorage.setItem('sessionEnded', 'true');
-    navigate('/user', { replace: true });
+    sessionStorage.setItem("sessionEnded", "true");
+    navigate("/user", { replace: true });
   };
 
   if (!sessionId) {
@@ -89,66 +103,74 @@ export default function CollabPage() {
   }
 
   return (
-    <CollabProvider sessionId={sessionId} collabRef={collabRef}>
-      <Grid>
-        <Grid.Col span={{ base: 12 }}>
-          <SessionControlBar
-            user={userId}
-            onEndSession={handleEndSession}
-          />
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <Card
-            style={{ height: COLLABCARDHEIGHT, overflowY: "auto" }}
-            c={"white"}
-          >
-            {question ? <HtmlRender
-              name={question.name}
-              topic={question.topic}
-              difficulty={question.difficulty}
-              description={question.description}
-            /> : <Text>Loading...</Text>}
-          </Card>
-        </Grid.Col>
-        <Grid.Col
-          span={{ base: 12, md: 6 }}
-          style={{ height: COLLABCARDHEIGHT }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              height: COLLABCARDHEIGHT,
-              gap: "16px",
-            }}
-          >
-            <Card
-              style={{ flexGrow: 1, height: "60%", overflow: "hidden" }}
-              c={"white"}
-            >
-              <CodeEditor
-                defaultLanguage="python"
-                theme="vs-dark"
-                width="100%"
-                height="100%"
+    <>
+      {checkingSession ? (
+        <Text ta={"center"}>Verifying session...</Text>
+      ) : (
+        <CollabProvider sessionId={sessionId} collabRef={collabRef}>
+          <Grid>
+            <Grid.Col span={{ base: 12 }}>
+              <SessionControlBar
+                user={userId}
+                onEndSession={handleEndSession}
               />
-            </Card>
-
-            <Card
-              style={{
-                flexGrow: 1,
-                height: "calc(40% - 16px)",
-                overflowY: "auto",
-              }}
-              c={"white"}
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <Card
+                style={{ height: COLLABCARDHEIGHT, overflowY: "auto" }}
+                c={"white"}
+              >
+                {question ? (
+                  <HtmlRender
+                    name={question.name}
+                    topic={question.topic}
+                    difficulty={question.difficulty}
+                    description={question.description}
+                  />
+                ) : (
+                  <Text>Loading...</Text>
+                )}
+              </Card>
+            </Grid.Col>
+            <Grid.Col
+              span={{ base: 12, md: 6 }}
+              style={{ height: COLLABCARDHEIGHT }}
             >
-              <TestCase />
-            </Card>
-          </div>
-        </Grid.Col>
-      </Grid>
-    </CollabProvider>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  height: COLLABCARDHEIGHT,
+                  gap: "16px",
+                }}
+              >
+                <Card
+                  style={{ flexGrow: 1, height: "60%", overflow: "hidden" }}
+                  c={"white"}
+                >
+                  <CodeEditor
+                    defaultLanguage="python"
+                    theme="vs-dark"
+                    width="100%"
+                    height="100%"
+                  />
+                </Card>
+
+                <Card
+                  style={{
+                    flexGrow: 1,
+                    height: "calc(40% - 16px)",
+                    overflowY: "auto",
+                  }}
+                  c={"white"}
+                >
+                  <TestCase />
+                </Card>
+              </div>
+            </Grid.Col>
+          </Grid>
+        </CollabProvider>
+      )}
+    </>
   );
 }
-
-

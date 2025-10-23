@@ -1,4 +1,5 @@
 import {
+  Button,
   Grid,
   useMantineTheme,
 } from "@mantine/core";
@@ -7,7 +8,9 @@ import StatsCard from "../components/statscard";
 import HistoryTable from "../components/table/table";
 import type { InterviewHistory } from "../components/table/table";
 import QueueModal from "~/components/queueupmodal/queuemodal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useCollabService } from "~/services/CollabService";
+import { useNavigate } from "react-router";
 
 export function meta() {
     return [{ title: "PeerPrep - Homepage" }, { name: "description", content: "Welcome to PeerPrep!" }];
@@ -15,6 +18,10 @@ export function meta() {
 
 export default function Userpage() {
   const theme = useMantineTheme();
+  const navigation = useNavigate();
+  const { getSessionByUser } = useCollabService();
+  const [inSession, setInSession] = useState(false);
+  const [userSessionId, setUserSessionId] = useState<string | null>(null);
 
   const [data, ] = useState<InterviewHistory[]>([
     {
@@ -25,6 +32,24 @@ export default function Userpage() {
       language: "JavaScript",
     },
   ]);
+
+  useEffect(() => {
+    getSessionByUser().then((responseData) => {
+      if (responseData.in_session) {
+        setInSession(true);
+        setUserSessionId(responseData.session_id);
+      }
+    }).catch((error) => {
+      console.error("Get Session by User Error:", error);
+    });
+  }, []);
+
+  const handleReconnect = () => {
+    if (userSessionId) {
+      navigation(`/collab/${userSessionId}`);
+    }
+  };
+
   
   return (
     <Grid>
@@ -55,7 +80,7 @@ export default function Userpage() {
             <StatsCard title="Hard" stat="1,234" color={theme.colors.red[5]} />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
-            <QueueModal />
+            {inSession ? <Button fullWidth onClick={handleReconnect}>Reconnect</Button> : <QueueModal />}
           </Grid.Col>
         </Grid>
       </Grid.Col>
