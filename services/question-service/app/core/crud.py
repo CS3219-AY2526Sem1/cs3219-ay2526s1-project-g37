@@ -125,6 +125,52 @@ def get_question(qid: str):
             "topic": question_data[3],
         }
 
+def get_questions_list(page, size, search):
+    """
+    Retrieves all questions from the database.
+    
+    Returns:
+        list[dict]: A list of question data dictionaries, each including id, name, difficulty and topic
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        offset = (page - 1) * size
+        search_pattern = f"%{search}%"
+        
+        cur.execute(
+            """
+            SELECT id, name, difficulty, topic 
+            FROM questions
+            WHERE name ILIKE %s
+            ORDER BY name
+            LIMIT %s OFFSET %s
+            """,
+            (search_pattern, size, offset)
+        )
+        rows = cur.fetchall()
+
+        questions = []
+        for row in rows:
+            questions.append({
+                "id": str(row[0]),
+                "name": row[1],
+                "difficulty": row[2],
+                "topic": row[3],
+            })
+        
+        # get total count for pagination (optional)
+        cur.execute(
+            """
+            SELECT COUNT(*)
+            FROM questions
+            WHERE name ILIKE %s
+            """,
+            (search_pattern,)
+        )
+
+
+        total_count = cur.fetchone()[0]
+
+        return questions, total_count
 
 def get_random_question_by_difficulty_and_topic(difficulty: str, topic: str):
     """
@@ -167,6 +213,25 @@ def get_random_question_by_difficulty_and_topic(difficulty: str, topic: str):
             "topic": row[4],
         }
 
+def get_questions_stats() -> Dict[str, int]:
+    """
+    Retrieves statistics about the questions in the database.
+    
+    Returns:
+        dict: A dictionary containing count per difficulty
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT difficulty, COUNT(*) 
+            FROM questions 
+            GROUP BY difficulty
+            """
+        )
+        rows = cur.fetchall()
+
+        stats = {row[0]: row[1] for row in rows}
+        return stats
 
 def override_question(
     qid: str,
