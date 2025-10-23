@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stack, Grid, TextInput, Button, PasswordInput, Divider, Text, Image } from "@mantine/core";
+import { Stack, TextInput, Button, PasswordInput, Divider, Text, Image, Group, Center } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Link, Navigate } from "react-router";
 import { doSignInWithEmailAndPassword, doSignInWithGoogle } from "~/firebase/helper";
@@ -63,74 +63,61 @@ export default function Login() {
     };
 
     return (
-        <Stack>
-            {userLoggedIn && <Navigate to={"/user"} replace={true} />}
-            <Grid>
-                <Grid.Col span={12}>
-                    <Grid justify="center" gutter={"xs"} mt={{ base: 20, md: 200 }}>
-                        <Grid.Col span={{ base: 12, md: 4 }}>
-                            <Image src={logo} alt="PeerPrep Logo" />
-                            <form onSubmit={form.onSubmit(handleSubmit)}>
-                                <Grid.Col span={12}>
-                                    <TextInput
-                                        label="Email"
-                                        placeholder="Enter your email"
-                                        type="email"
-                                        key={form.key("email")}
-                                        {...form.getInputProps("email")}
-                                    />
-                                </Grid.Col>
-                                <Grid.Col span={12}>
-                                    <PasswordInput
-                                        label="Password"
-                                        placeholder="Enter your password"
-                                        type="password"
-                                        key={form.key("password")}
-                                        {...form.getInputProps("password")}
-                                    />
-                                </Grid.Col>
-                                <Grid.Col span={12} mt="md">
-                                    <Button
-                                        type="submit"
-                                        fullWidth
-                                        autoContrast
-                                        disabled={isSigningIn}
-                                        loading={isSigningIn}
-                                    >
-                                        Login
-                                    </Button>
-                                </Grid.Col>
-                                {error && (
-                                    <Text color="red" size="sm" mt="md" style={{ textAlign: "center" }}>
-                                        {error}
-                                    </Text>
-                                )}
-                            </form>
-                            <Grid.Col span={12} mt="md">
-                                <Divider my="xs" />
-                            </Grid.Col>
-                            <Grid.Col span={12} mt="md" className="text-center">
-                                <Text span>Don't have an account? </Text>
-                                <Link to="/signup">
-                                    <Text span td="underline" c="blue" className="cursor-pointer">
-                                        Sign up!
-                                    </Text>
-                                </Link>
-                                <Text span> Or </Text>
-                                <Button
-                                    leftSection={<IconBrandGoogle size={14} />}
-                                    onClick={onGoogleSignIn}
-                                    loading={isSigningIn}
-                                    disabled={isSigningIn}
-                                    className=" m-2"
-                                >
-                                    Sign in with Google
-                                </Button>
-                            </Grid.Col>
-                        </Grid.Col>
-                    </Grid>
-                </Grid.Col>
-            </Grid>
-        </Stack>
+        <Center mih={"100vh"}>
+            <Stack justify="center" align="stretch" miw={"50%"}>
+                {userLoggedIn && <Navigate to={"/user"} replace={true} />}
+                <Image src={logo} alt="PeerPrep Logo" />
+                <form onSubmit={form.onSubmit(handleSubmit)}>
+                    <TextInput
+                        label="Email"
+                        placeholder="Enter your email"
+                        type="email"
+                        key={form.key("email")}
+                        {...form.getInputProps("email")}
+                    />
+                    <PasswordInput
+                        label="Password"
+                        placeholder="Enter your password"
+                        type="password"
+                        key={form.key("password")}
+                        {...form.getInputProps("password")}
+                    />
+                    <Button type="submit" fullWidth autoContrast disabled={isSigningIn} loading={isSigningIn} mt="md">
+                        Login
+                    </Button>
+                    {error && (
+                        <Text color="red" size="sm" mt="md" style={{ textAlign: "center" }}>
+                            {error}
+                        </Text>
+                    )}
+                </form>
+                <Divider my="xs" />
+                <Group align="center" justify="center">
+                    <Text span>Don't have an account? </Text>
+                    <Link to="/signup">
+                        <Text span td="underline" c="blue" className="cursor-pointer">
+                            Sign up!
+                        </Text>
+                    </Link>
+                </Group>
+                <Text ta="center"> Or </Text>
+                <Button
+                    leftSection={<IconBrandGoogle size={14} />}
+                    onClick={onGoogleSignIn}
+                    loading={isSigningIn}
+                    disabled={isSigningIn}
+                    className=" m-2"
+                >
+                    Sign in with Google
+                </Button>
+                <Center>
+                    <Link to="/reset-password">
+                        <Text span td="underline" c="blue" className="cursor-pointer">
+                            Forgot Password?
+                        </Text>
+                    </Link>
+                </Center>
+            </Stack>
+        </Center>
     );
 }

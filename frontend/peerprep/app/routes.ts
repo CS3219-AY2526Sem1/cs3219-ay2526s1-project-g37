@@ -4,6 +4,7 @@ export default [
     index("routes/home.tsx"),
     route("login", "pages/login.tsx"),
     route("signup", "pages/signup.tsx"),
+    route("reset-password", "pages/ResetPassword.tsx"),
     route("user", "pages/userpage.tsx"),
     route("admin/add", "pages/addquestionpage.tsx"),
     route("collab/:sessionId", "pages/collabpage.tsx"),

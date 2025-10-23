@@ -47,7 +47,14 @@ export const doSignOut = () => {
 };
 
 export const doPasswordReset = (email: AuthCredentials["email"]) => {
-    return sendPasswordResetEmail(auth, email);
+    return sendPasswordResetEmail(auth, email)
+        .then(() => {
+            console.log("Password reset email sent successfully.");
+        })
+        .catch((error) => {
+            console.error("Error sending password reset email:", error);
+            throw new Error(error);
+        });
 };
 
 export const doPasswordChange = (password: AuthCredentials["password"]) => {

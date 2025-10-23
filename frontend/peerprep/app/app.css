@@ -1,26 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-sans:
+        "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 }
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+    @apply bg-white dark:bg-gray-950;
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+    @media (prefers-color-scheme: dark) {
+        color-scheme: dark;
+    }
 
-  /* For some reason the default ul and ol has no list style, so we have to set it explicitly */
-  ul {
-    list-style: disc !important;
-    color: white;
-  }
+    /* For some reason the default ul and ol has no list style, so we have to set it explicitly */
+    ul {
+        list-style: disc !important;
+        color: white;
+    }
 
-  ol {
-    list-style: decimal !important;
-    color: white !important;
-  }
+    ol {
+        list-style: decimal !important;
+        color: white !important;
+    }
 }
