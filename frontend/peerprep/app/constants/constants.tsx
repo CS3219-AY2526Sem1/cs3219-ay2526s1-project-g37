@@ -15,6 +15,13 @@ export const DIFFICULTIES = ["Easy", "Medium", "Hard"];
 
 export const LANGUAGES = ["C++", "Python", "Java", "JavaScript"];
 
+export const CODE_EDITOR_LANGUAGES: Record<string, string> = {
+  "C++": "cpp",
+  "Python": "python",
+  "Java": "java",
+  "JavaScript": "javascript",
+};
+
 export const DIFFICULTYCOLOR: Record<string, string> = {
   "Easy": "var(--mantine-color-green-5)",
   "Medium": "var(--mantine-color-yellow-5)",

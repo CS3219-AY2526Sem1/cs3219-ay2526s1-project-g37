@@ -1,5 +1,5 @@
 import { Grid, Card, Text } from "@mantine/core";
-import { COLLABCARDHEIGHT } from "~/constants/constants";
+import { CODE_EDITOR_LANGUAGES, COLLABCARDHEIGHT } from "~/constants/constants";
 import SessionControlBar from "../components/sessioncontrolbar/SessionControlBar";
 import TestCase from "../components/testcases/TestCase";
 import { CodeEditor } from "../components/codeeditor/CodeEditor";
@@ -10,18 +10,24 @@ import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../context/authContext";
 import type { Question } from "~/services/QuestionService";
 import HtmlRender from "~/components/htmlrenderer/HtmlRender";
-import { useCollabService } from "~/services/CollabService";
+import {
+  useCollabService,
+  type SessionMetadata,
+} from "~/services/CollabService";
 
 export default function CollabPage() {
   // TODO: retrieve details from matching page
   const params = useParams();
   const { sessionId } = params;
-  const { getSessionQuestion, getSessionByUser } = useCollabService();
+  const { getSessionQuestion, getSessionByUser, getSessionMetadata } =
+    useCollabService();
   const [question, setQuestion] = useState<Question | null>(null);
   const collabRef = useRef<{ destroySession: () => void }>(null);
   const { userId } = useAuth();
   const navigate = useNavigate();
   const [checkingSession, setCheckingSession] = useState(true);
+  const [sessionMetadata, setSessionMetadata] =
+    useState<SessionMetadata | null>(null);
 
   // check user belongs to sessionId
   useEffect(() => {
@@ -46,6 +52,16 @@ export default function CollabPage() {
       console.log("py-collab: WebSocket connection established.");
       //  Get question details from backend
       fetchQuestionDetails();
+      // Get session metadata
+      getSessionMetadata(sessionId!)
+        .then((metadata) => {
+          console.log(metadata);
+          setSessionMetadata(metadata);
+          console.log("Fetched session metadata:", metadata);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch session metadata:", error);
+        });
     } else if (readyState === ReadyState.CLOSED) {
       console.log("py-collab: WebSocket connection closed.");
     }
@@ -95,7 +111,9 @@ export default function CollabPage() {
     }
 
     sessionStorage.setItem("sessionEnded", "true");
-    navigate("/user", { replace: true });
+    setTimeout(() => {
+      navigate("/user", { replace: true });
+    }, 0);
   };
 
   if (!sessionId) {
@@ -148,12 +166,14 @@ export default function CollabPage() {
                   style={{ flexGrow: 1, height: "60%", overflow: "hidden" }}
                   c={"white"}
                 >
-                  <CodeEditor
-                    defaultLanguage="python"
-                    theme="vs-dark"
-                    width="100%"
-                    height="100%"
-                  />
+                  {sessionMetadata && (
+                    <CodeEditor
+                      language={CODE_EDITOR_LANGUAGES[sessionMetadata.language]}
+                      theme="vs-dark"
+                      width="100%"
+                      height="100%"
+                    />
+                  )}
                 </Card>
 
                 <Card
