@@ -3,7 +3,7 @@ import {
   Button
 } from "@mantine/core";
 
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import QuestionsTable from "~/components/table/questionstable";
 import type {QuestionHistory} from "../components/table/questionstable";
@@ -11,7 +11,9 @@ import type {QuestionHistory} from "../components/table/questionstable";
 import { useEffect, useState } from "react";
 import { useAuth } from "~/context/authContext";
 import { useDebouncedValue } from "@mantine/hooks";
+import { useQuestionService } from "~/services/QuestionService";
 import DifficultyCards from "~/components/difficultycards/DifficultyCards";
+import { notifications } from "@mantine/notifications";
 
 export function meta() {
   return [
@@ -23,6 +25,8 @@ const PAGE_SIZE = 20;
 
 export default function Adminpage() {
   const { tokenId } = useAuth();
+  const navigation = useNavigate();
+  const { getQuestionsList, deleteQuestion } = useQuestionService();
   const [totalPages, setTotalPages] = useState<number>(1);
   const [data, setData] = useState<QuestionHistory[]>([    
     {
@@ -45,21 +49,8 @@ export default function Adminpage() {
   useEffect(() => {
     // Fetch the questions list from the API
     const fetchQuestionsList = async () => {
-
-      const questionsUrl = `${import.meta.env.VITE_AUTH_ROUTER_URL}/questions`;
       try {
-        const response = await fetch(`${questionsUrl}/questions?page=${currentPage}&search=${debouncedSearchQuery}`, {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${tokenId}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch questions");
-        }
-        
-        const data = await response.json();
+        const data = await getQuestionsList(currentPage, debouncedSearchQuery);
         const questionsList: QuestionHistory[] = data.questions;
         console.log("Fetched questions:", questionsList);
         setData(questionsList);
@@ -74,7 +65,34 @@ export default function Adminpage() {
     fetchQuestionsList();
   }, [currentPage, debouncedSearchQuery, tokenId]);
 
+  function handleEdit(id: string) {
+    console.log("Edit question with id:", id);
+    navigation(`/questions/edit/${id}`);
+  }
 
+  function handleDelete(id: string) {
+    console.log("Delete question with id:", id);
+    deleteQuestion(id)
+      .then(() => {
+        notifications.show({
+          title: "Success",
+          message: "Question deleted successfully!",
+          color: "green",
+          withBorder: true,
+        });
+        // Refresh the questions list after deletion
+        setData((prevData) => prevData.filter((question) => question.id !== id));
+      })
+      .catch((error) => {
+        console.error("Error deleting question:", error);
+        notifications.show({
+          title: "Error",
+          message: "Failed to delete question. Please try again.",
+          color: "red",
+          withBorder: true,
+        });
+      });
+  }
 
   return (
     <Grid>
@@ -94,6 +112,8 @@ export default function Adminpage() {
           totalPages={totalPages}
           onSearchQueryChange={(query) => setSearchQuery(query)}
           onPageChange={(page) => setCurrentPage(page)}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
         />
       </Grid.Col>
     </Grid>

@@ -24,3 +24,9 @@ body {
     color: white !important;
   }
 }
+
+.backText {
+  color: var(--mantine-color-brand-yellow-5);
+  cursor: pointer;
+  text-decoration: none;
+}

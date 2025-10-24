@@ -7,5 +7,6 @@ export default [
     route("user", "pages/userpage.tsx"),
     route("questions", "pages/adminpage.tsx"),
     route("questions/add", "pages/addquestionpage.tsx"),
+    route("questions/edit/:id", "pages/EditQuestionPage.tsx"),
     route("collab/:sessionId", "pages/collabpage.tsx"),
 ] satisfies RouteConfig;
