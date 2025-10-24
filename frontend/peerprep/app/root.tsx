@@ -10,6 +10,7 @@ import {
 
 import "@mantine/core/styles.css";
 import "@mantine/tiptap/styles.css";
+import '@mantine/notifications/styles.css';
 
 import { createTheme, MantineProvider, Container, Button, Input } from "@mantine/core";
 
@@ -17,6 +18,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import Header from "./components/header/header";
 import { AuthProvider } from "./context/authContext";
+import { Notifications } from "@mantine/notifications";
 
 export const links: Route.LinksFunction = () => [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -124,6 +126,20 @@ const theme = createTheme({
                 },
             },
         },
+        Notification: {
+            styles: {
+                root: {
+                    backgroundColor: "var(--mantine-color-custom-gray-9)",
+                    boxShadow: "0 4px 16px rgba(0, 0, 0, 0.6)",
+                },
+                title: {
+                    color: "white",
+                },
+                description: {
+                    color: "white",
+                },
+            },
+        },
     },
 
     primaryColor: "brand-yellow",
@@ -158,6 +174,7 @@ export default function App() {
   return (
     <AuthProvider>
         <MantineProvider theme={theme} defaultColorScheme="dark">
+        <Notifications />
         {isHeader() && <Header />}
         <Container fluid>{<Outlet />}</Container>      
         </MantineProvider>

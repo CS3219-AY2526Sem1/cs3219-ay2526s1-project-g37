@@ -11,11 +11,12 @@
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix --ignore-pattern \".react-router/\""
   },
   "dependencies": {
-    "@mantine/core": "^8.3.1",
-    "@mantine/form": "^8.3.1",
-    "@mantine/hooks": "^8.3.1",
-    "@mantine/modals": "^8.3.1",
-    "@mantine/tiptap": "^8.3.1",
+    "@mantine/core": "^8.3.5",
+    "@mantine/form": "^8.3.5",
+    "@mantine/hooks": "^8.3.5",
+    "@mantine/modals": "^8.3.5",
+    "@mantine/notifications": "^8.3.5",
+    "@mantine/tiptap": "^8.3.5",
     "@monaco-editor/react": "^4.7.0",
     "@react-router/node": "^7.7.1",
     "@react-router/serve": "^7.7.1",
