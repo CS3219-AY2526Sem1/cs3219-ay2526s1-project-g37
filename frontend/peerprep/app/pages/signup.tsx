@@ -1,4 +1,4 @@
-import { Grid, TextInput, Button, PasswordInput, Divider, Text, Image, Stack } from "@mantine/core";
+import { Grid, TextInput, Button, PasswordInput, Divider, Text, Image, Stack, Center, Group } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Link, Navigate } from "react-router";
 import { doCreateUserWithEmailAndPassword, doUpdateUserProfile } from "../firebase/helper";
@@ -42,65 +42,53 @@ export default function Signup() {
     };
 
     return (
-        <Stack>
-            {userLoggedIn && <Navigate to={"/login"} replace={true} />}
-            <Grid>
-                <Grid.Col span={12}>
-                    <Grid justify="center" gutter={"xs"} mt={{ base: 20, md: 200 }}>
-                        <Grid.Col span={{ base: 12, md: 4 }}>
-                            <Image src={logo} alt="PeerPrep Logo" />
-                            <form onSubmit={form.onSubmit(handleSubmit)}>
-                                <Grid.Col span={12}>
-                                    <TextInput
-                                        label="Email"
-                                        placeholder="Enter your email"
-                                        type="email"
-                                        key={form.key("email")}
-                                        {...form.getInputProps("email")}
-                                        error={undefined}
-                                    />
-                                </Grid.Col>
-                                <Grid.Col span={12}>
-                                    <TextInput
-                                        label="Username"
-                                        placeholder="Enter your Username"
-                                        type="text"
-                                        key={form.key("username")}
-                                        {...form.getInputProps("username")}
-                                        error={error}
-                                    />
-                                </Grid.Col>
-                                <Grid.Col span={12}>
-                                    <PasswordInput
-                                        label="Password"
-                                        placeholder="Enter your password"
-                                        type="password"
-                                        key={form.key("password")}
-                                        {...form.getInputProps("password")}
-                                        error={error}
-                                    />
-                                </Grid.Col>
-                                <Grid.Col span={12} mt="md">
-                                    <Button type="submit" fullWidth autoContrast>
-                                        Sign Up
-                                    </Button>
-                                </Grid.Col>
-                            </form>
-                            <Grid.Col span={12} mt="md">
-                                <Divider my="xs" />
-                            </Grid.Col>
-                            <Grid.Col span={12} mt="md" className="text-center">
-                                <Text span>Already have an account? </Text>
-                                <Link to="/login">
-                                    <Text span td="underline" c="blue" className="cursor-pointer">
-                                        Log in!
-                                    </Text>
-                                </Link>
-                            </Grid.Col>
-                        </Grid.Col>
-                    </Grid>
-                </Grid.Col>
-            </Grid>
-        </Stack>
+        <Center mih={"100vh"}>
+            <Stack justify="center" align="stretch" miw={"50%"}>
+                {userLoggedIn && <Navigate to={"/login"} replace={true} />}
+                <Image src={logo} alt="PeerPrep Logo" />
+                <form onSubmit={form.onSubmit(handleSubmit)}>
+                    <TextInput
+                        label="Email"
+                        placeholder="Enter your email"
+                        type="email"
+                        key={form.key("email")}
+                        {...form.getInputProps("email")}
+                    />
+                    <TextInput
+                        label="Username"
+                        placeholder="Enter your Username"
+                        type="text"
+                        key={form.key("username")}
+                        {...form.getInputProps("username")}
+                    />
+                    <PasswordInput
+                        label="Password"
+                        placeholder="Enter your password"
+                        type="password"
+                        key={form.key("password")}
+                        {...form.getInputProps("password")}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        autoContrast
+                        my="md"
+                        disabled={isRegistering}
+                        loading={isRegistering}
+                    >
+                        Sign Up
+                    </Button>
+                </form>
+                <Divider my="xs" />
+                <Group justify="center">
+                    <Text span>Already have an account? </Text>
+                    <Link to="/login">
+                        <Text span td="underline" c="blue" className="cursor-pointer">
+                            Log in!
+                        </Text>
+                    </Link>
+                </Group>
+            </Stack>
+        </Center>
     );
 }
