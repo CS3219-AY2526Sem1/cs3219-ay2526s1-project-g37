@@ -1,6 +1,5 @@
 import { Grid, Button, TextInput, Card, Select, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useEffect } from "react";
 import CustomRichTextEditor from "~/components/richtexteditor/CustomRichTextEditor";
 import HtmlRender from "~/components/htmlrenderer/HtmlRender";
 import { CARDHEIGHT } from "~/constants/constants";
