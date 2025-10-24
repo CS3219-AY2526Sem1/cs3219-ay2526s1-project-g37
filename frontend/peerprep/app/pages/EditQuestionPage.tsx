@@ -30,7 +30,7 @@ export default function EditQuestionPage() {
           setInitialValues(data);
           setLoading(false);
         })
-        .catch((error) => {
+        .catch(() => {
           setLoading(false);
           notifications.show({
             title: "Error",
