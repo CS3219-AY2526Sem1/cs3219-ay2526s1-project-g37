@@ -5,6 +5,11 @@ import { useEffect, useState } from "react";
 import { type Labels } from "~/Services/QuestionService";
 import { useQuestionService } from "~/Services/QuestionService";
 
+/**
+ * Selection Modal Props
+ * @param form - Form object for managing selection inputs
+ * @param handleQueue - Function to handle queue action
+ */
 type SelectionModalProps = {
     form: UseFormReturnType<{
         topic: string;
@@ -14,11 +19,19 @@ type SelectionModalProps = {
     handleQueue: () => void;
 };
 
+/**
+ * Selection Modal component
+ * @param props - Props containing form and handleQueue
+ * @returns JSX.Element
+ */
 export default function SelectionModal({ form, handleQueue }: SelectionModalProps) {
+  const { getLabels, isValidQuestion } = useQuestionService();
   const [labels, setLabels] = useState<Labels | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { getLabels, isValidQuestion } = useQuestionService();
 
+  /**
+   * Effect to fetch available labels (topics and difficulties) on component mount.
+   */
   useEffect(() => {
     getLabels()
     .then((data) => setLabels(data))
@@ -27,6 +40,10 @@ export default function SelectionModal({ form, handleQueue }: SelectionModalProp
     });
   }, []);
 
+  /**
+   * Handle form submission to join the queue.
+   * Validates the selected topic and difficulty before proceeding to queue.
+   */
   const joinQueue = form.onSubmit(async (values) => {
     const res = await isValidQuestion(values.difficulty, values.topic);
     if (res) {

@@ -1,6 +1,17 @@
-import { Button, Card, Divider, Table, Text, Pagination, Group } from "@mantine/core";
+import {
+  Button,
+  Card,
+  Divider,
+  Table,
+  Text,
+  Pagination,
+  Group,
+} from "@mantine/core";
 import classes from "./table.module.css";
 
+/**
+ * Interview History type definition
+ */
 export type InterviewHistory = {
   question: string;
   completionDate: string;
@@ -9,6 +20,11 @@ export type InterviewHistory = {
   language: string;
 };
 
+/**
+ * HistoryTable component to display interview history
+ * @param data - Array of InterviewHistory objects
+ * @returns JSX.Element
+ */
 export default function HistoryTable({ data }: { data: InterviewHistory[] }) {
   const rows = data.map((row) => (
     <Table.Tr key={row.question}>
@@ -44,8 +60,7 @@ export default function HistoryTable({ data }: { data: InterviewHistory[] }) {
         </Table>
       </Table.ScrollContainer>
       <Group justify="center">
-      <Pagination total={5} siblings={3} defaultValue={1} />
-
+        <Pagination total={5} siblings={3} defaultValue={1} />
       </Group>
     </Card>
   );

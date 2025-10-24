@@ -2,10 +2,18 @@ import { Text } from "@mantine/core";
 import { useCollabProvider } from "~/Context/CollabProvider";
 import EndSessionModal from "../CollabModals/EndSessionModal";
 
+/**
+ * Session Control Bar component
+ * @param props - Props containing user and optional onEndSession callback
+ * @returns JSX.Element
+ */
 export default function SessionControlBar(props: {user: string | null, onEndSession?: () => void}) {
   const { user, onEndSession } = props;
   const collabProvider = useCollabProvider();
 
+  /**
+   * Handle ending the session
+   */
   const handleEndSession = () => {
     if (collabProvider) {
       collabProvider.clearWebsocketSession();

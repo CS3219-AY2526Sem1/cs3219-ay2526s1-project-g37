@@ -2,8 +2,12 @@ import { Button } from "@mantine/core";
 import classes from "./TestCase.module.css";
 import { useRef, useEffect, useState } from "react";
 
+/**
+ * TestCaseBar component for displaying and selecting test cases
+ * @returns JSX.Element
+ */
 export default function TestCaseBar() {
-    const [selectedCase, setSelectedCase] = useState<number | null>(null);
+  const [selectedCase, setSelectedCase] = useState<number | null>(null);
   const TestCases = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // Example test case numbers
 
   //  container scroll when mouse wheel scrolls
@@ -35,11 +39,16 @@ export default function TestCaseBar() {
               size="compact-md"
               classNames={{ root: classes.CaseButton }}
               c={"white"}
-              style={{ backgroundColor: selectedCase === testCase ? "var(--mantine-color-dark-7)" : "var(--mantine-color-dark-6)" }}
+              style={{
+                backgroundColor:
+                  selectedCase === testCase
+                    ? "var(--mantine-color-dark-7)"
+                    : "var(--mantine-color-dark-6)",
+              }}
               onClick={() => setSelectedCase(testCase)}
             >
-
-              <span style={{ color: "var(--mantine-color-green-5)" }}>•</span>&nbsp;Case {testCase}
+              <span style={{ color: "var(--mantine-color-green-5)" }}>•</span>
+              &nbsp;Case {testCase}
             </Button>
           ))}
         </div>

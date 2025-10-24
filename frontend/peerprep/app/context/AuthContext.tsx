@@ -3,6 +3,9 @@ import { auth } from "../Firebase/init";
 import { GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 import type { User, UserInfo } from "firebase/auth";
 
+/**
+ * Authentication context type definition
+ */
 interface AuthContextType {
     userLoggedIn: boolean;
     isEmailUser: boolean;
@@ -14,6 +17,9 @@ interface AuthContextType {
     setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
+/**
+ * Authentication context creation
+ */
 const AuthContext = React.createContext<AuthContextType>({
     userLoggedIn: false,
     isEmailUser: false,
@@ -25,10 +31,19 @@ const AuthContext = React.createContext<AuthContextType>({
     setCurrentUser: () => {},
 });
 
+/**
+ * Custom hook to use authentication context
+ * @returns AuthContextType
+ */
 export function useAuth() {
     return useContext(AuthContext);
 }
 
+/**
+ * Authentication provider component
+ * @param props - Props containing children elements
+ * @returns JSX.Element
+ */
 export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [userLoggedIn, setUserLoggedIn] = useState(false);
@@ -44,6 +59,10 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
         return unsubscribe;
     }, []);
 
+    /**
+     * Initialize user state on authentication state change
+     * @param user - Firebase User object or null
+     */
     async function initializeUser(user: User | null) {
         if (user) {
             setCurrentUser(user);

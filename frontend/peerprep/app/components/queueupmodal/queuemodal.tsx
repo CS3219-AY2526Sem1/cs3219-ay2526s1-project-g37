@@ -10,19 +10,23 @@ import { useNavigate } from "react-router";
 import { useAuth } from "../../Context/AuthContext";
 import { useMatchingService } from "~/Services/MatchingService";
 
+/** Queue Modal component
+ * @returns JSX.Element
+ */
 export default function QueueModal() {
   const [opened, { open, close }] = useDisclosure(false);
+  const navigate = useNavigate();
+  const { userId } = useAuth();
+  const { sendQueueRequest, sendLeaveRequest } = useMatchingService();
+
+  const [socket, setSocket] = useState<WebSocket | null>(null);
   const [queueStatus, setQueueStatus] = useState<
     "idle" | "searching" | "found" | "timeout"
   >("idle");
-  const [socket, setSocket] = useState<WebSocket | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [redirectCountdown, setRedirectCountdown] = useState(3);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const { userId, tokenId } = useAuth();
   const [shouldNavigate, setShouldNavigate] = useState(false);
-  const { sendQueueRequest, sendLeaveRequest } = useMatchingService();
 
   const form = useForm({
     initialValues: {
@@ -39,6 +43,10 @@ export default function QueueModal() {
     },
   });
 
+  /**
+   * Get the request body for queueing up
+   * @returns Request body for queueing up
+   */
   const getRequestBody = (): {
     user_id: string;
     difficulty: string;
@@ -53,6 +61,10 @@ export default function QueueModal() {
     };
   };
 
+  /**
+   * Handle leave queue action.
+   * Sets the queue status to idle and closes the WebSocket connection.
+   */
   const handleLeaveQueue = () => {
     sendLeaveRequest(getRequestBody())
       .then((responseData) => {
@@ -70,6 +82,11 @@ export default function QueueModal() {
       .catch((error) => console.error("Error:", error));
   };
 
+  /**
+   * Handle queue action.
+   * Initiates the queueing process by establishing a WebSocket connection
+   * and sending the queue request to the server.
+   */
   const handleQueue = () => {
     setQueueStatus("searching");
 
@@ -84,6 +101,7 @@ export default function QueueModal() {
       newSocket.addEventListener("message", (event) => {
         const data = JSON.parse(event.data);
         console.log("Message from server ", data.data);
+
         if (data.event === "match.timeout") {
           setQueueStatus("timeout");
           newSocket.close();
@@ -105,6 +123,10 @@ export default function QueueModal() {
     }
   };
 
+  /**
+   * Leave the queue and reset the queue status to idle.
+   * Closes the WebSocket connection if it is open.
+   */
   const leaveQueue = () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       handleLeaveQueue();
@@ -113,6 +135,11 @@ export default function QueueModal() {
     setQueueStatus("idle");
   };
 
+  /**
+   * Effect to handle elapsed time and redirect countdown based on queue status.
+   * Sets up intervals to update elapsed time when searching and redirect countdown when a match is found.
+   * Cleans up intervals on component unmount or when queue status changes.
+   */
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (queueStatus === "searching") {
@@ -144,13 +171,21 @@ export default function QueueModal() {
     };
   }, [queueStatus]);
 
+  /**
+   * Effect to navigate to the collaboration session when a match is found.
+   * Triggers navigation to the collaboration page with the session ID.
+   */
   useEffect(() => {
     if (shouldNavigate) {
       navigate(`/collab/${sessionId}`);
     }
   }, [shouldNavigate]);
 
-  // unload when user closes tab
+  /**
+   * Effect to handle WebSocket connection cleanup on component unmount.
+   * Closes the WebSocket connection if it is open.
+   * Useful when user refreshes or closes the browser tab.
+   */
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (socket && socket.readyState === WebSocket.OPEN) {
@@ -166,6 +201,10 @@ export default function QueueModal() {
     };
   }, [queueStatus]);
 
+  /**
+   * Get the title for the modal based on the current queue status.
+   * @returns Title string for the modal
+   */
   const getTitle = () => {
     if (queueStatus === "idle") {
       return "Select Topic and Difficulty";
@@ -178,6 +217,10 @@ export default function QueueModal() {
     }
   };
 
+  /**
+   * Unload the modal and reset the state.
+   * Closes the WebSocket connection if it is open and resets the form and queue status.
+   */
   const unloadModal = () => {
     close();
     if (socket && socket.readyState === WebSocket.OPEN) {

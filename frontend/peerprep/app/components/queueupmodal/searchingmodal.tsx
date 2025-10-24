@@ -1,11 +1,19 @@
 import { Grid, Loader, Text, Button } from "@mantine/core";
 import { formatTime } from "~/Utils/Utils";
 
+/**
+ * Searching Modal Props
+ */
 type SearchingModalProps = {
   elapsedTime: number;
   leaveQueue: () => void;
 };
 
+/**
+ * Searching Modal component
+ * @param props - Props containing elapsedTime and leaveQueue
+ * @returns JSX.Element
+ */
 export default function SearchingModal({
   elapsedTime,
   leaveQueue,

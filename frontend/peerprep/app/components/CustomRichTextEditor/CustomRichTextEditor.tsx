@@ -14,17 +14,31 @@ import Image from "@tiptap/extension-image";
 import FileHandler from "@tiptap/extension-file-handler";
 import { useQuestionService } from "~/Services/QuestionService";
 
+/**
+ * Props for CustomRichTextEditor component
+ * @interface RichTextEditorProps
+ * @property {string} value - The HTML content of the editor
+ * @property {(value: string) => void} onChange - Callback function to handle content changes
+ */
 interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
 }
 
-const minheight = 200;
+const MINHEIGHT = 200;
 const MAXFILESIZE = 500; // in KB (500 KB)
+const ALLOWED_MIME_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
-function createFileHandlerExtension(uploadImage: (file: File) => Promise<{ url: string }>) {
+/**
+ * Create a file handler extension for uploading images
+ * @param uploadImage - Function to upload image, returns a promise with the image URL
+ * @returns FileHandler extension
+ */
+function createFileHandlerExtension(
+  uploadImage: (file: File) => Promise<{ url: string }>
+) {
   return FileHandler.configure({
-    allowedMimeTypes: ["image/png", "image/jpeg", "image/webp"],
+    allowedMimeTypes: ALLOWED_MIME_TYPES,
     onDrop: (currentEditor, files, pos) => {
       files.forEach((file) => {
         if (file.size / 1024 > MAXFILESIZE) {
@@ -87,11 +101,16 @@ function createFileHandlerExtension(uploadImage: (file: File) => Promise<{ url: 
   });
 }
 
+/**
+ * Custom Rich Text Editor component
+ * @param props - Props containing value and onChange callback
+ * @returns JSX.Element
+ */
 export default function CustomRichTextEditor({
   value,
   onChange,
 }: RichTextEditorProps) {
-    const { uploadImage } = useQuestionService();
+  const { uploadImage } = useQuestionService();
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -127,7 +146,7 @@ export default function CustomRichTextEditor({
   }, [value, editor]);
 
   return (
-    <RichTextEditor editor={editor} mih={minheight}>
+    <RichTextEditor editor={editor} mih={MINHEIGHT}>
       <RichTextEditor.Toolbar>
         <RichTextEditor.ControlsGroup>
           <RichTextEditor.Bold />
@@ -173,7 +192,7 @@ export default function CustomRichTextEditor({
         </RichTextEditor.ControlsGroup>
       </RichTextEditor.Toolbar>
 
-      <RichTextEditor.Content mih={minheight} />
+      <RichTextEditor.Content mih={MINHEIGHT} />
     </RichTextEditor>
   );
 }

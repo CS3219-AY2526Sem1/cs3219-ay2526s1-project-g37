@@ -1,6 +1,9 @@
 import { Button, Card, Divider, Table, Text, Pagination, Group, Input } from "@mantine/core";
 import classes from "./table.module.css";
 
+/**
+ * Question History type definition
+ */
 export type QuestionHistory = {
   question: string;
   dateAdded: string;
@@ -9,6 +12,11 @@ export type QuestionHistory = {
   topic: string;
 };
 
+/**
+ * QuestionsTable component to display questions
+ * @param data - Array of QuestionHistory objects
+ * @returns JSX.Element
+ */
 export default function QuestionsTable({ data }: { data: QuestionHistory[] }) {
   const rows = data.map((row) => (
     <Table.Tr key={row.question}>
