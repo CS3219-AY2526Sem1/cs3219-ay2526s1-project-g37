@@ -6,6 +6,7 @@ import { useCollabProvider } from "../../context/CollabProvider";
 export function CodeEditor(props: EditorProps) {
   const [isBindingLoaded, setIsBindingLoaded] = useState(false);
   const monacoBindingRef = useRef<typeof MonacoBinding | null>(null);
+  const editorRef = useRef<any>(null);
   const collabProvider = useCollabProvider();
 
   // Load MonacoBinding once
@@ -21,6 +22,8 @@ export function CodeEditor(props: EditorProps) {
   const [editorBinding, setEditorBinding] = useState<MonacoBinding | null>(
     null
   );
+
+  
 
   // Clean up editor binding
   useEffect(() => {
@@ -39,6 +42,7 @@ export function CodeEditor(props: EditorProps) {
       return;
 
     const MonacoBinding = monacoBindingRef.current;
+    editorRef.current = editor;
     const binding = new MonacoBinding(
       collabProvider.ydoc.getText("monaco-code"),
       editor.getModel()!,
@@ -48,6 +52,27 @@ export function CodeEditor(props: EditorProps) {
 
     setEditorBinding(binding);
   };
+
+  // Keyboard shortcut for formatting code: Alt + Shift + F
+  // Only works for supported languages eg. JavaScript, TypeScript, JSON, CSS, HTML, etc.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.altKey && e.shiftKey && (e.code === "KeyF" || e.key === "F" || e.key === "f")) {
+        console.log("Formatting code...");
+        e.preventDefault();
+        const editor = editorRef.current;
+        if (!editor) return;
+        try {
+          editor.getAction('editor.action.formatDocument').run();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   if (!collabProvider || !isBindingLoaded || !collabProvider.ydoc) {
     return (
