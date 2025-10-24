@@ -15,9 +15,11 @@ interface QuestionsTableProps {
   totalPages: number;
   onSearchQueryChange: (query: string) => void;
   onPageChange: (page: number) => void;
+  handleEdit: (id: string) => void;
+  handleDelete: (id: string) => void;
 }
 
-export default function QuestionsTable({ data, totalPages, onSearchQueryChange, onPageChange }: QuestionsTableProps) {
+export default function QuestionsTable({ data, totalPages, onSearchQueryChange, onPageChange, handleEdit, handleDelete }: QuestionsTableProps) {
 
   const rows = data.map((row) => (
     <Table.Tr key={row.name}>
@@ -27,10 +29,10 @@ export default function QuestionsTable({ data, totalPages, onSearchQueryChange, 
       <Table.Td ta="right">{row.difficulty}</Table.Td>
       <Table.Td ta="right">{row.topic}</Table.Td>
       <Table.Td ta="right" style={{ width: 50 }}>
-        <Button>Edit</Button>
+        <Button onClick={() => handleEdit(row.id)}>Edit</Button>
       </Table.Td>
       <Table.Td ta="right" style={{ width: 50 }}>
-        <Button>Delete</Button>
+        <Button onClick={() => handleDelete(row.id)}>Delete</Button>
       </Table.Td>
     </Table.Tr>
   ));
