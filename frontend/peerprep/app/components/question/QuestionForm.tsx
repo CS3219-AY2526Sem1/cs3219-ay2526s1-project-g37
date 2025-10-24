@@ -53,9 +53,11 @@ export default function QuestionForm({
           <Card style={{ height: CARDHEIGHT, overflowY: "auto" }}>
             <Grid gutter="sm">
               <Grid.Col span={12}>
-                <Text onClick={handleBack} className="backText">
-                  {"<< Back"}
-                </Text>
+                <a onClick={handleBack} className="backText">
+                  <Text>
+                    {"<< Back"}
+                  </Text>
+                </a>
               </Grid.Col>
               <Grid.Col span={12}>
                 <TextInput

@@ -25,10 +25,20 @@ export default function EditQuestionPage() {
     if (!id) {
       navigate("/questions", { replace: true });
     } else {
-      getQuestion(id).then((data) => {
-        setInitialValues(data);
-        setLoading(false);
-      });
+      getQuestion(id)
+        .then((data) => {
+          setInitialValues(data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          setLoading(false);
+          notifications.show({
+            title: "Error",
+            message: "Failed to load question. Please try again.",
+            color: "red",
+            withBorder: true,
+          });
+        });
     }
     getLabels().then((data) => setLabels(data));
   }, []);
@@ -46,22 +56,23 @@ export default function EditQuestionPage() {
       difficulty: values.difficulty ?? "",
       topic: values.topic ?? "",
     };
-    if (id) {
-      updateQuestion(payload, id);
-      notifications.show({
-        title: "Success",
-        message: "Question updated successfully!",
-        color: "green",
-        withBorder: true,
+    updateQuestion(payload, id!)
+      .then(() => {
+        notifications.show({
+          title: "Success",
+          message: "Question updated successfully!",
+          color: "green",
+          withBorder: true,
+        });
+      })
+      .catch(() => {
+        notifications.show({
+          title: "Error",
+          message: "Failed to update question. Please try again.",
+          color: "red",
+          withBorder: true,
+        });
       });
-    } else {
-      notifications.show({
-        title: "Error",
-        message: "Failed to update question. Please try again.",
-        color: "red",
-        withBorder: true,
-      });
-    }
   };
 
   return (
