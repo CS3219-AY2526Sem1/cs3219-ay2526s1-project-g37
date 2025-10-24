@@ -8,6 +8,7 @@ import SearchingModal from "./searchingmodal";
 import SelectionModal from "./selectionmodal";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../context/authContext";
+import { useMatchingService } from "~/services/MatchingService";
 
 export default function QueueModal() {
   const [opened, { open, close }] = useDisclosure(false);
@@ -21,6 +22,7 @@ export default function QueueModal() {
   const navigate = useNavigate();
   const { userId, tokenId } = useAuth();
   const [shouldNavigate, setShouldNavigate] = useState(false);
+  const { sendQueueRequest, sendLeaveRequest } = useMatchingService();
 
   const form = useForm({
     initialValues: {
@@ -30,56 +32,29 @@ export default function QueueModal() {
     },
     validate: {
       topic: (value) => (value.trim().length > 0 ? null : "Topic is required"),
-      difficulty: (value) => (value.trim().length > 0 ? null : "Difficulty is required"),
-      language: (value) => (value.trim().length > 0 ? null : "Language is required"),
+      difficulty: (value) =>
+        value.trim().length > 0 ? null : "Difficulty is required",
+      language: (value) =>
+        value.trim().length > 0 ? null : "Language is required",
     },
   });
 
-  const getRequestBody = () => {
-    console.log({
-      user_id: userId,
+  const getRequestBody = (): {
+    user_id: string;
+    difficulty: string;
+    topic: string;
+    language: string;
+  } => {
+    return {
+      user_id: userId ?? "",
       difficulty: form.values.difficulty,
       topic: form.values.topic,
       language: form.values.language,
-    });
-    return JSON.stringify({
-      user_id: userId,
-      difficulty: form.values.difficulty,
-      topic: form.values.topic,
-      language: form.values.language,
-    });
+    };
   };
 
-  const sendQueueRequest = () => {
-    const matching_url = `${import.meta.env.VITE_AUTH_ROUTER_URL}/matching`;
-    fetch(`${matching_url}/match/request`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${tokenId}`,
-        "Content-Type": "application/json",
-      },
-      body: getRequestBody(),
-    })
-      .then((data) => console.log("Success:", data))
-      .catch((error) => console.error("Error:", error));
-  };
-
-  const sendLeaveRequest = () => {
-    const matching_url = `${import.meta.env.VITE_AUTH_ROUTER_URL}/matching`;
-    fetch(`${matching_url}/match/cancel`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${tokenId}`,
-        "Content-Type": "application/json",
-      },
-      body: getRequestBody(),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
-        }
-        return response.json();
-      })
+  const handleLeaveQueue = () => {
+    sendLeaveRequest(getRequestBody())
       .then((responseData) => {
         console.log("Cancel Match Success:", responseData);
 
@@ -123,16 +98,16 @@ export default function QueueModal() {
 
       newSocket.addEventListener("open", () => {
         newSocket.send(JSON.stringify({ type: "join", ...form.values }));
-        sendQueueRequest();
+        sendQueueRequest(getRequestBody());
       });
     } else {
-      sendQueueRequest();
+      sendQueueRequest(getRequestBody());
     }
   };
 
   const leaveQueue = () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
-      sendLeaveRequest();
+      handleLeaveQueue();
       socket.close();
     }
     setQueueStatus("idle");
@@ -179,7 +154,7 @@ export default function QueueModal() {
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (socket && socket.readyState === WebSocket.OPEN) {
-        sendLeaveRequest();
+        handleLeaveQueue();
         socket.close();
       }
     };
@@ -206,7 +181,7 @@ export default function QueueModal() {
   const unloadModal = () => {
     close();
     if (socket && socket.readyState === WebSocket.OPEN) {
-      sendLeaveRequest();
+      handleLeaveQueue();
       socket.close();
     }
     form.reset();

@@ -1,17 +1,15 @@
 import {
+  Button,
   Grid,
-  Loader,
-  Center,
-  Text,
+  useMantineTheme,
 } from "@mantine/core";
 
 import HistoryTable from "../components/table/table";
 import type { InterviewHistory } from "../components/table/table";
 import QueueModal from "~/components/queueupmodal/queuemodal";
-
-import { useAuth } from "~/context/authContext";
-import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
+import { useCollabService } from "~/services/CollabService";
+import { useNavigate } from "react-router";
 import DifficultyCards from "~/components/difficultycards/DifficultyCards";
 
 export function meta() {
@@ -19,10 +17,12 @@ export function meta() {
 }
 
 export default function Userpage() {
-  const { userId, tokenId } = useAuth();
-  const navigate = useNavigate();
+  const theme = useMantineTheme();
+  const navigation = useNavigate();
+  const { getSessionByUser } = useCollabService();
+  const [inSession, setInSession] = useState(false);
+  const [userSessionId, setUserSessionId] = useState<string | null>(null);
 
-  const [loading, setLoading] = useState<boolean>(true);
   const [data, ] = useState<InterviewHistory[]>([
     {
       question: "Two Sum",
@@ -34,40 +34,22 @@ export default function Userpage() {
   ]);
 
   useEffect(() => {
-    const checkUserSession = async () => {
-      const collabUrl = `${import.meta.env.VITE_AUTH_ROUTER_URL}/collaboration`;
-      try {
-        const response = await fetch(`${collabUrl}/sessions?user_id=${userId}`, {
-          headers: {
-            "Authorization": `Bearer ${tokenId}`,
-            "Content-Type": "application/json",
-          }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          const sessionId = data.session_id;
-          if (sessionId) {
-            navigate(`/collab/${sessionId}`);
-            return; // stop and let navigation happen
-          }
-        } 
-      } catch (error) {
-        console.error("Error checking user session:", error);
+    getSessionByUser().then((responseData) => {
+      if (responseData.in_session) {
+        setInSession(true);
+        setUserSessionId(responseData.session_id);
       }
-      // no session found — stop loading and render page
-      setLoading(false);
-    };
-    checkUserSession();
-  }, [userId, tokenId, navigate]);
-  
-  if (loading) {
-    return (
-      <Center style={{ minHeight: "100vh" }}>
-        <Loader />
-        <Text ml="md">Checking session...</Text>
-      </Center>
-    );
-  }
+    }).catch((error) => {
+      console.error("Get Session by User Error:", error);
+    });
+  }, []);
+
+  const handleReconnect = () => {
+    if (userSessionId) {
+      navigation(`/collab/${userSessionId}`);
+    }
+  };
+
   
   return (
     <Grid>
@@ -75,7 +57,7 @@ export default function Userpage() {
         <Grid gutter="md" align="center">
           <DifficultyCards />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
-            <QueueModal />
+            {inSession ? <Button fullWidth onClick={handleReconnect}>Reconnect</Button> : <QueueModal />}
           </Grid.Col>
         </Grid>
       </Grid.Col>

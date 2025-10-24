@@ -149,7 +149,7 @@ export default function Signup() {
               </Grid.Col>
               <Grid.Col span={12} mt="md" className="text-center">
                 <Text span>Already have an account? </Text>
-                <Link to="/login">
+                <Link to="/">
                   <Text span td="underline" c="blue" className="cursor-pointer">
                     Log in!
                   </Text>
