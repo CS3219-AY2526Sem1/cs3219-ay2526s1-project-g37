@@ -1,16 +1,16 @@
 import { Grid, Card, Text } from "@mantine/core";
-import { COLLABCARDHEIGHT } from "~/constants/constants";
-import SessionControlBar from "../components/sessioncontrolbar/SessionControlBar";
-import TestCase from "../components/testcases/TestCase";
-import { CodeEditor } from "../components/codeeditor/CodeEditor";
+import { COLLABCARDHEIGHT } from "~/Constants/Constants";
+import SessionControlBar from "../Components/SessionControlBar/SessionControlBar";
+import TestCase from "../Components/TestCase/TestCase";
+import { CodeEditor } from "../Components/CodeEditor/CodeEditor";
 import { useEffect, useRef, useState } from "react";
-import { CollabProvider } from "~/context/CollabProvider";
+import { CollabProvider } from "~/Context/CollabProvider";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useParams, useNavigate } from "react-router";
-import { useAuth } from "../context/authContext";
-import type { Question } from "~/services/QuestionService";
-import HtmlRender from "~/components/htmlrenderer/HtmlRender";
-import { useCollabService } from "~/services/CollabService";
+import { useAuth } from "../Context/AuthContext";
+import type { Question } from "~/Services/QuestionService";
+import HtmlRender from "~/Components/HtmlRender/HtmlRender";
+import { useCollabService } from "~/Services/CollabService";
 
 export default function CollabPage() {
   // TODO: retrieve details from matching page

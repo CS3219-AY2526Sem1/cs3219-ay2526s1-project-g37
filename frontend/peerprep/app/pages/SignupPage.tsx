@@ -13,11 +13,11 @@ import { Link, Navigate } from "react-router";
 import {
   doCreateUserWithEmailAndPassword,
   doUpdateUserProfile,
-} from "../firebase/helper";
-import { useAuth } from "../context/authContext";
+} from "../Firebase/helper";
+import { useAuth } from "../Context/AuthContext";
 import logo from "../assets/images/logo.svg";
 import { useState } from "react";
-import { FIREBASE_AUTH_ERROR_CODES, EMAIL_REGEX } from "../constants/constants";
+import { FIREBASE_AUTH_ERROR_CODES, EMAIL_REGEX } from "../Constants/Constants";
 
 export function meta() {
   return [
@@ -26,7 +26,7 @@ export function meta() {
   ];
 }
 
-export default function Signup() {
+export default function SignupPage() {
   const { userLoggedIn } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);

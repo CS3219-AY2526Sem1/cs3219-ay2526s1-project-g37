@@ -2,13 +2,13 @@ import { useDisclosure } from "@mantine/hooks";
 import { Modal, Button } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
-import FoundModal from "./foundmodal";
-import TimeoutModal from "./timeoutmodal";
-import SearchingModal from "./searchingmodal";
-import SelectionModal from "./selectionmodal";
+import FoundModal from "./FoundModal";
+import TimeoutModal from "./TimeoutModal";
+import SearchingModal from "./SearchingModal";
+import SelectionModal from "./SelectionModal";
 import { useNavigate } from "react-router";
-import { useAuth } from "../../context/authContext";
-import { useMatchingService } from "~/services/MatchingService";
+import { useAuth } from "../../Context/AuthContext";
+import { useMatchingService } from "~/Services/MatchingService";
 
 export default function QueueModal() {
   const [opened, { open, close }] = useDisclosure(false);

@@ -6,9 +6,9 @@ import {
 
 import { Link } from "react-router";
 
-import StatsCard from "../components/statscard";
-import QuestionsTable from "~/components/table/questionstable";
-import type {QuestionHistory} from "../components/table/questionstable";
+import StatsCard from "../Components/StatsCard";
+import QuestionsTable from "~/Components/Tables/QuestionsTable";
+import type {QuestionHistory} from "../Components/Tables/QuestionsTable";
 
 import { useState } from "react";
 

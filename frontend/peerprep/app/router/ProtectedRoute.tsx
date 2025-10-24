@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate, useParams } from "react-router";
-import { useAuth } from "~/context/authContext";
-import { useCollabService } from "~/services/CollabService";
+import { useAuth } from "~/Context/AuthContext";
+import { useCollabService } from "~/Services/CollabService";
 
 export type AccessType = "USER" | "ADMIN";
 

@@ -14,12 +14,12 @@ import { Link, Navigate } from "react-router";
 import {
   doSignInWithEmailAndPassword,
   doSignInWithGoogle,
-} from "~/firebase/helper";
+} from "~/Firebase/helper";
 import { FirebaseError } from "firebase/app";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../Context/AuthContext";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import logo from "../assets/images/logo.svg";
-import { EMAIL_REGEX } from "~/constants/constants";
+import { EMAIL_REGEX } from "~/Constants/Constants";
 
 const INVALID_CREDENTIALS = "Invalid email/password, Please try again.";
 
@@ -30,7 +30,7 @@ export function meta() {
   ];
 }
 
-export default function Login() {
+export default function LoginPage() {
   const { userLoggedIn } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);

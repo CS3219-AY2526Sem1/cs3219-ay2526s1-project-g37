@@ -3,10 +3,10 @@
 
 import { Button, Container, Group, Text } from "@mantine/core";
 import { useNavigate } from "react-router";
-import classes from "./header.module.css";
+import classes from "./Header.module.css";
 import logo from "../../assets/images/logo.svg";
-import { useAuth } from "../../context/authContext";
-import { doSignOut } from "~/firebase/helper";
+import { useAuth } from "../../Context/AuthContext";
+import { doSignOut } from "~/Firebase/helper";
 
 export default function Header() {
   const navigate = useNavigate();

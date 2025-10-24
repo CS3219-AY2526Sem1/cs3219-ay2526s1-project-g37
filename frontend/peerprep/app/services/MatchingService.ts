@@ -1,4 +1,4 @@
-import { useAuth } from "~/context/authContext";
+import { useAuth } from "~/Context/AuthContext";
 
 const API_BASE_URL = `${import.meta.env.VITE_AUTH_ROUTER_URL}/matching`;
 

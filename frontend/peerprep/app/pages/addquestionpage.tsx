@@ -7,11 +7,11 @@ import {
 } from "@mantine/core";
 
 import { useForm } from "@mantine/form";
-import CustomRichTextEditor from "../components/richtexteditor/CustomRichTextEditor";
-import { CARDHEIGHT } from "~/constants/constants";
+import CustomRichTextEditor from "../Components/CustomRichTextEditor/CustomRichTextEditor";
+import { CARDHEIGHT } from "~/Constants/Constants";
 import { useEffect, useState } from "react";
-import { type Labels, useQuestionService } from "~/services/QuestionService";
-import HtmlRender from "~/components/htmlrenderer/HtmlRender";
+import { type Labels, useQuestionService } from "~/Services/QuestionService";
+import HtmlRender from "~/Components/HtmlRender/HtmlRender";
 
 export default function AddQuestionPage() {
   const [labels, setLabels] = useState<Labels>({ topics: [], difficulties: [] });

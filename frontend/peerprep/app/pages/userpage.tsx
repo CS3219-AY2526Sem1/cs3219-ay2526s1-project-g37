@@ -4,19 +4,19 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 
-import StatsCard from "../components/statscard";
-import HistoryTable from "../components/table/table";
-import type { InterviewHistory } from "../components/table/table";
-import QueueModal from "~/components/queueupmodal/queuemodal";
+import StatsCard from "../Components/StatsCard";
+import HistoryTable from "../Components/Tables/Table";
+import type { InterviewHistory } from "../Components/Tables/Table";
+import QueueModal from "~/Components/QueueupModal/QueueModal";
 import { useEffect, useState } from "react";
-import { useCollabService } from "~/services/CollabService";
+import { useCollabService } from "~/Services/CollabService";
 import { useNavigate } from "react-router";
 
 export function meta() {
     return [{ title: "PeerPrep - Homepage" }, { name: "description", content: "Welcome to PeerPrep!" }];
 }
 
-export default function Userpage() {
+export default function UserPage() {
   const theme = useMantineTheme();
   const navigation = useNavigate();
   const { getSessionByUser } = useCollabService();

@@ -1,6 +1,6 @@
 import { Group, Pill, Text, TypographyStylesProvider } from '@mantine/core';
 import DOMPurify from 'dompurify';
-import { DIFFICULTYCOLOR } from '~/constants/constants';
+import { DIFFICULTYCOLOR } from '~/Constants/Constants';
 
 export default function HtmlRender(props: { name: string; topic: string; difficulty: string; description: string }) {
     return (
