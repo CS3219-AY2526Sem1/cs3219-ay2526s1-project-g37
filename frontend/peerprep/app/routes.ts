@@ -1,11 +1,10 @@
 import { type RouteConfig, index, route } from "@react-router/dev/routes";
 
 export default [
-    index("routes/home.tsx"),
-    route("login", "pages/login.tsx"),
-    route("signup", "pages/signup.tsx"),
-    route("user", "pages/userpage.tsx"),
-    route("questions", "pages/adminpage.tsx"),
-    route("questions/add", "pages/addquestionpage.tsx"),
-    route("collab/:sessionId", "pages/collabpage.tsx"),
+    index("Pages/login.tsx"),
+    route("signup", "Pages/signup.tsx"),
+    route("user", "Pages/userpage.tsx"),
+    route("questions", "Pages/adminpage.tsx"),
+    route("questions/add", "Pages/addquestionpage.tsx"),
+    route("collab/:sessionId", "Pages/collabpage.tsx"),
 ] satisfies RouteConfig;

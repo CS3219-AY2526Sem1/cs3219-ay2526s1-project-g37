@@ -97,7 +97,7 @@ class ConnectionManager:
     
     def get_session_id(self, user_id: str) -> str:
         if user_id not in self.user_sessions:
-            raise UserNotFoundError()
+            return ""
         return self.user_sessions[user_id]
     
     def __str__(self):
