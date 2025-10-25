@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { Navigate, useLocation, useNavigate, useParams } from "react-router";
+import { useState } from "react";
+import { Navigate, useLocation } from "react-router";
 import { useAuth } from "~/Context/AuthContext";
-import { useCollabService } from "~/Services/CollabService";
 
 export type AccessType = "USER" | "ADMIN";
 
@@ -19,7 +18,7 @@ interface ProtectedRouteProps {
  */
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { userLoggedIn } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin] = useState(true);
   const location = useLocation();
 
   // Check if route requires admin access or authentication
