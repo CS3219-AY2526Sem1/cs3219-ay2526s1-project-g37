@@ -1,13 +1,17 @@
 import {
   Grid,
-  useMantineTheme,
   Button
 } from "@mantine/core";
+
 import { Link } from "react-router";
-import StatsCard from "../Components/StatsCard";
+
 import QuestionsTable from "~/Components/Tables/QuestionsTable";
 import type {QuestionHistory} from "../Components/Tables/QuestionsTable";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
+import { useAuth } from "~/Context/AuthContext";
+import { useDebouncedValue } from "@mantine/hooks";
+import DifficultyCards from "~/Components/DifficultyCards/DifficultyCards";
 
 export function meta() {
   return [
@@ -15,17 +19,19 @@ export function meta() {
     { name: "description", content: "Welcome to PeerPrep!" },
   ];
 }
+const PAGE_SIZE = 20;
 
 /**
- * Admin Page component
- * @returns JSX.Element - Admin Page component
+ * Questions Page component
+ * @returns JSX.Element
  */
 export default function QuestionsPage() {
-  const theme = useMantineTheme();
-
-  const [data, ] = useState<QuestionHistory[]>([
+  const { tokenId } = useAuth();
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [data, setData] = useState<QuestionHistory[]>([    
     {
-        question: "Two Sum",
+        id: "test-id-1",
+        name: "Two Sum",
         dateAdded: "2024-10-01",
         lastEdited: "2024-10-01",
         difficulty: "Easy",
@@ -33,34 +39,52 @@ export default function QuestionsPage() {
     },
   ]);
 
+
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  // Debounce search query to avoid excessive API calls
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [debouncedSearchQuery] = useDebouncedValue(searchQuery, 500);
+
+  useEffect(() => {
+    // Fetch the questions list from the API
+    const fetchQuestionsList = async () => {
+
+      const questionsUrl = `${import.meta.env.VITE_AUTH_ROUTER_URL}/questions`;
+      try {
+        const response = await fetch(`${questionsUrl}/questions?page=${currentPage}&search=${debouncedSearchQuery}`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${tokenId}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch questions");
+        }
+        
+        const data = await response.json();
+        const questionsList: QuestionHistory[] = data.questions;
+        console.log("Fetched questions:", questionsList);
+        setData(questionsList);
+
+        const totalCount: number = data.total_count;
+        const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+        setTotalPages(totalPages);
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      }
+    };
+    fetchQuestionsList();
+  }, [currentPage, debouncedSearchQuery, tokenId]);
+
+
+
   return (
     <Grid>
       <Grid.Col span={12}>
         <Grid gutter="md" align="center">
-          <Grid.Col span={{ base: 6, md: 2 }}>
-            <StatsCard
-              title="Total Questions"
-              stat="1,234"
-              color={theme.colors.gray[0]}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 6, md: 2 }}>
-            <StatsCard
-              title="Easy"
-              stat="1,234"
-              color={theme.colors.green[5]}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 6, md: 2 }}>
-            <StatsCard
-              title="Medium"
-              stat="1,234"
-              color={theme.colors.yellow[5]}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 6, md: 2 }}>
-            <StatsCard title="Hard" stat="1,234" color={theme.colors.red[5]} />
-          </Grid.Col>
+          <DifficultyCards />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
             <Link to="/questions/add">
               <Button fullWidth>Add Question</Button>
@@ -71,6 +95,9 @@ export default function QuestionsPage() {
       <Grid.Col span={12}>
         <QuestionsTable
           data={data}
+          totalPages={totalPages}
+          onSearchQueryChange={(query) => setSearchQuery(query)}
+          onPageChange={(page) => setCurrentPage(page)}
         />
       </Grid.Col>
     </Grid>

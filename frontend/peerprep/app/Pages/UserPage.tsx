@@ -1,15 +1,14 @@
 import {
   Button,
   Grid,
-  useMantineTheme,
 } from "@mantine/core";
 
-import StatsCard from "../Components/StatsCard";
 import HistoryTable, { type InterviewHistory } from "../Components/Tables/HistoryTable";
 import QueueModal from "~/Components/QueueupModal/QueueModal";
 import { useEffect, useState } from "react";
 import { useCollabService } from "~/Services/CollabService";
 import { useNavigate } from "react-router";
+import DifficultyCards from "~/Components/DifficultyCards/DifficultyCards";
 
 export function meta() {
     return [{ title: "PeerPrep - Homepage" }, { name: "description", content: "Welcome to PeerPrep!" }];
@@ -20,7 +19,6 @@ export function meta() {
  * @returns JSX.Element
  */
 export default function UserPage() {
-  const theme = useMantineTheme();
   const navigation = useNavigate();
   const { getSessionByUser } = useCollabService();
   const [inSession, setInSession] = useState(false);
@@ -63,30 +61,7 @@ export default function UserPage() {
     <Grid>
       <Grid.Col span={12}>
         <Grid gutter="md" align="center">
-          <Grid.Col span={{ base: 6, md: 2 }}>
-            <StatsCard
-              title="Interviews"
-              stat="1,234"
-              color={theme.colors.gray[0]}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 6, md: 2 }}>
-            <StatsCard
-              title="Easy"
-              stat="1,234"
-              color={theme.colors.green[5]}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 6, md: 2 }}>
-            <StatsCard
-              title="Medium"
-              stat="1,234"
-              color={theme.colors.yellow[5]}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 6, md: 2 }}>
-            <StatsCard title="Hard" stat="1,234" color={theme.colors.red[5]} />
-          </Grid.Col>
+          <DifficultyCards />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
             {inSession ? <Button fullWidth onClick={handleReconnect}>Reconnect</Button> : <QueueModal />}
           </Grid.Col>

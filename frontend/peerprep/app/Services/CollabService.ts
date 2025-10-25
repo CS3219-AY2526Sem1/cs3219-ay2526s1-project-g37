@@ -17,7 +17,6 @@ export function useCollabService() {
    */
   async function checkExistingSession(userId: string) {
     const url = `${API_BASE_URL}/sessions?user_id=${userId}`;
-    console.log('checkExistingSession GET', url);
     const response = await fetch(url, {
       headers: {
         "Authorization": `Bearer ${tokenId}`,
