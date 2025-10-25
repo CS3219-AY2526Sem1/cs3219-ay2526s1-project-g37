@@ -1,5 +1,5 @@
 import { Button, Card, Divider, Table, Text, Pagination, Group, Input } from "@mantine/core";
-import classes from "./table.module.css";
+import classes from "./Table.module.css";
 
 /**
  * Question History type definition
