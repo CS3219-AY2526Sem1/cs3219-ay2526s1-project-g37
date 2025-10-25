@@ -141,11 +141,31 @@ export function useQuestionService() {
     return response.json();
   }
 
+  /**
+   * Fetch question statistics from the backend
+   * @returns Question statistics data
+   * @throws Error if the fetch fails
+   */
+  async function fetchQuestionStats() {
+    const response = await fetch(`${API_BASE_URL}/questions/stats`, {
+      headers: {
+        Authorization: `Bearer ${tokenId}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch question stats");
+    }
+
+    return response.json();
+  }
+
   return {
     addQuestion,
     getQuestion,
     getLabels,
     uploadImage,
     isValidQuestion,
+    fetchQuestionStats,
   };
 }

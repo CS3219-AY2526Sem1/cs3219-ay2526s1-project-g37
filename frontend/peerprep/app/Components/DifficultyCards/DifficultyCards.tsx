@@ -1,50 +1,32 @@
 import { Grid, useMantineTheme } from "@mantine/core";
 import StatsCard from "../StatsCard";
 import { useEffect, useState } from "react";
-import { useAuth } from "~/Context/AuthContext";
-import { DIFFICULTYCOLOR } from "~/Constants/Constants";
+import { DIFFICULTYCOLOR, STAT_DIFFICULTIES } from "~/Constants/Constants";
+import { useQuestionService } from "~/Services/QuestionService";
 
 export default function DifficultyCards() {
     const theme = useMantineTheme();
-    const { tokenId } = useAuth();
     const [questionStats, setQuestionStats] = useState<{ [key: string]: number }>({});
+    const { fetchQuestionStats } = useQuestionService();
 
     const getTotalQuestions = () => {
         return Object.values(questionStats).reduce((acc, curr) => acc + curr, 0);
     }
 
     useEffect(() => {
-        // get total questions count for each difficulty
-        const fetchTotalQuestionsCount = async () => {
-        const questionsUrl = `${import.meta.env.VITE_AUTH_ROUTER_URL}/questions`;
-        try {
-            const response = await fetch(`${questionsUrl}/questions/stats`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${tokenId}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to fetch total questions count");
-            }
-
-            const data = await response.json();
+        (async () => {      
+            const data = await fetchQuestionStats();
             console.log("Fetched question stats:", data);
             
             //set default values for difficulties with zero questions
-            const difficulties = ["Easy", "Medium", "Hard"];
             const updatedStats: { [key: string]: number } = { ...data };
-            difficulties.forEach((level) => {
+            STAT_DIFFICULTIES.forEach((level) => {
                 if (!updatedStats[level]) {
                     updatedStats[level] = 0;
                 }
             });
             setQuestionStats(updatedStats);
-        } catch (error) {
-            console.error("Error fetching total questions count:", error);
-        }};
-        fetchTotalQuestionsCount();
+        })();
     }, []);
 
     return (
