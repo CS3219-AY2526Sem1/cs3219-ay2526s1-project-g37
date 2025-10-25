@@ -3,7 +3,7 @@
 
 import { Button, Container, Group, Text } from "@mantine/core";
 import { useNavigate } from "react-router";
-import classes from "./header.module.css";
+import classes from "./Header.module.css";
 import logo from "../../assets/images/logo.svg";
 import { useAuth } from "../../Context/authContext";
 import { doSignOut } from "~/Firebase/helper";

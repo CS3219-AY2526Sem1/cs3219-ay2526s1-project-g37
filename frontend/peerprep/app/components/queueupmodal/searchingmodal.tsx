@@ -1,5 +1,5 @@
 import { Grid, Loader, Text, Button } from "@mantine/core";
-import { formatTime } from "~/utils/utils";
+import { formatTime } from "~/Utils/utils";
 
 type SearchingModalProps = {
   elapsedTime: number;

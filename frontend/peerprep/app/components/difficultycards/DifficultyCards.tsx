@@ -1,7 +1,7 @@
 import { Grid, useMantineTheme } from "@mantine/core";
 import StatsCard from "../statscard";
 import { useEffect, useState } from "react";
-import { useAuth } from "~/context/authContext";
+import { useAuth } from "~/Context/authContext";
 import { DIFFICULTYCOLOR } from "~/Constants/constants";
 
 export default function DifficultyCards() {
