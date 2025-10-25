@@ -24,7 +24,7 @@ export function useCollabService() {
     const url = `${API_BASE_URL}/sessions?user_id=${userId}`;
     const response = await fetch(url, {
       headers: {
-        "Authorization": `Bearer ${tokenId}`,
+        Authorization: `Bearer ${tokenId}`,
         "Content-Type": "application/json",
       },
     });
@@ -52,7 +52,7 @@ export function useCollabService() {
       `${API_BASE_URL}/sessions/${sessionId}/question`,
       {
         headers: {
-          "Authorization": `Bearer ${tokenId}`,
+          Authorization: `Bearer ${tokenId}`,
           "Content-Type": "application/json",
         },
       }
@@ -74,7 +74,7 @@ export function useCollabService() {
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${tokenId}`,
+        Authorization: `Bearer ${tokenId}`,
         "Content-Type": "application/json",
       },
     });
@@ -82,16 +82,19 @@ export function useCollabService() {
     if (!response.ok) {
       throw new Error("Failed to get session for user");
     }
-    
+
     return response.json();
   }
 
   async function getSessionMetadata(session_id: string) {
-    const response = await fetch(`${API_BASE_URL}/sessions/${session_id}/metadata`, {
-      headers: {
-        Authorization: `Bearer ${tokenId}`,
-      },
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/sessions/${session_id}/metadata`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokenId}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Failed to fetch session metadata");
@@ -104,7 +107,6 @@ export function useCollabService() {
     checkExistingSession,
     getSessionQuestion,
     getSessionByUser,
-        getSessionMetadata,
-
+    getSessionMetadata,
   };
 }

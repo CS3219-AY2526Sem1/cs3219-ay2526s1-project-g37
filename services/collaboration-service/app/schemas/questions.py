@@ -12,4 +12,4 @@ class QuestionBase64Images(BaseModel):
     topic: str
     images: Optional[List[str]] = Field(default=None, description="Base64 encoded images")
     language: str
-    created_at: str = datetime.datetime.now().isoformat()
+    created_at: str = Field(default_factory=lambda: datetime.datetime.now().isoformat())

@@ -10,7 +10,10 @@ import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../Context/AuthContext";
 import type { Question } from "~/Services/QuestionService";
 import HtmlRender from "~/Components/HtmlRender/HtmlRender";
-import { useCollabService, type SessionMetadata, } from "~/Services/CollabService";
+import {
+  useCollabService,
+  type SessionMetadata,
+} from "~/Services/CollabService";
 
 /**
  * Collaboration Page component
@@ -47,7 +50,7 @@ export default function CollabPage() {
       { shouldReconnect: () => true }
     );
 
-    // WebSocket event listeners
+  // WebSocket event listeners
   useEffect(() => {
     console.log("py-collab: websocket state changed:", readyState);
     if (readyState === ReadyState.OPEN) {
@@ -123,9 +126,7 @@ export default function CollabPage() {
     }
 
     sessionStorage.setItem("sessionEnded", "true");
-    setTimeout(() => {
-      navigate("/user", { replace: true });
-    }, 0);
+    navigate("/user", { replace: true });
   };
 
   if (!sessionId) {
