@@ -160,6 +160,69 @@ export function useQuestionService() {
     return response.json();
   }
 
+  async function updateQuestion(question: Question, id: string) {
+    const response = await fetch(`${API_BASE_URL}/questions/${id}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${tokenId}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(question),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update question");
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Get a paginated list of questions from the backend
+   * @param page - Page number for pagination
+   * @param searchQuery - Search query to filter questions
+   * @returns List of questions and total count
+   * @throws Error if the fetch fails
+   */
+  async function getQuestionsList(page: number, searchQuery: string) {
+    const response = await fetch(
+      `${API_BASE_URL}/questions?page=${page}&search=${searchQuery}`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokenId}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch questions");
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Delete a question by its ID
+   * @param id - ID of the question to be deleted
+   * @returns Response from the backend after deleting the question
+   * @throws Error if the deletion fails
+   */
+  async function deleteQuestion(id: string) {
+    const response = await fetch(`${API_BASE_URL}/questions/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${tokenId}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete question");
+    }
+
+    return response.json();
+  }
+
   return {
     addQuestion,
     getQuestion,
@@ -167,5 +230,8 @@ export function useQuestionService() {
     uploadImage,
     isValidQuestion,
     fetchQuestionStats,
+    updateQuestion,
+    getQuestionsList,
+    deleteQuestion,
   };
 }
