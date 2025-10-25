@@ -1,7 +1,6 @@
 import {
   Button,
   Grid,
-  useMantineTheme,
 } from "@mantine/core";
 
 import HistoryTable from "~/Components/table/table";
@@ -17,7 +16,6 @@ export function meta() {
 }
 
 export default function Userpage() {
-  const theme = useMantineTheme();
   const navigation = useNavigate();
   const { getSessionByUser } = useCollabService();
   const [inSession, setInSession] = useState(false);
