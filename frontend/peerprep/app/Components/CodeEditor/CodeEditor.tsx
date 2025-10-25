@@ -11,7 +11,7 @@ import { useCollabProvider } from "../../Context/CollabProvider";
 export function CodeEditor(props: EditorProps) {
   const [isBindingLoaded, setIsBindingLoaded] = useState(false);
   const monacoBindingRef = useRef<typeof MonacoBinding | null>(null);
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null);
   const collabProvider = useCollabProvider();
 
   // Load MonacoBinding once
