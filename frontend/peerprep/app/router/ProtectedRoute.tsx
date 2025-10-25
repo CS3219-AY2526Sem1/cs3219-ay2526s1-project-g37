@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { Navigate, useLocation, useNavigate, useParams } from "react-router";
+import { useState } from "react";
+import { Navigate, useLocation } from "react-router";
 import { useAuth } from "~/context/authContext";
-import { useCollabService } from "~/services/CollabService";
 
 export type AccessType = "USER" | "ADMIN";
 
@@ -11,11 +10,8 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { userLoggedIn } = useAuth();
-  const { getSessionByUser } = useCollabService();
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin] = useState(true);
   const location = useLocation();
-  const navigate = useNavigate();
-  const params = useParams() as { sessionId?: string };
 
   const adminLinks = ["/questions"].some((path) =>
     location.pathname.startsWith(path)

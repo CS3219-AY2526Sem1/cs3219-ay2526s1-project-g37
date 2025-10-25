@@ -20,7 +20,7 @@ export default function QueueModal() {
   const [redirectCountdown, setRedirectCountdown] = useState(3);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { userId, tokenId } = useAuth();
+  const { userId } = useAuth();
   const [shouldNavigate, setShouldNavigate] = useState(false);
   const { sendQueueRequest, sendLeaveRequest } = useMatchingService();
 
