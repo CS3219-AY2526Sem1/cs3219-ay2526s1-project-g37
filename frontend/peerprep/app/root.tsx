@@ -10,6 +10,7 @@ import {
 
 import "@mantine/core/styles.css";
 import "@mantine/tiptap/styles.css";
+import "@mantine/notifications/styles.css";
 
 import {
   createTheme,
@@ -21,10 +22,15 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import Header from "./components/header/header";
-import { AuthProvider } from "./context/authContext";
-import ProtectedRoute from "./router/ProtectedRoute";
+import Header from "./Components/Header/Header";
+import { AuthProvider } from "./Context/AuthContext";
+import ProtectedRoute from "./Router/ProtectedRoute";
+import { Notifications } from "@mantine/notifications";
 
+/**
+ * Links function to include external stylesheets and fonts
+ * @returns Array of link objects for the document head
+ */
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -38,6 +44,9 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+/**
+ * Create a custom Mantine theme for the application
+ */
 const theme = createTheme({
   /** mantine theme overrides */
   colors: {
@@ -105,6 +114,7 @@ const theme = createTheme({
     ],
   },
 
+  /** Component style overrides */
   components: {
     Button: Button.extend({
       defaultProps: {
@@ -131,12 +141,30 @@ const theme = createTheme({
         },
       },
     },
+    Notification: {
+      styles: {
+        root: {
+          backgroundColor: "var(--mantine-color-custom-gray-9)",
+          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.6)",
+        },
+        title: {
+          color: "white",
+        },
+        description: {
+          color: "white",
+        },
+      },
+    },
   },
-
   primaryColor: "brand-yellow",
   primaryShade: { light: 6, dark: 6 },
 });
 
+/**
+ * Layout component to define the HTML structure of the application
+ * @param children - Child components to be rendered within the layout
+ * @returns JSX.Element - The layout structure
+ */
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -155,6 +183,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Main App component
+ * @returns JSX.Element - The main application structure
+ */
 export default function App() {
   const location = useLocation();
   const linksWithHeader = ["/user", "/admin", "/collab", "/questions"];
@@ -166,6 +198,7 @@ export default function App() {
     <AuthProvider>
       <ProtectedRoute>
         <MantineProvider theme={theme} defaultColorScheme="dark">
+          <Notifications />
           {isHeader() && <Header />}
           <Container fluid>{<Outlet />}</Container>
         </MantineProvider>
@@ -174,6 +207,11 @@ export default function App() {
   );
 }
 
+/**
+ * Error Boundary component to handle errors in the application
+ * @param error - The error object caught by the boundary
+ * @returns JSX.Element - The error display structure
+ */
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";
