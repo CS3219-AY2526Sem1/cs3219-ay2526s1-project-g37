@@ -8,7 +8,7 @@ import SearchingModal from "./searchingmodal";
 import SelectionModal from "./selectionmodal";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../context/authContext";
-import { useMatchingService } from "~/services/MatchingService";
+import { useMatchingService } from "~/Services/MatchingService";
 
 export default function QueueModal() {
   const [opened, { open, close }] = useDisclosure(false);
