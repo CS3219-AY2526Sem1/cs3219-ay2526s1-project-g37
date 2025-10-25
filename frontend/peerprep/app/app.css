@@ -24,3 +24,15 @@ body {
     color: white !important;
   }
 }
+
+.backText {
+  color: var(--mantine-color-brand-yellow-5);
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}

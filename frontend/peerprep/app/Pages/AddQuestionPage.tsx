@@ -1,11 +1,8 @@
-import { Grid, Button, TextInput, Card, Select } from "@mantine/core";
-
-import { useForm } from "@mantine/form";
-import CustomRichTextEditor from "../Components/CustomRichTextEditor/CustomRichTextEditor";
-import { CARDHEIGHT } from "~/Constants/Constants";
 import { useEffect, useState } from "react";
 import { type Labels, useQuestionService } from "~/Services/QuestionService";
-import HtmlRender from "~/Components/HtmlRender/HtmlRender";
+import QuestionForm from "~/Components/QuestionForm/QuestionForm";
+import { notifications } from "@mantine/notifications";
+
 
 /**
  * Add Question Page component
@@ -16,20 +13,6 @@ export default function AddQuestionPage() {
   const [labels, setLabels] = useState<Labels>({
     topics: [],
     difficulties: [],
-  });
-
-  const form = useForm<{
-    name: string;
-    description: string;
-    difficulty?: string | null;
-    topic?: string | null;
-  }>({
-    initialValues: {
-      name: "",
-      description: "",
-      difficulty: null,
-      topic: null,
-    },
   });
 
   /**
@@ -60,86 +43,31 @@ export default function AddQuestionPage() {
     addQuestion(payload)
       .then((response) => {
         console.log("Question added successfully:", response);
-        alert("Question added successfully!");
-        form.reset();
+        notifications.show({
+          title: "Success",
+          message: "Question added successfully!",
+          color: "green",
+          withBorder: true,
+        });
       })
       .catch((error) => {
         console.error("Error adding question:", error);
-        alert("Failed to add question. Please try again.");
+        notifications.show({
+          title: "Error",
+          message: "Failed to add question. Please try again.",
+          color: "red",
+          withBorder: true,
+        });
       });
   };
 
   return (
     <>
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Grid>
-          <Grid.Col span={{ base: 12, md: 6 }} style={{ height: "100%" }}>
-            <Card style={{ height: CARDHEIGHT, overflowY: "auto" }}>
-              <Grid gutter="sm">
-                <Grid.Col span={12}>
-                  <TextInput
-                    label="Question Title"
-                    placeholder="Enter question title"
-                    {...form.getInputProps("name")}
-                    required
-                  />
-                </Grid.Col>
-                <Grid.Col span={12}>
-                  <Select
-                    label="Topic"
-                    placeholder="Select topic"
-                    data={labels.topics}
-                    searchable
-                    required
-                    {...form.getInputProps("topic")}
-                  />
-                </Grid.Col>
-                <Grid.Col span={12}>
-                  <Select
-                    label="Difficulty"
-                    placeholder="Select difficulty"
-                    data={labels.difficulties}
-                    searchable
-                    required
-                    {...form.getInputProps("difficulty")}
-                  />
-                </Grid.Col>
-                <Grid.Col span={12}>
-                  <CustomRichTextEditor
-                    value={form.values.description}
-                    onChange={(value) =>
-                      form.setFieldValue("description", value)
-                    }
-                  />
-                </Grid.Col>
-                {/* Future implementation */}
-                {/* <Grid.Col span={12}>
-                  <Textarea
-                    label="Test Cases"
-                    placeholder="Enter test cases"
-                    required
-                  />
-                </Grid.Col> */}
-                <Grid.Col span={12}>
-                  <Button type="submit" fullWidth>
-                    Submit
-                  </Button>
-                </Grid.Col>
-              </Grid>
-            </Card>
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6 }}>
-            <Card style={{ height: CARDHEIGHT, overflowY: "auto" }} c={"white"}>
-              <HtmlRender
-                name={form.values.name}
-                topic={form.values.topic ?? ""}
-                difficulty={form.values.difficulty ?? ""}
-                description={form.values.description}
-              />
-            </Card>
-          </Grid.Col>
-        </Grid>
-      </form>
+      <QuestionForm
+        labels={labels}
+        onSubmit={handleSubmit}
+        submitLabel="Submit"
+      />
     </>
   );
 }
