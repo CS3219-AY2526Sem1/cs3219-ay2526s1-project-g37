@@ -26,6 +26,10 @@ export function meta() {
   ];
 }
 
+/**
+ * Signup Page component
+ * @returns JSX.Element - Signup Page component
+ */
 export default function SignupPage() {
   const { userLoggedIn } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
@@ -58,6 +62,11 @@ export default function SignupPage() {
     },
   });
 
+  /**
+   * Handle form submission for signup
+   * Creates an account using email and password
+   * @param values - Form values containing email, username, password, and confirmPassword
+   */
   const handleSubmit = async (values: typeof form.values) => {
     if (!isRegistering) {
       setIsRegistering(true);

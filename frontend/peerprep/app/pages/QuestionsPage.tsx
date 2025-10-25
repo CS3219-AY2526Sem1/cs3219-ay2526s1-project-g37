@@ -3,13 +3,10 @@ import {
   useMantineTheme,
   Button
 } from "@mantine/core";
-
 import { Link } from "react-router";
-
 import StatsCard from "../Components/StatsCard";
 import QuestionsTable from "~/Components/Tables/QuestionsTable";
 import type {QuestionHistory} from "../Components/Tables/QuestionsTable";
-
 import { useState } from "react";
 
 export function meta() {
@@ -19,7 +16,11 @@ export function meta() {
   ];
 }
 
-export default function Userpage() {
+/**
+ * Admin Page component
+ * @returns JSX.Element - Admin Page component
+ */
+export default function QuestionsPage() {
   const theme = useMantineTheme();
 
   const [data, ] = useState<QuestionHistory[]>([

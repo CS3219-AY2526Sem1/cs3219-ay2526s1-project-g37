@@ -30,6 +30,10 @@ export function meta() {
   ];
 }
 
+/**
+ * Login Page component
+ * @returns JSX.Element - Login Page component
+ */
 export default function LoginPage() {
   const { userLoggedIn } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -47,6 +51,11 @@ export default function LoginPage() {
     },
   });
 
+  /**
+   * Handle form submission for login
+   * Logins user using email and password
+   * @param values - Form values containing email and password
+   */
   const handleSubmit = async (values: typeof form.values) => {
     if (!isSigningIn) {
       setIsSigningIn(true);
@@ -67,6 +76,9 @@ export default function LoginPage() {
     }
   };
 
+  /**
+   * Handle Google Sign-In
+   */
   const onGoogleSignIn = async () => {
     if (!isSigningIn) {
       setIsSigningIn(true);
