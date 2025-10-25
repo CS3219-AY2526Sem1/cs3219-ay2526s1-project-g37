@@ -100,6 +100,14 @@ class ConnectionManager:
             return ""
         return self.user_sessions[user_id]
     
+    def get_session_metadata(self, session_id: str):
+        if session_id not in self.questions:
+            raise SessionNotFoundError()
+        return {
+            "language": self.questions[session_id].language,
+            "created_at": self.questions[session_id].created_at
+        }
+
     def __str__(self):
         return f"ConnectionManager(active_connections={self.active_connections}, questions={self.questions}, user_sessions={self.user_sessions})"
 

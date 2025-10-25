@@ -3,6 +3,13 @@
  */
 export const LANGUAGES = ["C++", "Python", "Java", "JavaScript"];
 
+export const CODE_EDITOR_LANGUAGES: Record<string, string> = {
+  "C++": "cpp",
+  "Python": "python",
+  "Java": "java",
+  "JavaScript": "javascript",
+};
+
 /**
  * Color mapping for question difficulties
  */

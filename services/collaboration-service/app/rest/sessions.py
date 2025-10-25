@@ -29,3 +29,11 @@ def get_sessions_by_user(
 ):
     session_id = connection_manager.get_session_id(user_id)
     return {"in_session": session_id != "", "session_id": session_id}
+
+@router.get("/{session_id}/metadata")
+def get_session_metadata(session_id: str):
+    try:
+        metadata = connection_manager.get_session_metadata(session_id)
+        return metadata
+    except SessionNotFoundError as err:
+        raise HTTPException(status_code=404, detail=err.msg)

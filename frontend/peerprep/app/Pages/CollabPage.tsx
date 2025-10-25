@@ -1,5 +1,5 @@
 import { Grid, Card, Text } from "@mantine/core";
-import { COLLABCARDHEIGHT } from "~/Constants/Constants";
+import { CODE_EDITOR_LANGUAGES, COLLABCARDHEIGHT } from "~/Constants/Constants";
 import SessionControlBar from "../Components/SessionControlBar/SessionControlBar";
 import TestCase from "../Components/TestCase/TestCase";
 import { CodeEditor } from "../Components/CodeEditor/CodeEditor";
@@ -10,7 +10,10 @@ import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../Context/AuthContext";
 import type { Question } from "~/Services/QuestionService";
 import HtmlRender from "~/Components/HtmlRender/HtmlRender";
-import { useCollabService } from "~/Services/CollabService";
+import {
+  useCollabService,
+  type SessionMetadata,
+} from "~/Services/CollabService";
 
 /**
  * Collaboration Page component
@@ -19,12 +22,15 @@ import { useCollabService } from "~/Services/CollabService";
 export default function CollabPage() {
   const params = useParams();
   const { sessionId } = params;
-  const { getSessionQuestion, getSessionByUser } = useCollabService();
+  const { getSessionQuestion, getSessionByUser, getSessionMetadata } =
+    useCollabService();
   const [question, setQuestion] = useState<Question | null>(null);
   const collabRef = useRef<{ destroySession: () => void }>(null);
   const { userId } = useAuth();
   const navigate = useNavigate();
   const [checkingSession, setCheckingSession] = useState(true);
+  const [sessionMetadata, setSessionMetadata] =
+    useState<SessionMetadata | null>(null);
 
   // check user belongs to sessionId
   useEffect(() => {
@@ -44,13 +50,23 @@ export default function CollabPage() {
       { shouldReconnect: () => true }
     );
 
-    // WebSocket event listeners
+  // WebSocket event listeners
   useEffect(() => {
     console.log("py-collab: websocket state changed:", readyState);
     if (readyState === ReadyState.OPEN) {
       console.log("py-collab: WebSocket connection established.");
       //  Get question details from backend
       fetchQuestionDetails();
+      // Get session metadata
+      getSessionMetadata(sessionId!)
+        .then((metadata) => {
+          console.log(metadata);
+          setSessionMetadata(metadata);
+          console.log("Fetched session metadata:", metadata);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch session metadata:", error);
+        });
     } else if (readyState === ReadyState.CLOSED) {
       console.log("py-collab: WebSocket connection closed.");
     }
@@ -163,12 +179,14 @@ export default function CollabPage() {
                   style={{ flexGrow: 1, height: "60%", overflow: "hidden" }}
                   c={"white"}
                 >
-                  <CodeEditor
-                    defaultLanguage="python"
-                    theme="vs-dark"
-                    width="100%"
-                    height="100%"
-                  />
+                  {sessionMetadata && (
+                    <CodeEditor
+                      language={CODE_EDITOR_LANGUAGES[sessionMetadata.language]}
+                      theme="vs-dark"
+                      width="100%"
+                      height="100%"
+                    />
+                  )}
                 </Card>
 
                 <Card
