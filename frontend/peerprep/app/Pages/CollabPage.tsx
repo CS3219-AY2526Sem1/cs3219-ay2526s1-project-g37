@@ -10,7 +10,7 @@ import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../Context/AuthContext";
 import type { Question } from "~/Services/QuestionService";
 import HtmlRender from "~/Components/HtmlRender/HtmlRender";
-import { useCollabService, type SessionMetadata, } from "~/services/CollabService";
+import { useCollabService, type SessionMetadata, } from "~/Services/CollabService";
 
 /**
  * Collaboration Page component
