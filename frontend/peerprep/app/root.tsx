@@ -10,7 +10,7 @@ import {
 
 import "@mantine/core/styles.css";
 import "@mantine/tiptap/styles.css";
-import '@mantine/notifications/styles.css';
+import "@mantine/notifications/styles.css";
 
 import {
   createTheme,
@@ -25,6 +25,7 @@ import "./app.css";
 import Header from "./Components/Header/Header";
 import { AuthProvider } from "./Context/AuthContext";
 import ProtectedRoute from "./Router/ProtectedRoute";
+import { Notifications } from "@mantine/notifications";
 
 /**
  * Links function to include external stylesheets and fonts
@@ -138,27 +139,23 @@ const theme = createTheme({
           backgroundColor: "var(--mantine-color-brand-yellow-7)",
           color: "var(--mantine-color-dark-filled)",
         },
-<<<<<<< HEAD
-        Notification: {
-            styles: {
-                root: {
-                    backgroundColor: "var(--mantine-color-custom-gray-9)",
-                    boxShadow: "0 4px 16px rgba(0, 0, 0, 0.6)",
-                },
-                title: {
-                    color: "white",
-                },
-                description: {
-                    color: "white",
-                },
-            },
-        },
-=======
       },
->>>>>>> 400aab98ca3def503bc1bf2a97c8413c0f462152
+    },
+    Notification: {
+      styles: {
+        root: {
+          backgroundColor: "var(--mantine-color-custom-gray-9)",
+          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.6)",
+        },
+        title: {
+          color: "white",
+        },
+        description: {
+          color: "white",
+        },
+      },
     },
   },
-
   primaryColor: "brand-yellow",
   primaryShade: { light: 6, dark: 6 },
 });
@@ -201,14 +198,9 @@ export default function App() {
     <AuthProvider>
       <ProtectedRoute>
         <MantineProvider theme={theme} defaultColorScheme="dark">
-<<<<<<< HEAD
-        <Notifications />
-        {isHeader() && <Header />}
-        <Container fluid>{<Outlet />}</Container>      
-=======
+          <Notifications />
           {isHeader() && <Header />}
           <Container fluid>{<Outlet />}</Container>
->>>>>>> 400aab98ca3def503bc1bf2a97c8413c0f462152
         </MantineProvider>
       </ProtectedRoute>
     </AuthProvider>
