@@ -21,7 +21,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   );
 
   // If route requires auth and user isn't logged in, redirect to root/login
-  if ((authLinks && !userLoggedIn) || (adminLinks && !userLoggedIn)) {
+  if ((authLinks || adminLinks) && !userLoggedIn) {
     return <Navigate to="/" replace state={{ from: location }} />;
   }
 
