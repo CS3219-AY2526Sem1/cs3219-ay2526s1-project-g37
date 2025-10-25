@@ -7,7 +7,7 @@ import {
   Pagination,
   Group,
 } from "@mantine/core";
-import classes from "./table.module.css";
+import classes from "./Table.module.css";
 
 /**
  * Interview History type definition
