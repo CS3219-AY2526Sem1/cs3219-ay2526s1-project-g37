@@ -91,7 +91,7 @@ export function useQuestionService() {
   /**
    * Upload an image to the backend
    * @param imageData - File object containing the image data
-   * @returns Response from the backend after uploading the image, Url of the uploaded image
+   * @returns Response from the backend after uploading the image, URL of the uploaded image
    * @throws Error if the upload fails
    */
   async function uploadImage(imageData: File) {
