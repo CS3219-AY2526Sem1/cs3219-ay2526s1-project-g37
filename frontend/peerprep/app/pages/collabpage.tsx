@@ -4,11 +4,11 @@ import SessionControlBar from "../Components/SessionControlBar/SessionControlBar
 import TestCase from "../Components/testcases/TestCase";
 import { CodeEditor } from "../Components/CodeEditor/CodeEditor";
 import { useEffect, useRef, useState } from "react";
-import { CollabProvider } from "~/context/CollabProvider";
+import { CollabProvider } from "~/Context/CollabProvider";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useParams, useNavigate } from "react-router";
-import { useAuth } from "../context/authContext";
-import type { Question } from "~/services/QuestionService";
+import { useAuth } from "../Context/authContext";
+import type { Question } from "~/Services/QuestionService";
 import HtmlRender from "~/Components/htmlrenderer/HtmlRender";
 import { useCollabService } from "~/Services/CollabService";
 

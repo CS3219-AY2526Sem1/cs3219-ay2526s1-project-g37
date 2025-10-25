@@ -10,7 +10,7 @@ import { useForm } from "@mantine/form";
 import CustomRichTextEditor from "../Components/richtexteditor/CustomRichTextEditor";
 import { CARDHEIGHT } from "~/Constants/constants";
 import { useEffect, useState } from "react";
-import { type Labels, useQuestionService } from "~/services/QuestionService";
+import { type Labels, useQuestionService } from "~/Services/QuestionService";
 import HtmlRender from "~/Components/htmlrenderer/HtmlRender";
 
 export default function AddQuestionPage() {

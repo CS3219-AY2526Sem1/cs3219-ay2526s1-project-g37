@@ -7,7 +7,7 @@ import TimeoutModal from "./timeoutmodal";
 import SearchingModal from "./searchingmodal";
 import SelectionModal from "./selectionmodal";
 import { useNavigate } from "react-router";
-import { useAuth } from "../../context/authContext";
+import { useAuth } from "../../Context/authContext";
 import { useMatchingService } from "~/Services/MatchingService";
 
 export default function QueueModal() {

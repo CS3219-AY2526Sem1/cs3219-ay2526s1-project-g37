@@ -5,13 +5,13 @@ import {
 
 import { Link } from "react-router";
 
-import QuestionsTable from "~/components/table/questionstable";
-import type {QuestionHistory} from "../components/table/questionstable";
+import QuestionsTable from "~/Components/table/questionstable";
+import type {QuestionHistory} from "../Components/table/questionstable";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "~/context/authContext";
+import { useAuth } from "~/Context/authContext";
 import { useDebouncedValue } from "@mantine/hooks";
-import DifficultyCards from "~/components/difficultycards/DifficultyCards";
+import DifficultyCards from "~/Components/difficultycards/DifficultyCards";
 
 export function meta() {
   return [

@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, useRef, useCallback, us
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { useSearchParams } from "react-router";
-import { stringToPaletteColor } from "~/utils/utils";
+import { stringToPaletteColor } from "~/Utils/utils";
 
 const CollabContext = createContext<{
   provider: WebsocketProvider | null;

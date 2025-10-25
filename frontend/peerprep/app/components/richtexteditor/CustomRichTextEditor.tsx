@@ -12,7 +12,7 @@ import SubScript from "@tiptap/extension-subscript";
 import DOMPurify from "dompurify";
 import Image from "@tiptap/extension-image";
 import FileHandler from "@tiptap/extension-file-handler";
-import { useQuestionService } from "~/services/QuestionService";
+import { useQuestionService } from "~/Services/QuestionService";
 
 interface RichTextEditorProps {
   value: string;

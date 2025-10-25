@@ -1,4 +1,4 @@
-import { useAuth } from "~/context/authContext";
+import { useAuth } from "~/Context/authContext";
 
 export type Question = {
   name: string;

@@ -14,12 +14,12 @@ import { Link, Navigate } from "react-router";
 import {
   doSignInWithEmailAndPassword,
   doSignInWithGoogle,
-} from "~/firebase/helper";
+} from "~/Firebase/helper";
 import { FirebaseError } from "firebase/app";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../Context/authContext";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import logo from "../assets/images/logo.svg";
-import { EMAIL_REGEX } from "~/constants/constants";
+import { EMAIL_REGEX } from "~/Constants/constants";
 
 const INVALID_CREDENTIALS = "Invalid email/password, Please try again.";
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate, useLocation } from "react-router";
-import { useAuth } from "~/context/authContext";
+import { useAuth } from "~/Context/authContext";
 
 export type AccessType = "USER" | "ADMIN";
 

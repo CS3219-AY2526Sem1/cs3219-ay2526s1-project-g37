@@ -1,5 +1,5 @@
 import { Button, Grid, Select, Text } from "@mantine/core";
-import { LANGUAGES } from "~/constants/constants";
+import { LANGUAGES } from "~/Constants/constants";
 import type { UseFormReturnType } from "@mantine/form";
 import { useEffect, useState } from "react";
 import { type Labels } from "~/services/QuestionService";

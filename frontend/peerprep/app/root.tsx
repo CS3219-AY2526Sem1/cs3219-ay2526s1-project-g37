@@ -21,9 +21,9 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import Header from "./components/header/header";
-import { AuthProvider } from "./context/authContext";
-import ProtectedRoute from "./router/ProtectedRoute";
+import Header from "./Components/Header/header";
+import { AuthProvider } from "./Context/authContext";
+import ProtectedRoute from "./Router/ProtectedRoute";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
