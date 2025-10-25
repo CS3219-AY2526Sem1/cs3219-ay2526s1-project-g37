@@ -1,19 +1,22 @@
 import { Grid, Card, Text } from "@mantine/core";
-import { COLLABCARDHEIGHT } from "~/Constants/constants";
+import { COLLABCARDHEIGHT } from "~/Constants/Constants";
 import SessionControlBar from "../Components/SessionControlBar/SessionControlBar";
-import TestCase from "../Components/testcases/TestCase";
+import TestCase from "../Components/TestCase/TestCase";
 import { CodeEditor } from "../Components/CodeEditor/CodeEditor";
 import { useEffect, useRef, useState } from "react";
 import { CollabProvider } from "~/Context/CollabProvider";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useParams, useNavigate } from "react-router";
-import { useAuth } from "../Context/authContext";
+import { useAuth } from "../Context/AuthContext";
 import type { Question } from "~/Services/QuestionService";
-import HtmlRender from "~/Components/htmlrenderer/HtmlRender";
+import HtmlRender from "~/Components/HtmlRender/HtmlRender";
 import { useCollabService } from "~/Services/CollabService";
 
+/**
+ * Collaboration Page component
+ * @returns JSX.Element - Collaboration Page component
+ */
 export default function CollabPage() {
-  // TODO: retrieve details from matching page
   const params = useParams();
   const { sessionId } = params;
   const { getSessionQuestion, getSessionByUser } = useCollabService();
@@ -34,12 +37,14 @@ export default function CollabPage() {
     });
   }, []);
 
+  // WebSocket setup
   const { sendJsonMessage, lastMessage, readyState, getWebSocket } =
     useWebSocket(
       `${import.meta.env.VITE_COLLAB_SERVICE_WS_URL}/ws/sessions/${sessionId}?user_id=${userId}`,
       { shouldReconnect: () => true }
     );
 
+    // WebSocket event listeners
   useEffect(() => {
     console.log("py-collab: websocket state changed:", readyState);
     if (readyState === ReadyState.OPEN) {
@@ -51,6 +56,7 @@ export default function CollabPage() {
     }
   }, [readyState]);
 
+  // Handle incoming WebSocket messages
   useEffect(() => {
     if (lastMessage !== null) {
       console.log("py-collab: Received message:", lastMessage.data);
@@ -62,6 +68,9 @@ export default function CollabPage() {
     }
   }, [lastMessage]);
 
+  /**
+   * Fetch question details for the session
+   */
   const fetchQuestionDetails = async () => {
     try {
       const data = await getSessionQuestion(sessionId!);
@@ -73,6 +82,9 @@ export default function CollabPage() {
     }
   };
 
+  /**
+   * End the WebSocket connection gracefully
+   */
   const endWebSocket = () => {
     if (readyState === ReadyState.OPEN) {
       sendJsonMessage({ type: "collaborator_ended" });
@@ -83,6 +95,9 @@ export default function CollabPage() {
     }
   };
 
+  /**
+   * Handle ending the collaboration session
+   */
   const handleEndSession = () => {
     // send end session signal to server
     console.log("End session signal sent.");

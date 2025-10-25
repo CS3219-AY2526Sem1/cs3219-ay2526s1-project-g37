@@ -14,10 +14,10 @@ import {
   doCreateUserWithEmailAndPassword,
   doUpdateUserProfile,
 } from "../Firebase/helper";
-import { useAuth } from "../Context/authContext";
+import { useAuth } from "../Context/AuthContext";
 import logo from "../assets/images/logo.svg";
 import { useState } from "react";
-import { FIREBASE_AUTH_ERROR_CODES, EMAIL_REGEX } from "../Constants/constants";
+import { FIREBASE_AUTH_ERROR_CODES, EMAIL_REGEX } from "../Constants/Constants";
 
 export function meta() {
   return [
@@ -26,7 +26,11 @@ export function meta() {
   ];
 }
 
-export default function Signup() {
+/**
+ * Signup Page component
+ * @returns JSX.Element - Signup Page component
+ */
+export default function SignupPage() {
   const { userLoggedIn } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +62,11 @@ export default function Signup() {
     },
   });
 
+  /**
+   * Handle form submission for signup
+   * Creates an account using email and password
+   * @param values - Form values containing email, username, password, and confirmPassword
+   */
   const handleSubmit = async (values: typeof form.values) => {
     if (!isRegistering) {
       setIsRegistering(true);

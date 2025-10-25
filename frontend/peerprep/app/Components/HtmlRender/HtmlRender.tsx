@@ -1,7 +1,12 @@
 import { Group, Pill, Text, TypographyStylesProvider } from '@mantine/core';
 import DOMPurify from 'dompurify';
-import { DIFFICULTYCOLOR } from '~/Constants/constants';
+import { DIFFICULTYCOLOR } from '~/Constants/Constants';
 
+/**
+ * HtmlRender component to display question details
+ * @param props - Props containing name, topic, difficulty, and description of the question
+ * @returns JSX.Element
+ */
 export default function HtmlRender(props: { name: string; topic: string; difficulty: string; description: string }) {
     return (
         <>

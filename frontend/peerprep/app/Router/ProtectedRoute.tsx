@@ -1,18 +1,27 @@
 import { useState } from "react";
 import { Navigate, useLocation } from "react-router";
-import { useAuth } from "~/Context/authContext";
+import { useAuth } from "~/Context/AuthContext";
 
 export type AccessType = "USER" | "ADMIN";
 
+/**
+ * Props for ProtectedRoute component
+ */
 interface ProtectedRouteProps {
   children?: React.ReactNode;
 }
 
+/**
+ * ProtectedRoute component to guard routes based on authentication and authorization
+ * @param children - Child components to render if access is granted
+ * @returns JSX.Element - Either the children or a redirect to appropriate route
+ */
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { userLoggedIn } = useAuth();
   const [isAdmin] = useState(true);
   const location = useLocation();
 
+  // Check if route requires admin access or authentication
   const adminLinks = ["/questions"].some((path) =>
     location.pathname.startsWith(path)
   );

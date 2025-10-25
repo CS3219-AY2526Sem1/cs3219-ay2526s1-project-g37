@@ -1,6 +1,10 @@
 import { Card, TextInput } from "@mantine/core";
 import TestCaseBar from "./TestCaseBar";
 
+/**
+ * Test Case component
+ * @returns JSX.Element
+ */
 export default function TestCase() {
   return (
     <>

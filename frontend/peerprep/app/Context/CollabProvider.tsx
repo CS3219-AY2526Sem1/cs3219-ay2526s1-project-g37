@@ -1,10 +1,21 @@
 // CollabProvider.tsx
-import { createContext, useContext, useEffect, useState, useRef, useCallback, useImperativeHandle } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useImperativeHandle,
+} from "react";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { useSearchParams } from "react-router";
-import { stringToPaletteColor } from "~/Utils/utils";
+import { stringToPaletteColor } from "~/Utils/Utils";
 
+/**
+ * Collab context definition
+ */
 const CollabContext = createContext<{
   provider: WebsocketProvider | null;
   sessionId: string;
@@ -12,6 +23,9 @@ const CollabContext = createContext<{
   clearWebsocketSession: () => void;
 } | null>(null);
 
+/**
+ * Props for CollabProvider component
+ */
 interface CollabProviderProps {
   sessionId: string;
   children: React.ReactNode;
@@ -20,6 +34,11 @@ interface CollabProviderProps {
 
 // Inject awareness cursor styles
 // Related documentation: https://github.com/yjs/y-monaco/blob/master/demo/index.html, https://github.com/yjs/y-monaco
+/**
+ * Inject styles for remote user cursors and selections
+ * @param clientId - Unique client ID for the remote user
+ * @param color - Color associated with the remote user
+ */
 function injectAwarenessStyles(clientId: number, color: string) {
   const styleId = `y-cursor-style-${clientId}`;
   if (typeof document === "undefined" || document.getElementById(styleId))
@@ -61,7 +80,16 @@ function injectAwarenessStyles(clientId: number, color: string) {
   document.head.appendChild(style);
 }
 
-export function CollabProvider({ sessionId, children, collabRef }: CollabProviderProps) {
+/**
+ * CollabProvider component to provide Yjs WebSocket collaboration context
+ * @param props - Props containing sessionId, children elements, and optional collabRef
+ * @returns JSX.Element
+ */
+export function CollabProvider({
+  sessionId,
+  children,
+  collabRef,
+}: CollabProviderProps) {
   const [provider, setProvider] = useState<WebsocketProvider | null>(null);
   const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
   const [searchParams] = useSearchParams();
@@ -71,6 +99,10 @@ export function CollabProvider({ sessionId, children, collabRef }: CollabProvide
   );
   const USER_COLOR = useRef(stringToPaletteColor(USER.current));
 
+  /**
+   * Clear the current WebSocket collaboration session
+   * Sets the document to empty and destroys the provider
+   */
   const clearWebsocketSession = useCallback(() => {
     console.log("Clearing websocket session...", provider);
     if (provider && ydoc) {
@@ -83,10 +115,21 @@ export function CollabProvider({ sessionId, children, collabRef }: CollabProvide
     }
   }, [provider, ydoc]);
 
-  useImperativeHandle(collabRef, () => ({
-    destroySession: clearWebsocketSession
-  }), [clearWebsocketSession]);
+  /**
+   * Expose destroySession method via collabRef
+   */
+  useImperativeHandle(
+    collabRef,
+    () => ({
+      destroySession: clearWebsocketSession,
+    }),
+    [clearWebsocketSession]
+  );
 
+  /**
+   * Initialize Yjs document and WebSocket provider on sessionId change
+   * @returns Cleanup function to destroy provider and document on unmount
+   */
   useEffect(() => {
     const ydocInstance = new Y.Doc();
     setYdoc(ydocInstance);
@@ -101,6 +144,9 @@ export function CollabProvider({ sessionId, children, collabRef }: CollabProvide
       color: USER_COLOR.current,
     });
 
+    /**
+     * Update awareness styles for remote users
+     */
     const updateAwareness = () => {
       wsProvider.awareness.getStates().forEach((state, clientId) => {
         if (state.user) {
@@ -108,6 +154,7 @@ export function CollabProvider({ sessionId, children, collabRef }: CollabProvide
         }
       });
     };
+
     wsProvider.awareness.on("update", updateAwareness);
     updateAwareness();
 
@@ -128,12 +175,18 @@ export function CollabProvider({ sessionId, children, collabRef }: CollabProvide
   }, [sessionId, USER, USER_COLOR]);
 
   return (
-    <CollabContext.Provider value={{ provider, sessionId, ydoc, clearWebsocketSession }}>
+    <CollabContext.Provider
+      value={{ provider, sessionId, ydoc, clearWebsocketSession }}
+    >
       {children}
     </CollabContext.Provider>
   );
 }
 
+/**
+ * Custom hook to use Collab context
+ * @returns Collab context value
+ */
 export function useCollabProvider() {
   return useContext(CollabContext);
 }

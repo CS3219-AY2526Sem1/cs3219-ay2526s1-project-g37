@@ -1,9 +1,18 @@
 import { Grid, Text } from "@mantine/core";
 
+/**
+ * Found Modal Props
+ * @param redirectCountdown - Countdown in seconds before redirect
+ */
 type FoundModalProps = {
   redirectCountdown: number;
 };
 
+/**
+ * Found Modal component
+ * @param props - Props containing redirectCountdown
+ * @returns JSX.Element
+ */
 export default function FoundModal({ redirectCountdown }: FoundModalProps) {
   return (
     <Grid justify="center" align="center">

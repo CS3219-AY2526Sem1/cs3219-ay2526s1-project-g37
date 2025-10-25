@@ -1,9 +1,18 @@
 import { Button, Grid, Text } from "@mantine/core";
 
+/**
+ * Timeout Modal Props
+ * @param handleQueue - Function to handle retry action
+ */
 type TimeoutModalProps = {
     handleQueue: () => void;
 };
 
+/**
+ * Timeout Modal component
+ * @param props - Props containing handleQueue
+ * @returns JSX.Element
+ */
 export default function TimeoutModal({ handleQueue }: TimeoutModalProps) {
   return (
       <Grid justify="center" align="center">

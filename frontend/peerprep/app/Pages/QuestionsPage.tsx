@@ -5,13 +5,13 @@ import {
 
 import { Link } from "react-router";
 
-import QuestionsTable from "~/Components/table/questionstable";
-import type {QuestionHistory} from "../Components/table/questionstable";
+import QuestionsTable from "~/Components/Tables/QuestionsTable";
+import type {QuestionHistory} from "../Components/Tables/QuestionsTable";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "~/Context/authContext";
+import { useAuth } from "~/Context/AuthContext";
 import { useDebouncedValue } from "@mantine/hooks";
-import DifficultyCards from "~/Components/difficultycards/DifficultyCards";
+import DifficultyCards from "~/Components/DifficultyCards/DifficultyCards";
 
 export function meta() {
   return [
@@ -21,7 +21,11 @@ export function meta() {
 }
 const PAGE_SIZE = 20;
 
-export default function Adminpage() {
+/**
+ * Questions Page component
+ * @returns JSX.Element
+ */
+export default function QuestionsPage() {
   const { tokenId } = useAuth();
   const [totalPages, setTotalPages] = useState<number>(1);
   const [data, setData] = useState<QuestionHistory[]>([    

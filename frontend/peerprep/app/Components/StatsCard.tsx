@@ -1,5 +1,12 @@
 import { Card, Text } from "@mantine/core";
 
+/**
+ * Stats Card component
+ * @param title - Title of the stat
+ * @param stat - Stat value
+ * @param color - Color for the title text
+ * @returns JSX.Element
+ */
 export default function StatsCard({
   title,
   stat,

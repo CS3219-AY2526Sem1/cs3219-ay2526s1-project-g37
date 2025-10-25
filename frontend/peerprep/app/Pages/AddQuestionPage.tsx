@@ -1,22 +1,23 @@
-import {
-  Grid,
-  Button,
-  TextInput,
-  Card,
-  Select,
-} from "@mantine/core";
+import { Grid, Button, TextInput, Card, Select } from "@mantine/core";
 
 import { useForm } from "@mantine/form";
-import CustomRichTextEditor from "../Components/richtexteditor/CustomRichTextEditor";
-import { CARDHEIGHT } from "~/Constants/constants";
+import CustomRichTextEditor from "../Components/CustomRichTextEditor/CustomRichTextEditor";
+import { CARDHEIGHT } from "~/Constants/Constants";
 import { useEffect, useState } from "react";
 import { type Labels, useQuestionService } from "~/Services/QuestionService";
-import HtmlRender from "~/Components/htmlrenderer/HtmlRender";
+import HtmlRender from "~/Components/HtmlRender/HtmlRender";
 
+/**
+ * Add Question Page component
+ * @returns JSX.Element
+ */
 export default function AddQuestionPage() {
-  const [labels, setLabels] = useState<Labels>({ topics: [], difficulties: [] });
   const { addQuestion, getLabels } = useQuestionService();
-  
+  const [labels, setLabels] = useState<Labels>({
+    topics: [],
+    difficulties: [],
+  });
+
   const form = useForm<{
     name: string;
     description: string;
@@ -31,10 +32,17 @@ export default function AddQuestionPage() {
     },
   });
 
+  /**
+   * Fetch labels on component mount
+   */
   useEffect(() => {
     getLabels().then((data) => setLabels(data));
   }, []);
 
+  /**
+   * Handle form submission to add a question
+   * @param values - Form values containing question details
+   */
   const handleSubmit = (values: {
     name: string;
     description: string;
@@ -99,7 +107,9 @@ export default function AddQuestionPage() {
                 <Grid.Col span={12}>
                   <CustomRichTextEditor
                     value={form.values.description}
-                    onChange={(value) => form.setFieldValue("description", value)}
+                    onChange={(value) =>
+                      form.setFieldValue("description", value)
+                    }
                   />
                 </Grid.Col>
                 {/* Future implementation */}
@@ -120,7 +130,7 @@ export default function AddQuestionPage() {
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6 }}>
             <Card style={{ height: CARDHEIGHT, overflowY: "auto" }} c={"white"}>
-              <HtmlRender 
+              <HtmlRender
                 name={form.values.name}
                 topic={form.values.topic ?? ""}
                 difficulty={form.values.difficulty ?? ""}

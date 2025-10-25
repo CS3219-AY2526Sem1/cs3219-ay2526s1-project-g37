@@ -1,6 +1,9 @@
 import { Button, Card, Divider, Table, Text, Pagination, Group, Input } from "@mantine/core";
-import classes from "./table.module.css";
+import classes from "./Table.module.css";
 
+/**
+ * Question History type definition
+ */
 export type QuestionHistory = {
   id: string;
   name: string;
@@ -17,6 +20,11 @@ interface QuestionsTableProps {
   onPageChange: (page: number) => void;
 }
 
+/**
+ * QuestionsTable component to display a table of questions
+ * @param props - Props containing data, totalPages, onSearchQueryChange, and onPageChange
+ * @returns JSX.Element
+ */
 export default function QuestionsTable({ data, totalPages, onSearchQueryChange, onPageChange }: QuestionsTableProps) {
 
   const rows = data.map((row) => (

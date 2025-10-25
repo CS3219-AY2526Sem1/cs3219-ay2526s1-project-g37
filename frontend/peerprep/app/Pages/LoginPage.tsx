@@ -16,10 +16,10 @@ import {
   doSignInWithGoogle,
 } from "~/Firebase/helper";
 import { FirebaseError } from "firebase/app";
-import { useAuth } from "../Context/authContext";
+import { useAuth } from "../Context/AuthContext";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import logo from "../assets/images/logo.svg";
-import { EMAIL_REGEX } from "~/Constants/constants";
+import { EMAIL_REGEX } from "~/Constants/Constants";
 
 const INVALID_CREDENTIALS = "Invalid email/password, Please try again.";
 
@@ -30,7 +30,11 @@ export function meta() {
   ];
 }
 
-export default function Login() {
+/**
+ * Login Page component
+ * @returns JSX.Element - Login Page component
+ */
+export default function LoginPage() {
   const { userLoggedIn } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +51,11 @@ export default function Login() {
     },
   });
 
+  /**
+   * Handle form submission for login
+   * Logs in user using email and password
+   * @param values - Form values containing email and password
+   */
   const handleSubmit = async (values: typeof form.values) => {
     if (!isSigningIn) {
       setIsSigningIn(true);
@@ -67,6 +76,9 @@ export default function Login() {
     }
   };
 
+  /**
+   * Handle Google Sign-In
+   */
   const onGoogleSignIn = async () => {
     if (!isSigningIn) {
       setIsSigningIn(true);

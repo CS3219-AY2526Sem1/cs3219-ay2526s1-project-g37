@@ -3,19 +3,22 @@ import {
   Grid,
 } from "@mantine/core";
 
-import HistoryTable from "~/Components/table/table";
-import type { InterviewHistory } from "~/Components/table/table";
-import QueueModal from "~/Components/QueueupModal/queuemodal";
+import HistoryTable, { type InterviewHistory } from "../Components/Tables/HistoryTable";
+import QueueModal from "~/Components/QueueupModal/QueueModal";
 import { useEffect, useState } from "react";
 import { useCollabService } from "~/Services/CollabService";
 import { useNavigate } from "react-router";
-import DifficultyCards from "~/Components/difficultycards/DifficultyCards";
+import DifficultyCards from "~/Components/DifficultyCards/DifficultyCards";
 
 export function meta() {
     return [{ title: "PeerPrep - Homepage" }, { name: "description", content: "Welcome to PeerPrep!" }];
 }
 
-export default function Userpage() {
+/**
+ * User Page component
+ * @returns JSX.Element
+ */
+export default function UserPage() {
   const navigation = useNavigate();
   const { getSessionByUser } = useCollabService();
   const [inSession, setInSession] = useState(false);
@@ -31,6 +34,9 @@ export default function Userpage() {
     },
   ]);
 
+  /**
+   * Effect to check if user is in an active session on component mount.
+   */
   useEffect(() => {
     getSessionByUser().then((responseData) => {
       if (responseData.in_session) {
@@ -42,13 +48,15 @@ export default function Userpage() {
     });
   }, []);
 
+  /**
+   * Handle reconnecting to an active session
+   */
   const handleReconnect = () => {
     if (userSessionId) {
       navigation(`/collab/${userSessionId}`);
     }
   };
 
-  
   return (
     <Grid>
       <Grid.Col span={12}>
