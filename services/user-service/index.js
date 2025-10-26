@@ -32,6 +32,22 @@ app.post("/register", async (req, res) => {
     }
 });
 
+app.put("/update/:uuid", async (req, res) => {
+    const { uuid } = req.params;
+    const { username } = req.body;
+    try {
+        const client = await pool.connect();
+        const updateQuery = "UPDATE users SET username = $1 WHERE uuid = $2 RETURNING *;";
+        const values = [username, uuid];
+        const result = await client.query(updateQuery, values);
+        client.release();
+        res.status(200).json(result.rows[0]);
+    } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
 const PORT = process.env.USER_PORT || 8003;
 app.listen(PORT, () => {
     console.log(`User Service is running on port ${PORT}`);
