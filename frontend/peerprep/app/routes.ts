@@ -8,4 +8,5 @@ export default [
     route("questions/add", "Pages/AddQuestionPage.tsx"),
     route("questions/edit/:id", "Pages/EditQuestionPage.tsx"),
     route("collab/:sessionId", "Pages/CollabPage.tsx"),
+    route("reset-password", "Pages/ResetPassword.tsx"),
 ] satisfies RouteConfig;

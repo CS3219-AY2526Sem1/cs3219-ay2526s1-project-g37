@@ -29,7 +29,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     location.pathname.startsWith(path)
   );
 
-  // If route requires auth and user isn't logged in, redirect to root/login
+  // If route requires auth and user isn't logged in, redirect to root/
   if ((authLinks || adminLinks) && !userLoggedIn) {
     return <Navigate to="/" replace state={{ from: location }} />;
   }

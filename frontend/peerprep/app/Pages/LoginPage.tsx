@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Stack, TextInput, Button, PasswordInput, Divider, Text, Image, Group, Center } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Link, Navigate } from "react-router";
-import { doSignInWithEmailAndPassword, doSignInWithGoogle } from "~/firebase/helper";
+import { doSignInWithEmailAndPassword, doSignInWithGoogle } from "~/Firebase/helper";
 import { FirebaseError } from "firebase/app";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../Context/AuthContext";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import logo from "../assets/images/logo.svg";
 

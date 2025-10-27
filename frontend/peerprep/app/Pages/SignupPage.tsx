@@ -1,8 +1,8 @@
 import { Grid, TextInput, Button, PasswordInput, Divider, Text, Image, Stack, Center, Group } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Link, Navigate } from "react-router";
-import { doCreateUserWithEmailAndPassword, doUpdateUserProfile } from "../firebase/helper";
-import { useAuth } from "../context/authContext";
+import { doCreateUserWithEmailAndPassword, doUpdateUserProfile } from "../Firebase/helper";
+import { useAuth } from "../Context/AuthContext";
 import logo from "../assets/images/logo.svg";
 import { useState } from "react";
 
@@ -82,7 +82,7 @@ export default function Signup() {
                 <Divider my="xs" />
                 <Group justify="center">
                     <Text span>Already have an account? </Text>
-                    <Link to="/login">
+                    <Link to="/">
                         <Text span td="underline" c="blue" className="cursor-pointer">
                             Log in!
                         </Text>
