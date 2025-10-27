@@ -1,9 +1,9 @@
 import React from "react";
-import { Alert, Button, Center, Stack, TextInput } from "@mantine/core";
-import { doPasswordReset } from "~/firebase/helper";
+import { Alert, Button, Center, Stack, TextInput, Text } from "@mantine/core";
+import { doPasswordReset } from "~/Firebase/helper";
 import { useNavigate } from "react-router";
 
-export default function ResetPassword() {
+export default function ResetPasswordPage() {
     const [email, setEmail] = React.useState("");
     const [passwordReset, setPasswordReset] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
@@ -29,6 +29,7 @@ export default function ResetPassword() {
                 </Alert>
             ) : (
                 <Stack gap="md" miw={"30%"}>
+                    <Text size="xl">Reset Your Password</Text>
                     <TextInput
                         label="Email"
                         placeholder="Enter your email"

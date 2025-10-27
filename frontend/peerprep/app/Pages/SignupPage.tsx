@@ -1,4 +1,4 @@
-import { Grid, TextInput, Button, PasswordInput, Divider, Text, Image, Stack, Center, Group } from "@mantine/core";
+import { TextInput, Button, PasswordInput, Divider, Text, Image, Stack, Center, Group } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Link, Navigate } from "react-router";
 import { doCreateUserWithEmailAndPassword, doUpdateUserProfile } from "../Firebase/helper";
@@ -13,7 +13,7 @@ export function meta() {
 export default function Signup() {
     const { userLoggedIn } = useAuth();
     const [isRegistering, setIsRegistering] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [setError] = useState<string | null>(null);
 
     const form = useForm({
         initialValues: {
@@ -44,7 +44,7 @@ export default function Signup() {
     return (
         <Center mih={"100vh"}>
             <Stack justify="center" align="stretch" miw={"50%"}>
-                {userLoggedIn && <Navigate to={"/login"} replace={true} />}
+                {userLoggedIn && <Navigate to={"/"} replace={true} />}
                 <Image src={logo} alt="PeerPrep Logo" />
                 <form onSubmit={form.onSubmit(handleSubmit)}>
                     <TextInput
