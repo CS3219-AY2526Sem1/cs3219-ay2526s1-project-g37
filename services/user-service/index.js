@@ -4,6 +4,11 @@ const app = express();
 app.use(express.json());
 const dotenv = require("dotenv");
 dotenv.config();
+
+app.get("/health", (req, res) => {
+    res.send("User Service is healthy");
+});
+
 app.get("/:uuid", async (req, res) => {
     try {
         const { uuid } = req.params;
@@ -53,6 +58,3 @@ app.listen(PORT, () => {
     console.log(`User Service is running on port ${PORT}`);
 });
 
-app.get("/health", (req, res) => {
-    res.send("User Service is healthy");
-});
