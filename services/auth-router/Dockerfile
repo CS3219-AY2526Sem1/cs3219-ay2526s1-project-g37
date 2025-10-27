@@ -6,4 +6,4 @@ RUN npm install
 COPY . .
 EXPOSE 4000
 # This Dockerfile runs the middleware
-CMD ["node", "middleware.js"]
+CMD ["node", "index.js"]

@@ -16,32 +16,13 @@ services:
       interval: 2s
       retries: 10
 
-  # 2. MIDDLEWARE SERVICE
-  middleware-service-dev:
-    profiles: ["dev"]
-    build:
-      context: .
-      dockerfile: Dockerfile.middleware
-    container_name: middleware-service-dev
-    ports:
-      - "4000:4000"
-    volumes:
-      - .:/app
-      - /app/node_modules
-    environment:
-      - MIDDLEWARE_PORT=${MIDDLEWARE_PORT}
-      - QUESTION_SERVICE_URL=${AUTH_QUESTION_SERVICE_URL}
-      - MATCHING_SERVICE_URL=${AUTH_MATCHING_SERVICE_URL}
-      - COLLAB_SERVICE_URL=${AUTH_COLLAB_SERVICE_URL}
-      - USER_SERVICE_URL=${AUTH_USER_SERVICE_URL}
-      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
 
   # 3. USER SERVICE
   user-service-dev:
     profiles: ["dev"]
     build:
       context: .
-      dockerfile: Dockerfile.user
+      dockerfile: Dockerfile
     container_name: user-service-dev
     ports:
       - "${USER_PORT}:8003"
