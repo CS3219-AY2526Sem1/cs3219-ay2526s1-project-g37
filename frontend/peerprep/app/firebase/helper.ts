@@ -9,6 +9,7 @@ import {
     GoogleAuthProvider,
     signInWithPopup,
     updateProfile,
+    getAdditionalUserInfo,
 } from "firebase/auth";
 
 export interface AuthCredentials {
@@ -54,7 +55,20 @@ export const doSignInWithEmailAndPassword = (
 
 export const doSignInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    return signInWithPopup(auth, provider).then(async (result) => {
+        const isNewUser = getAdditionalUserInfo(result)?.isNewUser;
+        if (isNewUser) {
+            await fetch("http://localhost:4000/users/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${await auth?.currentUser?.getIdToken()}`,
+                },
+                body: JSON.stringify({ uuid: auth?.currentUser?.uid, username: result.user.displayName }),
+            });
+        }
+        return result;
+    });
 };
 
 export const doSignOut = () => {
