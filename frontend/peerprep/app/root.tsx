@@ -6,195 +6,237 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
-  useNavigate,
 } from "react-router";
 
 import "@mantine/core/styles.css";
 import "@mantine/tiptap/styles.css";
+import "@mantine/notifications/styles.css";
 
-import { createTheme, MantineProvider, Container, Button, Input } from "@mantine/core";
+import {
+  createTheme,
+  MantineProvider,
+  Container,
+  Button,
+  Input,
+} from "@mantine/core";
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import Header from "./components/header/header";
-import { AuthProvider } from "./context/authContext";
+import Header from "./Components/Header/Header";
+import { AuthProvider } from "./Context/AuthContext";
+import ProtectedRoute from "./Router/ProtectedRoute";
+import { Notifications } from "@mantine/notifications";
 
+/**
+ * Links function to include external stylesheets and fonts
+ * @returns Array of link objects for the document head
+ */
 export const links: Route.LinksFunction = () => [
-    { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossOrigin: "anonymous",
-    },
-    {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
-    },
+  { rel: "preconnect", href: "https://fonts.googleapis.com" },
+  {
+    rel: "preconnect",
+    href: "https://fonts.gstatic.com",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+  },
 ];
 
+/**
+ * Create a custom Mantine theme for the application
+ */
 const theme = createTheme({
-    /** mantine theme overrides */
-    colors: {
-        "brand-yellow": [
-            "#fff9df",
-            "#fff2ca",
-            "#ffe399",
-            "#ffd463",
-            "#ffc736",
-            "#ffc01e",
-            "#ffba02",
-            "#e4a300",
-            "#cb9100",
-            "#af7c00",
-        ],
-        "custom-gray": [
-            "#f5f5f4",
-            "#e7e7e7",
-            "#cdcdcd",
-            "#b2b2b2",
-            "#9a9a9a",
-            "#8b8b8b",
-            "#848484",
-            "#717171",
-            "#646464",
-            "#343231",
-        ],
-        green: [
-            "#e5ffe5",
-            "#cefecf",
-            "#9ffa9f",
-            "#6bf76b",
-            "#48f548",
-            "#24f324",
-            "#0df212",
-            "#00d701",
-            "#00c000",
-            "#00a600",
-        ],
+  /** mantine theme overrides */
+  colors: {
+    "brand-yellow": [
+      "#fff9df",
+      "#fff2ca",
+      "#ffe399",
+      "#ffd463",
+      "#ffc736",
+      "#ffc01e",
+      "#ffba02",
+      "#e4a300",
+      "#cb9100",
+      "#af7c00",
+    ],
+    "custom-gray": [
+      "#f5f5f4",
+      "#e7e7e7",
+      "#cdcdcd",
+      "#b2b2b2",
+      "#9a9a9a",
+      "#8b8b8b",
+      "#848484",
+      "#717171",
+      "#646464",
+      "#343231",
+    ],
+    green: [
+      "#e5ffe5",
+      "#cefecf",
+      "#9ffa9f",
+      "#6bf76b",
+      "#48f548",
+      "#24f324",
+      "#0df212",
+      "#00d701",
+      "#00c000",
+      "#00a600",
+    ],
 
-        yellow: [
-            "#fff9df",
-            "#fff2ca",
-            "#ffe399",
-            "#ffd463",
-            "#ffc736",
-            "#ffc01e",
-            "#ffba02",
-            "#e4a300",
-            "#cb9100",
-            "#af7c00",
-        ],
+    yellow: [
+      "#fff9df",
+      "#fff2ca",
+      "#ffe399",
+      "#ffd463",
+      "#ffc736",
+      "#ffc01e",
+      "#ffba02",
+      "#e4a300",
+      "#cb9100",
+      "#af7c00",
+    ],
 
-        red: [
-            "#ffe7e8",
-            "#ffcece",
-            "#ff9b9b",
-            "#ff6464",
-            "#fe3736",
-            "#fe1b19",
-            "#ff0000",
-            "#e40000",
-            "#cb0000",
-            "#b20000",
-        ],
-    },
+    red: [
+      "#ffe7e8",
+      "#ffcece",
+      "#ff9b9b",
+      "#ff6464",
+      "#fe3736",
+      "#fe1b19",
+      "#ff0000",
+      "#e40000",
+      "#cb0000",
+      "#b20000",
+    ],
+  },
 
-    components: {
-        Button: Button.extend({
-            defaultProps: {
-                variant: "filled",
-                color: "brand-yellow",
-                c: "custom-gray.9",
-            },
-        }),
+  /** Component style overrides */
+  components: {
+    Button: Button.extend({
+      defaultProps: {
+        variant: "filled",
+        color: "brand-yellow",
+        c: "custom-gray.9",
+      },
+    }),
 
-        Input: Input.extend({}),
+    Input: Input.extend({}),
 
-        InputWrapper: Input.Wrapper.extend({
-            classNames: {
-                label: "text-white",
-                error: "text-red-500",
-            },
-        }),
+    InputWrapper: Input.Wrapper.extend({
+      classNames: {
+        label: "text-white",
+        error: "text-red-500",
+      },
+    }),
 
-        Pill: {
-            styles: {
-                root: {
-                    backgroundColor: "var(--mantine-color-brand-yellow-7)",
-                    color: "var(--mantine-color-dark-filled)",
-                },
-            },
+    Pill: {
+      styles: {
+        root: {
+          backgroundColor: "var(--mantine-color-brand-yellow-7)",
+          color: "var(--mantine-color-dark-filled)",
         },
+      },
     },
-
-    primaryColor: "brand-yellow",
-    primaryShade: { light: 6, dark: 6 },
+    Notification: {
+      styles: {
+        root: {
+          backgroundColor: "var(--mantine-color-custom-gray-9)",
+          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.6)",
+        },
+        title: {
+          color: "white",
+        },
+        description: {
+          color: "white",
+        },
+      },
+    },
+  },
+  primaryColor: "brand-yellow",
+  primaryShade: { light: 6, dark: 6 },
 });
 
+/**
+ * Layout component to define the HTML structure of the application
+ * @param children - Child components to be rendered within the layout
+ * @returns JSX.Element - The layout structure
+ */
 export function Layout({ children }: { children: React.ReactNode }) {
-    return (
-        <html lang="en">
-            <head>
-                <meta charSet="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <Meta />
-                <Links />
-            </head>
-            <body>
-                {children}
-                <ScrollRestoration />
-                <Scripts />
-            </body>
-        </html>
-    );
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        {children}
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
 }
 
+/**
+ * Main App component
+ * @returns JSX.Element - The main application structure
+ */
 export default function App() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const linksWithHeader = ["/user", "/admin", "/collab"];
+  const linksWithHeader = ["/user", "/admin", "/collab", "/questions"];
   const isHeader = () => {
-    return linksWithHeader.some(path => location.pathname.startsWith(path));
+    return linksWithHeader.some((path) => location.pathname.startsWith(path));
   };
 
   return (
     <AuthProvider>
+      <ProtectedRoute>
         <MantineProvider theme={theme} defaultColorScheme="dark">
-        {isHeader() && <Header />}
-
-        <Container fluid>{<Outlet />}</Container>      
-        {location.pathname === "/" && (
-            <div style={{ display: "flex", justifyContent: "center", marginTop: 15 }}>
-            <Button onClick={() => navigate("/collab")}>Go to Collab</Button>
-            </div>
-        )}
+          <Notifications />
+          {isHeader() && <Header />}
+          <Container fluid>{<Outlet />}</Container>
         </MantineProvider>
+      </ProtectedRoute>
     </AuthProvider>
   );
 }
 
+/**
+ * Error Boundary component to handle errors in the application
+ * @param error - The error object caught by the boundary
+ * @returns JSX.Element - The error display structure
+ */
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-    let message = "Oops!";
-    let details = "An unexpected error occurred.";
-    let stack: string | undefined;
+  let message = "Oops!";
+  let details = "An unexpected error occurred.";
+  let stack: string | undefined;
 
-    if (isRouteErrorResponse(error)) {
-        message = error.status === 404 ? "404" : "Error";
-        details = error.status === 404 ? "The requested page could not be found." : error.statusText || details;
-    } else if (import.meta.env.DEV && error && error instanceof Error) {
-        details = error.message;
-        stack = error.stack;
-    }
+  if (isRouteErrorResponse(error)) {
+    message = error.status === 404 ? "404" : "Error";
+    details =
+      error.status === 404
+        ? "The requested page could not be found."
+        : error.statusText || details;
+  } else if (import.meta.env.DEV && error && error instanceof Error) {
+    details = error.message;
+    stack = error.stack;
+  }
 
-    return (
-        <main className="pt-16 p-4 container mx-auto">
-            <h1>{message}</h1>
-            <p>{details}</p>
-            {stack && (
-                <pre className="w-full p-4 overflow-x-auto">
-                    <code>{stack}</code>
-                </pre>
-            )}
-        </main>
-    );
+  return (
+    <main className="pt-16 p-4 container mx-auto">
+      <h1>{message}</h1>
+      <p>{details}</p>
+      {stack && (
+        <pre className="w-full p-4 overflow-x-auto">
+          <code>{stack}</code>
+        </pre>
+      )}
+    </main>
+  );
 }

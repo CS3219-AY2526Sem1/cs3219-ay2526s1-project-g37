@@ -19,13 +19,15 @@ async def fetch_question(difficulty: str, topic: str):
         resp.raise_for_status()
         return resp.json()
     
-async def create_session(user_ids: list[str], question_data: dict):
+async def create_session(user_ids: list[str], question_data: dict, language: str) -> str:
+    payload = question_data.copy()
+    payload["language"] = language
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"http://{COLLAB_SERVICE_URL}/sessions/",
             json={
                 "user_ids": user_ids,
-                "question": question_data},
+                "question": payload},
             timeout=10.0
         )
         resp.raise_for_status()
@@ -49,7 +51,7 @@ class MatchingService:
 
             try:
                 question_data = await fetch_question(difficulty, topic)
-                session_id = await create_session([user_id, peer_id], question_data)
+                session_id = await create_session([user_id, peer_id], question_data, language)
                 print(f"Session {session_id} started")
 
                 await manager.send_event(user_id, "match.found", {"peer_id": peer_id, "session_id": session_id, "question": question_data})

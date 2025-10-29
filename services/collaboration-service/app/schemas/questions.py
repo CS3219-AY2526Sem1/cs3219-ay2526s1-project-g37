@@ -1,3 +1,4 @@
+import datetime
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
@@ -10,3 +11,5 @@ class QuestionBase64Images(BaseModel):
     difficulty: str
     topic: str
     images: Optional[List[str]] = Field(default=None, description="Base64 encoded images")
+    language: str
+    created_at: str = Field(default_factory=lambda: datetime.datetime.now().isoformat())
