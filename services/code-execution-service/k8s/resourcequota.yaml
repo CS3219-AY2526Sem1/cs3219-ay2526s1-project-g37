@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: runner-quota
+  namespace: runner-dev
+spec:
+  hard:
+    requests.cpu: "2" # 10 pods × 100m = 1 CPU, buffer = 2 CPU
+    requests.memory: "2Gi" # 10 pods × 128Mi = 1.25Gi, buffer = 2Gi
+    limits.cpu: "8" # 10 pods × 500m = 5 CPU, buffer = 8 CPU
+    limits.memory: "4Gi" # 10 pods × 256Mi = 2.5Gi, buffer = 4Gi
+    pods: "15" # 10 concurrent + 5 buffer
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: runner-quota
+  namespace: runner-prod
+spec:
+  hard:
+    requests.cpu: "2" # Same as dev for school project
+    requests.memory: "2Gi"
+    limits.cpu: "8"
+    limits.memory: "4Gi"
+    pods: "15"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: runner-limits
+  namespace: runner-dev
+spec:
+  limits:
+    - max:
+        cpu: "1"
+        memory: "1Gi"
+      min:
+        cpu: "50m"
+        memory: "64Mi"
+      default:
+        cpu: "500m"
+        memory: "256Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "128Mi"
+      type: Container
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: runner-limits
+  namespace: runner-prod
+spec:
+  limits:
+    - max:
+        cpu: "2"
+        memory: "2Gi"
+      min:
+        cpu: "50m"
+        memory: "64Mi"
+      default:
+        cpu: "500m"
+        memory: "256Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "128Mi"
+      type: Container

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: runner-dev
+  labels:
+    name: runner-dev
+    env: dev
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: runner-prod
+  labels:
+    name: runner-prod
+    env: prod

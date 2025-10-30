@@ -1,0 +1,45 @@
+# Example Job template for testing
+# This is a reference template - actual jobs are created dynamically by the controller
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-python-runner
+  namespace: runner-dev
+spec:
+  ttlSecondsAfterFinished: 60
+  backoffLimit: 0
+  activeDeadlineSeconds: 30
+  template:
+    metadata:
+      labels:
+        app: code-runner
+        language: python
+    spec:
+      restartPolicy: Never
+      serviceAccountName: code-execution-runner
+      containers:
+        - name: runner
+          image: ${ECR_REGISTRY}/python-runner:dev-latest
+          env:
+            - name: CODE_B64
+              value: "cHJpbnQoJ0hlbGxvLCBXb3JsZCEnKQ==" # print('Hello, World!')
+            - name: STDIN_B64
+              value: ""
+            - name: TIMEOUT
+              value: "10"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
