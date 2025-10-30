@@ -1,0 +1,148 @@
+name: Build and Deploy Runner Images
+
+on:
+  push:
+    branches:
+      - dev
+      - master
+    paths:
+      - "services/code-execution-service/runners/**"
+      - "services/code-execution-service/k8s/**"
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+  ECR_REPO_NAMESPACE: ${{ secrets.ECR_REPO_NAMESPACE }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+
+jobs:
+  # Detect what changed
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      runners: ${{ steps.filter.outputs.runners }}
+      k8s: ${{ steps.filter.outputs.k8s }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            runners:
+              - 'services/code-execution-service/runners/**'
+            k8s:
+              - 'services/code-execution-service/k8s/**'
+
+  build-and-push-runners:
+    name: Build and Push Runner Images
+    needs: changes
+    if: needs.changes.outputs.runners == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract Git SHA
+        id: git-sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and push Python Runner image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/code-execution-service/runners/python-runner
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_NAMESPACE }}/python:${{ steps.git-sha.outputs.sha_short }}
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_NAMESPACE }}/python:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Node Runner image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/code-execution-service/runners/node-runner
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_NAMESPACE }}/node:${{ steps.git-sha.outputs.sha_short }}
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_NAMESPACE }}/node:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push C++ Runner image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/code-execution-service/runners/cpp-runner
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_NAMESPACE }}/cpp:${{ steps.git-sha.outputs.sha_short }}
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_NAMESPACE }}/cpp:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Java Runner image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/code-execution-service/runners/java-runner
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_NAMESPACE }}/java:${{ steps.git-sha.outputs.sha_short }}
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO_NAMESPACE }}/java:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  setup-k8s-infrastructure:
+    name: Setup Kubernetes Infrastructure
+    needs: [changes, build-and-push-runners]
+    if: |
+      always() && 
+      needs.changes.outputs.k8s == 'true' &&
+      (needs.build-and-push-runners.result == 'success' || needs.build-and-push-runners.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Setup Kubernetes infrastructure
+        run: |
+          kubectl apply -f services/code-execution-service/k8s/namespace.yaml
+          kubectl apply -f services/code-execution-service/k8s/serviceaccount.yaml
+          kubectl apply -f services/code-execution-service/k8s/role.yaml
+          kubectl apply -f services/code-execution-service/k8s/rolebinding.yaml
+          kubectl apply -f services/code-execution-service/k8s/resourcequota.yaml
+          kubectl apply -f services/code-execution-service/k8s/networkpolicy.yaml
+
+      - name: Verify setup
+        run: |
+          NAMESPACE=${{ github.ref == 'refs/heads/master' && 'runner-prod' || 'runner-dev' }}
+          kubectl get namespace $NAMESPACE
+          kubectl get role,rolebinding -n $NAMESPACE
+          echo "Kubernetes infrastructure ready for controller"

@@ -53,16 +53,17 @@ except config.ConfigException as e:
 # Environment variables
 NAMESPACE = os.getenv("RUNNER_NAMESPACE")
 ECR_REGISTRY = os.getenv("ECR_REGISTRY")
-IMAGE_TAG = os.getenv("IMAGE_TAG")
+ECR_REPO_NAMESPACE = os.getenv("ECR_REPO_NAMESPACE")
+IMAGE_TAG = os.getenv("IMAGE_TAG", "dev-latest")
 JOB_TIMEOUT = int(os.getenv("JOB_TIMEOUT"))
 SERVICE_ACCOUNT = os.getenv("SERVICE_ACCOUNT")
 
 # Language to runner image mapping
 LANGUAGE_IMAGES = {
-    "python": f"{ECR_REGISTRY}/python-runner:{IMAGE_TAG}",
-    "cpp": f"{ECR_REGISTRY}/cpp-runner:{IMAGE_TAG}",
-    "java": f"{ECR_REGISTRY}/java-runner:{IMAGE_TAG}",
-    "javascript": f"{ECR_REGISTRY}/node-runner:{IMAGE_TAG}",
+    "python": f"{ECR_REGISTRY}/{ECR_REPO_NAMESPACE}/python:{IMAGE_TAG}",
+    "cpp": f"{ECR_REGISTRY}/{ECR_REPO_NAMESPACE}/cpp:{IMAGE_TAG}",
+    "java": f"{ECR_REGISTRY}/{ECR_REPO_NAMESPACE}/java:{IMAGE_TAG}",
+    "javascript": f"{ECR_REGISTRY}/{ECR_REPO_NAMESPACE}/node:{IMAGE_TAG}",
 }
 
 
