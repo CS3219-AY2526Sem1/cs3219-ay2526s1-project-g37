@@ -51,11 +51,11 @@ except config.ConfigException as e:
     raise RuntimeError("Cannot connect to Kubernetes cluster. Ensure kubeconfig is properly configured.")
 
 # Environment variables
-NAMESPACE = os.getenv("RUNNER_NAMESPACE", "runner-dev")
-ECR_REGISTRY = os.getenv("ECR_REGISTRY", "")
-IMAGE_TAG = os.getenv("IMAGE_TAG", "dev-latest")
-JOB_TIMEOUT = int(os.getenv("JOB_TIMEOUT", "30"))
-SERVICE_ACCOUNT = os.getenv("SERVICE_ACCOUNT", "controller-sa")
+NAMESPACE = os.getenv("RUNNER_NAMESPACE")
+ECR_REGISTRY = os.getenv("ECR_REGISTRY")
+IMAGE_TAG = os.getenv("IMAGE_TAG")
+JOB_TIMEOUT = int(os.getenv("JOB_TIMEOUT"))
+SERVICE_ACCOUNT = os.getenv("SERVICE_ACCOUNT")
 
 # Language to runner image mapping
 LANGUAGE_IMAGES = {
