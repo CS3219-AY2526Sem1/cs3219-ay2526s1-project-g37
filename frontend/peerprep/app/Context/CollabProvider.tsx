@@ -12,6 +12,7 @@ import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { useSearchParams } from "react-router";
 import { stringToPaletteColor } from "~/Utils/Utils";
+import { ENTRY_POINTS } from "~/constants/constants";
 
 /**
  * Collab context definition
@@ -30,6 +31,7 @@ interface CollabProviderProps {
   sessionId: string;
   children: React.ReactNode;
   collabRef?: React.RefObject<{ destroySession: () => void } | null>;
+  language: string;
 }
 
 // Inject awareness cursor styles
@@ -89,6 +91,7 @@ export function CollabProvider({
   sessionId,
   children,
   collabRef,
+  language,
 }: CollabProviderProps) {
   const [provider, setProvider] = useState<WebsocketProvider | null>(null);
   const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
@@ -132,6 +135,8 @@ export function CollabProvider({
    */
   useEffect(() => {
     const ydocInstance = new Y.Doc();
+    const monacoText = ydocInstance.getText("monaco-code");
+
     setYdoc(ydocInstance);
     const wsProvider = new WebsocketProvider(
       import.meta.env.VITE_YJS_WS_URL,
@@ -161,7 +166,14 @@ export function CollabProvider({
     wsProvider.on("status", (event) =>
       console.log("Y-WebSocket status:", event.status)
     );
-    wsProvider.on("sync", () => console.log("y-websocket: init sync complete"));
+    wsProvider.on("sync", () => {
+      console.log("y-websocket: init sync complete");
+      if (monacoText.length === 0) {
+        console.log("Inserting default template:", ENTRY_POINTS[language]);
+        monacoText.insert(0, ENTRY_POINTS[language]);
+        console.log("Initialized document with default template.");
+      }
+    });
 
     setProvider(wsProvider);
     console.log("Provider initialized:", wsProvider);
