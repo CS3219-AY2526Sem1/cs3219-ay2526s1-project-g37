@@ -15,7 +15,7 @@ import {
   type SessionMetadata,
 } from "~/Services/CollabService";
 import { useUserService  } from "~/Services/UserService";
-
+import VoiceChat from "~/Components/VoiceChat/VoiceChat";
 
 /**
  * Collaboration Page component
@@ -167,6 +167,7 @@ export default function CollabPage() {
         <CollabProvider sessionId={sessionId} collabRef={collabRef}>
           <Grid>
             <Grid.Col span={{ base: 12 }}>
+              <VoiceChat userId={userId!} collaboratorId={sessionMetadata?.collaborator_id!} />
               <SessionControlBar
                 user={collaboratorName}
                 onEndSession={handleEndSession}
@@ -187,6 +188,7 @@ export default function CollabPage() {
                 ) : (
                   <Text>Loading...</Text>
                 )}
+                <VoiceChat userId={userId!} collaboratorId={sessionMetadata?.collaborator_id!} />
               </Card>
             </Grid.Col>
             <Grid.Col
