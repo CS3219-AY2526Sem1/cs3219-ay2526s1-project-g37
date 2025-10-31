@@ -188,7 +188,6 @@ export default function CollabPage() {
                 ) : (
                   <Text>Loading...</Text>
                 )}
-                <VoiceChat userId={userId!} collaboratorId={sessionMetadata?.collaborator_id!} />
               </Card>
             </Grid.Col>
             <Grid.Col

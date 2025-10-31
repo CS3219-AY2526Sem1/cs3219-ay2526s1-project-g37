@@ -102,10 +102,41 @@ export default function VoiceChat({ userId, collaboratorId }: { userId: string; 
             });
     };
 
-    const endCall = () => {
-        peerInstance.current?.destroy();
+    const handleEndCall = () => {
+        console.log("localAudioRef.current?.srcObject", localAudioRef.current?.srcObject);
+        console.log("remoteAudioRef.current?.srcObject", remoteAudioRef.current?.srcObject);
+
         setInCall(false);
-    }
+        // Stop local audio
+        const localStream = localAudioRef.current?.srcObject as MediaStream;
+        localStream?.getTracks().forEach((track) => track.stop());
+        if (localAudioRef.current) {
+            localAudioRef.current.srcObject = null;
+        }
+        if (remoteAudioRef.current) {
+            remoteAudioRef.current.srcObject = null;
+        }
+
+        peerInstance.current?.destroy();
+        peerInstance.current = null;
+    };
+
+    const handleMute = () => {
+        setIsMuted((prev) => !prev);
+        const localStream = localAudioRef.current?.srcObject as MediaStream;
+        console.log("Toggling mute, isMuted:", isMuted);
+        console.log("Local stream tracks:", localStream);
+        localStream?.getAudioTracks().forEach((track) => (track.enabled = !isMuted));
+    };
+
+    const handleDeafen = () => {
+        setIsDeafened((prev) => !prev);
+        if (isDeafened) {
+            remoteAudioRef.current?.play();
+        } else {
+            remoteAudioRef.current?.pause();
+        }
+    };
 
     return (
         <div>
@@ -114,12 +145,12 @@ export default function VoiceChat({ userId, collaboratorId }: { userId: string; 
             ) : (
                 // button to mute and deafen
                 <>
-                    <button onClick={() => setIsMuted(!isMuted)}>{isMuted ? "Unmute" : "Mute"}</button>
-                    <button onClick={() => {setIsDeafened(!isDeafened); remoteAudioRef.current.pause()}}>{isDeafened ? "Undeafen" : "Deafen"}</button>
-                    <button onClick={endCall}>End Voice Chat</button>
+                    <button onClick={handleMute}>{isMuted ? "Muted" : "Unmuted"}</button>
+                    <button onClick={handleDeafen}>{isDeafened ? "Deafened" : "Undeafened"}</button>
+                    <button onClick={handleEndCall}>End Voice Chat</button>
                 </>
             )}
-            {/* <audio ref={localAudioRef} /> */}
+            <audio ref={localAudioRef} muted />
             <audio ref={remoteAudioRef} />
         </div>
     );
