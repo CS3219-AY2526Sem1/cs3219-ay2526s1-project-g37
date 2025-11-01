@@ -29,34 +29,79 @@ app.add_middleware(
 )
 
 # Kubernetes configuration
-# Controller runs outside the cluster, so always use kubeconfig
-try:
-    kubeconfig_path = os.getenv("KUBECONFIG", None)
-    context = os.getenv("K8S_CONTEXT", None)
+# For cloud environment, controller can connect to a separate EKS cluster using IAM authentication
+# For local development, it can either use local kubeconfig OR connect to EKS with AWS credentials
+if os.getenv("LOCAL_DEV") == "true":
+    # Check if EKS_CLUSTER_NAME is set for local dev with EKS
+    eks_cluster_name = os.getenv("EKS_CLUSTER_NAME")
     
-    if kubeconfig_path:
-        logger.info(f"Loading Kubernetes configuration from: {kubeconfig_path}")
-        config.load_kube_config(config_file=kubeconfig_path, context=context)
-    else:
-        logger.info("Loading Kubernetes configuration from default kubeconfig")
-        config.load_kube_config(context=context)
-    
-    if context:
-        logger.info(f"Using Kubernetes context: {context}")
-    else:
-        logger.info("Using default Kubernetes context")
+    if eks_cluster_name:
+        # Local dev connecting to EKS cluster
+        logger.info("Local dev mode: Connecting to EKS with AWS credentials")
+        aws_region = os.getenv("AWS_REGION", "ap-southeast-1")
+        role_arn = os.getenv("AWS_ROLE_ARN")
         
-except config.ConfigException as e:
-    logger.error(f"Failed to load Kubernetes configuration: {e}")
-    raise RuntimeError("Cannot connect to Kubernetes cluster. Ensure kubeconfig is properly configured.")
+        try:
+            from .eks_auth import load_eks_config
+            load_eks_config(
+                cluster_name=eks_cluster_name,
+                region=aws_region,
+                role_arn=role_arn
+            )
+            logger.info(f"Successfully connected to EKS cluster: {eks_cluster_name}")
+        except Exception as e:
+            logger.error(f"Failed to authenticate with EKS: {e}")
+            raise RuntimeError(f"Cannot connect to EKS cluster: {e}")
+    else:
+        # Local dev with local kubeconfig
+        logger.info("Local dev mode: Using local kubeconfig")
+        kubeconfig_path = os.getenv("KUBECONFIG", None)
+        context = os.getenv("K8S_CONTEXT", None)
+        
+        if context:
+            logger.info(f"Using Kubernetes context: {context}")
+        else:
+            logger.info("Using default Kubernetes context")
+        
+        try:
+            if kubeconfig_path:
+                logger.info(f"Loading Kubernetes configuration from: {kubeconfig_path}")
+                config.load_kube_config(config_file=kubeconfig_path, context=context)
+            else:
+                logger.info("Loading Kubernetes configuration from default kubeconfig")
+                config.load_kube_config(context=context)
+
+        except config.ConfigException as e:
+            logger.error(f"Failed to load Kubernetes configuration: {e}")
+            raise RuntimeError("Cannot connect to Kubernetes cluster. Ensure kubeconfig is properly configured.")
+
+else:
+    # Production mode: Always use EKS IAM authentication
+    eks_cluster_name = os.getenv("EKS_CLUSTER_NAME")
+    aws_region = os.getenv("AWS_REGION", "ap-southeast-1")
+    role_arn = os.getenv("AWS_ROLE_ARN")  # Optional: IAM role to assume
+
+    try:
+        # Cross-cluster EKS authentication using IAM
+        logger.info(f"Connecting to EKS cluster: {eks_cluster_name} in {aws_region}")
+        from .eks_auth import load_eks_config
+        load_eks_config(
+            cluster_name=eks_cluster_name,
+            region=aws_region,
+            role_arn=role_arn
+        )
+        logger.info("Successfully authenticated with EKS cluster using IAM")
+
+    except Exception as e:
+        logger.error(f"Failed to authenticate with EKS: {e}")
+        raise RuntimeError(f"Cannot connect to EKS cluster: {e}")
 
 # Environment variables
 NAMESPACE = os.getenv("RUNNER_NAMESPACE")
 ECR_REGISTRY = os.getenv("ECR_REGISTRY")
 ECR_REPO_NAMESPACE = os.getenv("ECR_REPO_NAMESPACE")
-IMAGE_TAG = os.getenv("IMAGE_TAG", "dev-latest")
+IMAGE_TAG = os.getenv("IMAGE_TAG", "latest")
 JOB_TIMEOUT = int(os.getenv("JOB_TIMEOUT"))
-SERVICE_ACCOUNT = os.getenv("SERVICE_ACCOUNT")
 
 # Language to runner image mapping
 LANGUAGE_IMAGES = {
@@ -202,7 +247,7 @@ def create_job_manifest(job_name: str, language: str, code_b64: str, stdin_b64: 
                 ),
                 spec=client.V1PodSpec(
                     restart_policy="Never",
-                    service_account_name=SERVICE_ACCOUNT,
+                    service_account_name="code-execution-runner",
                     containers=[
                         client.V1Container(
                             name="runner",
@@ -218,7 +263,7 @@ def create_job_manifest(job_name: str, language: str, code_b64: str, stdin_b64: 
                             ),
                             security_context=client.V1SecurityContext(
                                 run_as_non_root=True,
-                                run_as_user=1000,
+                                run_as_user=1001,  # Must match UID in runner Dockerfiles
                                 read_only_root_filesystem=True,
                                 allow_privilege_escalation=False,
                                 capabilities=client.V1Capabilities(drop=["ALL"]),

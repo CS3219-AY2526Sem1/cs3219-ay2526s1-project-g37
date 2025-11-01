@@ -1,3 +1,5 @@
 fastapi
 kubernetes
 pydantic
+boto3
+pyyaml
