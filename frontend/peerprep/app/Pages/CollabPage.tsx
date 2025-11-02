@@ -39,6 +39,7 @@ export default function CollabPage() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [sessionMetadata, setSessionMetadata] =
     useState<SessionMetadata | null>(null);
+  const [refreshRefs, setRefreshRefs] = useState<boolean>(false);
 
   // check user belongs to sessionId
   useEffect(() => {
@@ -103,6 +104,8 @@ export default function CollabPage() {
       if (jsonData.type === "collaborator_ended") {
         console.log("py-collab: Collaborator ended the session.");
         handleEndSession();
+      } else if (jsonData.type === "collaborator_disconnect" || jsonData.type === "collaborator_connect") {
+        onRefreshRefs();
       }
     }
   }, [lastMessage]);
@@ -155,6 +158,11 @@ export default function CollabPage() {
     navigate("/user", { replace: true });
   };
 
+  const onRefreshRefs = () => {
+    console.log("Refreshing refs from CollabPage...");
+    setRefreshRefs((prev) => !prev); // Toggle the state to trigger a refresh
+  };
+
   if (!sessionId) {
     return <div>Loading session...</div>;
   }
@@ -167,10 +175,12 @@ export default function CollabPage() {
         <CollabProvider sessionId={sessionId} collabRef={collabRef}>
           <Grid>
             <Grid.Col span={{ base: 12 }}>
-              <VoiceChat userId={userId!} collaboratorId={sessionMetadata?.collaborator_id!} />
               <SessionControlBar
                 user={collaboratorName}
                 onEndSession={handleEndSession}
+                userId={userId!}
+                collaboratorId={sessionMetadata?.collaborator_id!}
+                refreshRefs={refreshRefs}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>

@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import Peer from "peerjs";
 
-export default function VoiceChat({ userId, collaboratorId }: { userId: string; collaboratorId: string }) {
+import unmuteIcon from '../../assets/images/mic-svgrepo-com.svg';
+import muteIcon from '../../assets/images/mic-off-svgrepo-com.svg';
+import deafenIcon from '../../assets/images/headset-off-svgrepo-com.svg';
+import undeafenIcon from '../../assets/images/headset-svgrepo-com.svg';
+
+export default function VoiceChat({ userId, collaboratorId, refreshRefs }: { userId: string; collaboratorId: string, refreshRefs: boolean }) {
     const [inCall, setInCall] = useState<boolean>(false);
     const [peerId, setPeerId] = useState<string>("");
     const [isMuted, setIsMuted] = useState<boolean>(false);
@@ -14,8 +19,8 @@ export default function VoiceChat({ userId, collaboratorId }: { userId: string; 
     // Initialize PeerJS
     useEffect(() => {
         const peer = new Peer(userId, {
-            host: `${import.meta.env.VITE_PEERJS_HOST}`, // Replace with your PeerJS server's hostname
-            port: parseInt(import.meta.env.VITE_PEERJS_PORT) || 9000,                    // Replace with your PeerJS server's port
+            host: `${import.meta.env.VITE_PEERJS_HOST}`,
+            port: parseInt(import.meta.env.VITE_PEERJS_PORT) || 9000,
         });
 
         peer.on("open", (id) => {
@@ -65,7 +70,7 @@ export default function VoiceChat({ userId, collaboratorId }: { userId: string; 
     }, [userId]);
 
     // Handle outgoing calls
-    const callCollaborator = () => {
+    const startCall = () => {
         setInCall(true);
 
         if (!collaboratorId) {
@@ -101,29 +106,23 @@ export default function VoiceChat({ userId, collaboratorId }: { userId: string; 
                 console.error("Failed to get local audio stream:", err);
             });
     };
-
-    const handleEndCall = () => {
-        console.log("localAudioRef.current?.srcObject", localAudioRef.current?.srcObject);
-        console.log("remoteAudioRef.current?.srcObject", remoteAudioRef.current?.srcObject);
-
-        setInCall(false);
-        // Stop local audio
-        const localStream = localAudioRef.current?.srcObject as MediaStream;
-        localStream?.getTracks().forEach((track) => track.stop());
+    
+    useEffect(() => {
         if (localAudioRef.current) {
-            localAudioRef.current.srcObject = null;
+            console.log("Local audio ref updated:", localAudioRef.current);
         }
         if (remoteAudioRef.current) {
-            remoteAudioRef.current.srcObject = null;
+            console.log("Remote audio ref updated:", remoteAudioRef.current);
         }
-
-        peerInstance.current?.destroy();
-        peerInstance.current = null;
-    };
+    }, [localAudioRef.current, remoteAudioRef.current, refreshRefs]);
 
     const handleMute = (mute: boolean) => {
         setIsMuted(mute);
         const localStream = localAudioRef.current?.srcObject as MediaStream;
+        if (!localStream) {
+            console.error("Local audio stream is not available.");
+            return;
+        }
         console.log("Toggling mute, isMuted:", isMuted);
         console.log("Local stream tracks:", localStream);
         localStream?.getAudioTracks().forEach((track) => (track.enabled = !mute));
@@ -141,17 +140,19 @@ export default function VoiceChat({ userId, collaboratorId }: { userId: string; 
     return (
         <div>
             {!inCall ? (
-                <button onClick={callCollaborator}>Start Voice Chat</button>
+                <button onClick={startCall}>Start Voice Chat</button>
             ) : (
-                // button to mute and deafen
                 <>
-                    {isMuted ? (
-                        <button onClick={() => handleMute(false)}>Muted</button>
-                    ) : (
-                        <button onClick={() => handleMute(true)}>Unmuted</button>
-                    )}
-                    <button onClick={handleDeafen}>{isDeafened ? "Deafened" : "Undeafened"}</button>
-                    <button onClick={handleEndCall}>End Voice Chat</button>
+                    <button onClick={() => handleMute(!isMuted)}>
+                        {isMuted 
+                            ? <img style={{ height: '24px', width: '24px' }} src={muteIcon} alt="Mute Icon" /> 
+                            : <img style={{ height: '24px', width: '24px' }} src={unmuteIcon} alt="Unmute Icon" />}
+                    </button>
+                    <button onClick={handleDeafen}>
+                        {isDeafened 
+                            ? <img style={{ height: '24px', width: '24px' }} src={deafenIcon} alt="Deafen Icon" /> 
+                            : <img style={{ height: '24px', width: '24px' }} src={undeafenIcon} alt="Undeafen Icon" />}
+                    </button>
                 </>
             )}
             <audio ref={localAudioRef} muted />
