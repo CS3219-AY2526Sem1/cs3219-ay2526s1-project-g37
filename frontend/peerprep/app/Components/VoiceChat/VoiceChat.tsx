@@ -121,12 +121,12 @@ export default function VoiceChat({ userId, collaboratorId }: { userId: string; 
         peerInstance.current = null;
     };
 
-    const handleMute = () => {
-        setIsMuted((prev) => !prev);
+    const handleMute = (mute: boolean) => {
+        setIsMuted(mute);
         const localStream = localAudioRef.current?.srcObject as MediaStream;
         console.log("Toggling mute, isMuted:", isMuted);
         console.log("Local stream tracks:", localStream);
-        localStream?.getAudioTracks().forEach((track) => (track.enabled = !isMuted));
+        localStream?.getAudioTracks().forEach((track) => (track.enabled = !mute));
     };
 
     const handleDeafen = () => {
@@ -145,7 +145,11 @@ export default function VoiceChat({ userId, collaboratorId }: { userId: string; 
             ) : (
                 // button to mute and deafen
                 <>
-                    <button onClick={handleMute}>{isMuted ? "Muted" : "Unmuted"}</button>
+                    {isMuted ? (
+                        <button onClick={() => handleMute(false)}>Muted</button>
+                    ) : (
+                        <button onClick={() => handleMute(true)}>Unmuted</button>
+                    )}
                     <button onClick={handleDeafen}>{isDeafened ? "Deafened" : "Undeafened"}</button>
                     <button onClick={handleEndCall}>End Voice Chat</button>
                 </>
