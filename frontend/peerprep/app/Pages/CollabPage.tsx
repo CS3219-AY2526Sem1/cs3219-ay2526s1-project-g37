@@ -20,14 +20,18 @@ import {
  * @returns JSX.Element - Collaboration Page component
  */
 export default function CollabPage() {
+  const navigate = useNavigate();
   const params = useParams();
   const { sessionId } = params;
+  
   const { getSessionQuestion, getSessionByUser, getSessionMetadata } =
     useCollabService();
   const [question, setQuestion] = useState<Question | null>(null);
   const collabRef = useRef<{ destroySession: () => void }>(null);
+
   const { userId } = useAuth();
-  const navigate = useNavigate();
+  const [ collaboratorName, setCollaboratorName ] = useState<string>("");
+
   const [checkingSession, setCheckingSession] = useState(true);
   const [sessionMetadata, setSessionMetadata] =
     useState<SessionMetadata | null>(null);
@@ -84,6 +88,9 @@ export default function CollabPage() {
     }
   }, [lastMessage]);
 
+  // useEffect(() => {
+  //    const data = fetch(`${import.meta.env.VITE_AUTH_ROUTER_URL}/users/${}`)
+  // })
   /**
    * Fetch question details for the session
    */
