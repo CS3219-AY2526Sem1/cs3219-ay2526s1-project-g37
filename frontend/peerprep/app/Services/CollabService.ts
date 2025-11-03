@@ -3,6 +3,7 @@ import { useAuth } from "~/Context/AuthContext";
 export type SessionMetadata = {
   language: string;
   created_at: string;
+  collaborator_id: string;
 };
 
 const API_BASE_URL = `${import.meta.env.VITE_AUTH_ROUTER_URL}/collaboration`;
@@ -86,9 +87,9 @@ export function useCollabService() {
     return response.json();
   }
 
-  async function getSessionMetadata(session_id: string) {
+  async function getSessionMetadata(session_id: string, user_id: string) {
     const response = await fetch(
-      `${API_BASE_URL}/sessions/${session_id}/metadata`,
+      `${API_BASE_URL}/sessions/${session_id}/metadata?user_id=${user_id}`,
       {
         headers: {
           Authorization: `Bearer ${tokenId}`,

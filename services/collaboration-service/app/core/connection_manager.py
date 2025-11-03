@@ -30,7 +30,7 @@ class ConnectionManager:
         id = next((uid for uid in session_data if uid != user_id), None)
         if id is None:
             return None
-        return session_data[id]
+        return session_data[id], id
         
     async def on_connect(self, session_id: str, user_id: str, out_q: asyncio.Queue):
         if session_id not in self.active_connections:
@@ -41,7 +41,7 @@ class ConnectionManager:
 
         self.active_connections[session_id][user_id] = out_q
 
-        collaborator_q = self._get_collaborator_q(session_id, user_id)
+        collaborator_q, _ = self._get_collaborator_q(session_id, user_id)
 
         if collaborator_q is None:
             return None
@@ -61,7 +61,7 @@ class ConnectionManager:
 
         self.active_connections[session_id][user_id] = None
 
-        collaborator_q = self._get_collaborator_q(session_id, user_id)
+        collaborator_q, _ = self._get_collaborator_q(session_id, user_id)
 
         if collaborator_q is None:
             return None
@@ -78,7 +78,7 @@ class ConnectionManager:
             del self.user_sessions[user_id]
         
     async def on_message(self, session_id: str, user_id: str, msg: Message):
-        collaborator_q = self._get_collaborator_q(session_id, user_id)
+        collaborator_q, _ = self._get_collaborator_q(session_id, user_id)
 
         if collaborator_q is None:
             return None
@@ -100,12 +100,16 @@ class ConnectionManager:
             return ""
         return self.user_sessions[user_id]
     
-    def get_session_metadata(self, session_id: str):
+    def get_session_metadata(self, session_id: str, user_id: str):
         if session_id not in self.questions:
             raise SessionNotFoundError()
+
+        _, id = self._get_collaborator_q(session_id, user_id)
+
         return {
             "language": self.questions[session_id].language,
-            "created_at": self.questions[session_id].created_at
+            "created_at": self.questions[session_id].created_at,
+            "collaborator_id": id
         }
 
     def __str__(self):
