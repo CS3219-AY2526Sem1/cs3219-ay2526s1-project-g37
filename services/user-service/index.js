@@ -15,7 +15,7 @@ app.get("/:uuid", async (req, res) => {
         const client = await pool.connect();
         const result = await client.query("SELECT * FROM users where uuid = $1;", [uuid]);
         client.release();
-        res.status(200).json(result.rows);
+        res.status(200).json(result.rows[0]);
     } catch (error) {
         console.error("Error fetching users:", error);
         res.status(500).json({ message: "Internal Server Error" });
