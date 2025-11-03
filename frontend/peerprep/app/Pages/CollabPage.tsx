@@ -14,20 +14,28 @@ import {
   useCollabService,
   type SessionMetadata,
 } from "~/Services/CollabService";
+import { useUserService  } from "~/Services/UserService";
+
 
 /**
  * Collaboration Page component
  * @returns JSX.Element - Collaboration Page component
  */
 export default function CollabPage() {
+  const navigate = useNavigate();
   const params = useParams();
   const { sessionId } = params;
+  
   const { getSessionQuestion, getSessionByUser, getSessionMetadata } =
     useCollabService();
+  const { getUserDetails } = useUserService();
+
   const [question, setQuestion] = useState<Question | null>(null);
   const collabRef = useRef<{ destroySession: () => void }>(null);
+
   const { userId } = useAuth();
-  const navigate = useNavigate();
+  const [ collaboratorName, setCollaboratorName ] = useState<string>("");
+
   const [checkingSession, setCheckingSession] = useState(true);
   const [sessionMetadata, setSessionMetadata] =
     useState<SessionMetadata | null>(null);
@@ -58,7 +66,7 @@ export default function CollabPage() {
       //  Get question details from backend
       fetchQuestionDetails();
       // Get session metadata
-      getSessionMetadata(sessionId!)
+      getSessionMetadata(sessionId!, userId!)
         .then((metadata) => {
           console.log(metadata);
           setSessionMetadata(metadata);
@@ -72,6 +80,21 @@ export default function CollabPage() {
     }
   }, [readyState]);
 
+  useEffect(() => {
+    if (sessionMetadata) {
+      const { collaborator_id } = sessionMetadata;
+      getUserDetails(collaborator_id)
+        .then((data) => {
+          console.log("Fetched collaborator details:", data);
+          setCollaboratorName(data.username);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch collaborator name:", error);
+        });
+    }
+  }, [sessionMetadata]);
+
+
   // Handle incoming WebSocket messages
   useEffect(() => {
     if (lastMessage !== null) {
@@ -84,6 +107,9 @@ export default function CollabPage() {
     }
   }, [lastMessage]);
 
+  // useEffect(() => {
+  //    const data = fetch(`${import.meta.env.VITE_AUTH_ROUTER_URL}/users/${}`)
+  // })
   /**
    * Fetch question details for the session
    */
@@ -142,7 +168,7 @@ export default function CollabPage() {
           <Grid>
             <Grid.Col span={{ base: 12 }}>
               <SessionControlBar
-                user={userId}
+                user={collaboratorName}
                 onEndSession={handleEndSession}
               />
             </Grid.Col>
@@ -207,3 +233,4 @@ export default function CollabPage() {
     </>
   );
 }
+

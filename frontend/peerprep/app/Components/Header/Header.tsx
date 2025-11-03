@@ -21,7 +21,7 @@ export default function Header() {
    */
   function handleSignOut() {
     doSignOut();
-    navigate("/login");
+    navigate("/");
   }
 
   /**
