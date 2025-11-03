@@ -2,19 +2,26 @@
 FastAPI Controller for Code Execution Service
 Spawns Kubernetes Jobs to execute code in isolated runner containers.
 """
+import base64
+import os
+import time
+import logging
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
-import base64
-import os
-import time
 from typing import Optional
 from pydantic import BaseModel
-import logging
 
-logging.basicConfig(level=logging.INFO)
+from app import load_eks_config
+
+
+# Configure logging to output to stdout
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Code Execution Service")
@@ -29,72 +36,24 @@ app.add_middleware(
 )
 
 # Kubernetes configuration
-# For cloud environment, controller can connect to a separate EKS cluster using IAM authentication
-# For local development, it can either use local kubeconfig OR connect to EKS with AWS credentials
 if os.getenv("LOCAL_DEV") == "true":
-    # Check if EKS_CLUSTER_NAME is set for local dev with EKS
     eks_cluster_name = os.getenv("EKS_CLUSTER_NAME")
-    
-    if eks_cluster_name:
-        # Local dev connecting to EKS cluster
-        logger.info("Local dev mode: Connecting to EKS with AWS credentials")
-        aws_region = os.getenv("AWS_REGION", "ap-southeast-1")
-        role_arn = os.getenv("AWS_ROLE_ARN")
-        
-        try:
-            from .eks_auth import load_eks_config
-            load_eks_config(
-                cluster_name=eks_cluster_name,
-                region=aws_region,
-                role_arn=role_arn
-            )
-            logger.info(f"Successfully connected to EKS cluster: {eks_cluster_name}")
-        except Exception as e:
-            logger.error(f"Failed to authenticate with EKS: {e}")
-            raise RuntimeError(f"Cannot connect to EKS cluster: {e}")
-    else:
-        # Local dev with local kubeconfig
-        logger.info("Local dev mode: Using local kubeconfig")
-        kubeconfig_path = os.getenv("KUBECONFIG", None)
-        context = os.getenv("K8S_CONTEXT", None)
-        
-        if context:
-            logger.info(f"Using Kubernetes context: {context}")
-        else:
-            logger.info("Using default Kubernetes context")
-        
-        try:
-            if kubeconfig_path:
-                logger.info(f"Loading Kubernetes configuration from: {kubeconfig_path}")
-                config.load_kube_config(config_file=kubeconfig_path, context=context)
-            else:
-                logger.info("Loading Kubernetes configuration from default kubeconfig")
-                config.load_kube_config(context=context)
-
-        except config.ConfigException as e:
-            logger.error(f"Failed to load Kubernetes configuration: {e}")
-            raise RuntimeError("Cannot connect to Kubernetes cluster. Ensure kubeconfig is properly configured.")
-
-else:
-    # Production mode: Always use EKS IAM authentication
-    eks_cluster_name = os.getenv("EKS_CLUSTER_NAME")
+    logger.info("Local dev mode: Connecting to EKS with AWS credentials")
     aws_region = os.getenv("AWS_REGION", "ap-southeast-1")
-    role_arn = os.getenv("AWS_ROLE_ARN")  # Optional: IAM role to assume
-
+    
     try:
-        # Cross-cluster EKS authentication using IAM
-        logger.info(f"Connecting to EKS cluster: {eks_cluster_name} in {aws_region}")
-        from .eks_auth import load_eks_config
         load_eks_config(
-            cluster_name=eks_cluster_name,
-            region=aws_region,
-            role_arn=role_arn
+            cluster_name=eks_cluster_name
         )
-        logger.info("Successfully authenticated with EKS cluster using IAM")
-
+        logger.info(f"Successfully connected to EKS cluster: {eks_cluster_name}")
     except Exception as e:
         logger.error(f"Failed to authenticate with EKS: {e}")
         raise RuntimeError(f"Cannot connect to EKS cluster: {e}")
+
+else:
+    # Production mode: Always use EKS IAM authentication
+    # TODO: Implement IAM auth
+    logger.info("Production mode: Using in-cluster config for EKS")
 
 # Environment variables
 NAMESPACE = os.getenv("RUNNER_NAMESPACE")
@@ -124,6 +83,7 @@ class ExecutionResponse(BaseModel):
     stdout: str
     stderr: str
     execution_time: float
+    exit_code: Optional[int] = None
 
 
 @app.get("/health")
@@ -143,23 +103,32 @@ async def execute_code(request: ExecutionRequest):
             detail=f"Unsupported language: {request.language}. Supported: {list(LANGUAGE_IMAGES.keys())}"
         )
 
-    # Encode code and stdin to base64
-    code_b64 = base64.b64encode(request.code.encode()).decode()
-    stdin_b64 = base64.b64encode(request.stdin.encode()).decode()
-
+    # Ensure base64 strings are valid
+    try:
+        base64.b64decode(request.code).decode('utf-8')
+        base64.b64decode(request.stdin).decode('utf-8')
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid base64 encoded code or stdin: {str(e)}"
+        )
+    
     # Generate unique job name
     job_name = f"runner-{request.language}-{int(time.time())}"
 
     # Create Kubernetes Job
     batch_v1 = client.BatchV1Api()
     core_v1 = client.CoreV1Api()
+    
+    # Store timeout for later use
+    actual_timeout = min(request.timeout, JOB_TIMEOUT)
 
     job = create_job_manifest(
         job_name=job_name,
         language=request.language,
-        code_b64=code_b64,
-        stdin_b64=stdin_b64,
-        timeout=min(request.timeout, JOB_TIMEOUT),
+        code_b64=request.code,
+        stdin_b64=request.stdin,
+        timeout=actual_timeout,
     )
 
     try:
@@ -183,7 +152,7 @@ async def execute_code(request: ExecutionRequest):
             
             time.sleep(0.5)
 
-        # Get pod logs
+        # Get pod logs and exit code
         pods = core_v1.list_namespaced_pod(
             namespace=NAMESPACE,
             label_selector=f"job-name={job_name}"
@@ -191,15 +160,55 @@ async def execute_code(request: ExecutionRequest):
 
         stdout = ""
         stderr = ""
+        exit_code = None
         
         if pods.items:
             pod_name = pods.items[0].metadata.name
+            
+            # Get stdout logs
             try:
-                logs = core_v1.read_namespaced_pod_log(name=pod_name, namespace=NAMESPACE)
-                stdout = logs
+                stdout = core_v1.read_namespaced_pod_log(name=pod_name, namespace=NAMESPACE)
             except ApiException as e:
-                stderr = f"Failed to retrieve logs: {str(e)}"
-                logger.error(f"Failed to get logs for {pod_name}: {e}")
+                logger.error(f"Failed to get stdout logs for {pod_name}: {e}")
+            
+            # Get stderr logs separately
+            try:
+                pod_logs = core_v1.read_namespaced_pod_log(
+                    name=pod_name, 
+                    namespace=NAMESPACE,
+                    container="runner",
+                    follow=False,
+                    _preload_content=False
+                )
+                stderr = pod_logs.read().decode('utf-8')
+                # If there are errors, they would be in the logs
+                # The runner scripts write errors to stderr which get captured in pod logs
+            except ApiException as e:
+                logger.error(f"Failed to get stderr logs for {pod_name}: {e}")
+            
+            # Get pod status to check exit code
+            try:
+                pod_status = core_v1.read_namespaced_pod_status(name=pod_name, namespace=NAMESPACE)
+                if pod_status.status.container_statuses:
+                    container_status = pod_status.status.container_statuses[0]
+                    if container_status.state.terminated:
+                        exit_code = container_status.state.terminated.exit_code
+                        logger.info(f"Container exit code: {exit_code}")
+                        
+                        # If exit code is non-zero, the logs contain the error
+                        if exit_code != 0:
+                            stderr = stdout if stdout else "Execution failed with no output"
+                            stdout = ""
+                            
+                            # Provide context based on exit code
+                            if exit_code == 124:
+                                stderr = f"Execution timed out after {actual_timeout} seconds\n{stderr}"
+                            elif exit_code == 137:
+                                stderr = "Execution killed (possibly out of memory or timeout)\n" + stderr
+                            elif exit_code == 1:
+                                stderr = "Runtime error:\n" + stderr
+            except ApiException as e:
+                logger.error(f"Failed to get pod status for {pod_name}: {e}")
 
         execution_time = time.time() - start_time
 
@@ -218,7 +227,8 @@ async def execute_code(request: ExecutionRequest):
             status="success" if job_status.status.succeeded else "failed",
             stdout=stdout,
             stderr=stderr,
-            execution_time=execution_time
+            execution_time=execution_time,
+            exit_code=exit_code
         )
 
     except ApiException as e:
@@ -247,7 +257,6 @@ def create_job_manifest(job_name: str, language: str, code_b64: str, stdin_b64: 
                 ),
                 spec=client.V1PodSpec(
                     restart_policy="Never",
-                    service_account_name="code-execution-runner",
                     containers=[
                         client.V1Container(
                             name="runner",
@@ -263,11 +272,26 @@ def create_job_manifest(job_name: str, language: str, code_b64: str, stdin_b64: 
                             ),
                             security_context=client.V1SecurityContext(
                                 run_as_non_root=True,
-                                run_as_user=1001,  # Must match UID in runner Dockerfiles
+                                run_as_user=1001,
                                 read_only_root_filesystem=True,
                                 allow_privilege_escalation=False,
                                 capabilities=client.V1Capabilities(drop=["ALL"]),
                             ),
+                            volume_mounts=[
+                                client.V1VolumeMount(
+                                    name="tmp",
+                                    mount_path="/tmp"
+                                )
+                            ],
+                        )
+                    ],
+                    volumes=[
+                        client.V1Volume(
+                            name="tmp",
+                            empty_dir=client.V1EmptyDirVolumeSource(
+                                medium="Memory",
+                                size_limit="64Mi"
+                            )
                         )
                     ],
                 ),

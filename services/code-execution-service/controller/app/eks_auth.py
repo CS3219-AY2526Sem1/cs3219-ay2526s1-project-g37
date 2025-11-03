@@ -1,121 +1,145 @@
 """
 AWS EKS Authentication Helper
-Generates kubeconfig with IAM authentication for cross-cluster access
+Uses AWS CLI to generate kubeconfig with IAM authentication
 """
-
-import tempfile
-import yaml
-import boto3
-from kubernetes import config
-from typing import Optional
+import subprocess
+import os
 import logging
+
+from pathlib import Path
+from kubernetes import config
 
 logger = logging.getLogger(__name__)
 
 
-def get_eks_kubeconfig(
+def configure_aws_credentials(
+    access_key_id: str,
+    secret_access_key: str,
+    region: str
+) -> None:
+    """
+    Configure AWS credentials by writing to ~/.aws/credentials and ~/.aws/config files.
+    
+    Args:
+        access_key_id: AWS access key ID
+        secret_access_key: AWS secret access key
+        region: AWS region
+        session_token: Optional session token (for temporary credentials)
+    """
+    try:
+        # Create ~/.aws directory if it doesn't exist
+        aws_dir = Path.home() / '.aws'
+        aws_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Write credentials file
+        credentials_file = aws_dir / 'credentials'
+        credentials_content = f"""[default]
+aws_access_key_id = {access_key_id}
+aws_secret_access_key = {secret_access_key}
+"""
+     
+        with open(credentials_file, 'w') as f:
+            f.write(credentials_content)
+        
+        # Set proper permissions (readable only by owner)
+        credentials_file.chmod(0o600)
+        
+        # Write config file
+        config_file = aws_dir / 'config'
+        config_content = f"""[default]
+region = {region}
+output = json
+"""
+        
+        with open(config_file, 'w') as f:
+            f.write(config_content)
+        
+        config_file.chmod(0o600)
+        
+        logger.info(f"AWS credentials configured in {credentials_file}")
+        logger.info(f"AWS config configured in {config_file} for region: {region}")
+        
+    except Exception as e:
+        logger.error(f"Failed to configure AWS credentials: {e}")
+        raise
+
+
+def update_kubeconfig(
     cluster_name: str,
-    region: str = "us-east-1",
-    role_arn: Optional[str] = None
+    region: str,
+    kubeconfig_path: str = "/tmp/kubeconfig"
 ) -> str:
     """
-    Generate a kubeconfig file for EKS cluster with IAM authentication.
+    Update kubeconfig using AWS CLI.
     
     Args:
         cluster_name: Name of the EKS cluster
         region: AWS region
-        role_arn: Optional IAM role ARN to assume
+        kubeconfig_path: Path where kubeconfig will be written
         
     Returns:
-        Path to the generated kubeconfig file
+        Path to the updated kubeconfig file
     """
-    eks_client = boto3.client('eks', region_name=region)
-    
-    # Get cluster information
-    cluster_info = eks_client.describe_cluster(name=cluster_name)
-    cluster = cluster_info['cluster']
-    
-    # Extract cluster details
-    cluster_endpoint = cluster['endpoint']
-    cluster_ca = cluster['certificateAuthority']['data']
-    cluster_arn = cluster['arn']
-    
-    # Build kubeconfig
-    kubeconfig = {
-        'apiVersion': 'v1',
-        'kind': 'Config',
-        'clusters': [{
-            'cluster': {
-                'certificate-authority-data': cluster_ca,
-                'server': cluster_endpoint
-            },
-            'name': cluster_arn
-        }],
-        'contexts': [{
-            'context': {
-                'cluster': cluster_arn,
-                'user': cluster_arn
-            },
-            'name': cluster_arn
-        }],
-        'current-context': cluster_arn,
-        'preferences': {},
-        'users': [{
-            'name': cluster_arn,
-            'user': {
-                'exec': {
-                    'apiVersion': 'client.authentication.k8s.io/v1beta1',
-                    'command': 'aws',
-                    'args': [
-                        'eks',
-                        'get-token',
-                        '--cluster-name',
-                        cluster_name,
-                        '--region',
-                        region
-                    ],
-                    'env': None,
-                    'interactiveMode': 'Never',
-                    'provideClusterInfo': False
-                }
-            }
-        }]
-    }
-    
-    # Add role assumption if provided
-    if role_arn:
-        kubeconfig['users'][0]['user']['exec']['args'].extend([
-            '--role-arn',
-            role_arn
-        ])
-    
-    # Write to temporary file
-    temp_kubeconfig = tempfile.NamedTemporaryFile(
-        mode='w',
-        suffix='.yaml',
-        delete=False
-    )
-    yaml.dump(kubeconfig, temp_kubeconfig, default_flow_style=False)
-    temp_kubeconfig.flush()
-    
-    logger.info(f"Generated kubeconfig for cluster {cluster_name} at {temp_kubeconfig.name}")
-    
-    return temp_kubeconfig.name
+    try:
+        # Build the AWS CLI command
+        cmd = [
+            'aws', 'eks', 'update-kubeconfig',
+            '--region', region,
+            '--name', cluster_name,
+            '--kubeconfig', kubeconfig_path
+        ]
+        
+        # Execute the command
+        logger.info(f"Running: {' '.join(cmd)}")
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        
+        logger.info(f"Kubeconfig updated successfully: {result.stdout.strip()}")
+        logger.info(f"Kubeconfig written to: {kubeconfig_path}")
+        
+        return kubeconfig_path
+        
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Failed to update kubeconfig: {e.stderr}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error updating kubeconfig: {e}")
+        raise
 
 
 def load_eks_config(
-    cluster_name: str,
-    region: str = "us-east-1",
-    role_arn: Optional[str] = None
+    cluster_name: str
 ) -> None:
     """
-    Load Kubernetes configuration for an EKS cluster.
+    Load Kubernetes configuration for an EKS cluster using AWS CLI.
+    
+    This function:
+    1. Configures AWS credentials (from environment variables)
+    2. Runs 'aws eks update-kubeconfig' to generate kubeconfig
+    3. Loads the kubeconfig into the Kubernetes client
     
     Args:
         cluster_name: Name of the EKS cluster
-        region: AWS region
-        role_arn: Optional IAM role ARN to assume
     """
-    kubeconfig_path = get_eks_kubeconfig(cluster_name, region, role_arn)
+    # Configure AWS credentials from environment variables
+    access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+    secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+    region = os.getenv('AWS_REGION')
+
+    configure_aws_credentials(
+        access_key_id=access_key_id,
+        secret_access_key=secret_access_key,
+        region=region
+    )
+
+    kubeconfig_path = update_kubeconfig(
+        cluster_name=cluster_name,
+        region=region
+    )
+    
     config.load_kube_config(config_file=kubeconfig_path)
-    logger.info(f"Loaded Kubernetes configuration for EKS cluster: {cluster_name}")
+    logger.info(f"Successfully loaded Kubernetes configuration for EKS cluster: {cluster_name}")
