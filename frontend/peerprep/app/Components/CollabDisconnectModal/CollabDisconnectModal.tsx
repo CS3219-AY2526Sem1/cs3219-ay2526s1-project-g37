@@ -1,5 +1,4 @@
 import { Modal, Text, Button, Grid } from "@mantine/core";
-import { useEffect, useState } from "react";
 
 
 export default function CollabDisconnectModal(props: { durationInS: number, opened: boolean, onTerminate?: () => void, onClose: () => void }) {
