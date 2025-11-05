@@ -36,3 +36,4 @@ export const FIREBASE_AUTH_ERROR_CODES: Record<string, string> = {
 
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+export const COLLAB_DURATION_S = 15; 
