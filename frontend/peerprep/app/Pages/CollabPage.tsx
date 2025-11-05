@@ -15,7 +15,7 @@ import {
   type SessionMetadata,
 } from "~/Services/CollabService";
 import { useUserService  } from "~/Services/UserService";
-import CollabDisconnectModal from "~/Components/CollabDisconnectModel/CollabDisconnectModal";
+import CollabDisconnectModal from "~/Components/CollabDisconnectModal/CollabDisconnectModal";
 
 
 /**
@@ -122,13 +122,14 @@ export default function CollabPage() {
   // Open disconnect modal if COLLAB_DURATION_S seconds have passed
   useEffect(() => {
     if (!isConnected && lastConnectedTime) {
+      const remainingTime = Math.max(
+        0,
+        COLLAB_DURATION_S * 1000 - (Date.now() - lastConnectedTime.getTime())
+      );
+
       const timer = setTimeout(() => {
-        const now = new Date();
-        const timeElapsed = (now.getTime() - lastConnectedTime.getTime()) / 1000;
-        if (timeElapsed >= COLLAB_DURATION_S) {
-          setIsDisconnectModalOpen(true);
-        }
-      }, COLLAB_DURATION_S * 1000);
+        setIsDisconnectModalOpen(true);
+      }, remainingTime);
 
       return () => clearTimeout(timer); // Cleanup timer on unmount or reconnect
     }
@@ -189,7 +190,12 @@ export default function CollabPage() {
         <Text ta={"center"}>Verifying session...</Text>
       ) : (
         <CollabProvider sessionId={sessionId} collabRef={collabRef}>
-          <CollabDisconnectModal durationInS={COLLAB_DURATION_S} opened={isDisconnectModalOpen} onTerminate={handleEndSession} />
+          <CollabDisconnectModal
+            durationInS={COLLAB_DURATION_S}
+            opened={isDisconnectModalOpen}
+            onTerminate={handleEndSession}
+            onClose={() => setIsDisconnectModalOpen(false)}
+          />
           <Grid>
             <Grid.Col span={{ base: 12 }}>
               <SessionControlBar

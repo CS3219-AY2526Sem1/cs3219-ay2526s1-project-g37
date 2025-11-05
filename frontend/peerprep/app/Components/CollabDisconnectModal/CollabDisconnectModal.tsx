@@ -2,15 +2,10 @@ import { Modal, Text, Button, Grid } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 
-export default function CollabDisconnectModal(props: { durationInS: number, opened: boolean, onTerminate?: () => void }) {
-    const [opened, setOpened] = useState(props.opened);
-
-    useEffect(() => {
-        setOpened(props.opened);
-    }, [props.opened]);
+export default function CollabDisconnectModal(props: { durationInS: number, opened: boolean, onTerminate?: () => void, onClose: () => void }) {
     
     return (
-        <Modal opened={opened} onClose={() => setOpened(false)} centered>
+        <Modal opened={props.opened} onClose={() => props.onClose()} centered>
             <Text size="xl" fw={700} mb={20}>
                 Inactive/Disconnected Collaborator
             </Text>
