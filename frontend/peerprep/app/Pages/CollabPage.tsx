@@ -42,8 +42,7 @@ export default function CollabPage() {
     useState<SessionMetadata | null>(null);
 
   // Get WebSocket readyState from useWebSocket
-  const { readyState } = useWebSocket();
-  const [ isConnected, setIsConnected ] = useState<boolean>(readyState === ReadyState.OPEN);
+  const [ isConnected, setIsConnected ] = useState<boolean>(false);
   const [ lastConnectedTime, setLastConnectedTime ] = useState<Date | null>(null);
   const [ isDisconnectModalOpen, setIsDisconnectModalOpen ] = useState(false);
 
