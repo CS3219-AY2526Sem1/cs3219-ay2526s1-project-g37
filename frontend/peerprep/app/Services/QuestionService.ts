@@ -1,4 +1,4 @@
-import { useAuth } from "~/Context/AuthContext";
+import { useAuth } from '~/Context/AuthContext';
 
 /**
  * Question type defining the structure of a question
@@ -34,16 +34,16 @@ export function useQuestionService() {
    */
   async function addQuestion(question: Question) {
     const response = await fetch(`${API_BASE_URL}/questions`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${tokenId}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(question),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to add question");
+      throw new Error('Failed to add question');
     }
 
     return response.json();
@@ -63,7 +63,7 @@ export function useQuestionService() {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch question");
+      throw new Error('Failed to fetch question');
     }
 
     return response.json();
@@ -82,7 +82,7 @@ export function useQuestionService() {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch labels");
+      throw new Error('Failed to fetch labels');
     }
 
     return response.json();
@@ -96,10 +96,10 @@ export function useQuestionService() {
    */
   async function uploadImage(imageData: File) {
     const formData = new FormData();
-    formData.append("file", imageData);
+    formData.append('file', imageData);
 
     const response = await fetch(`${API_BASE_URL}/images/upload`, {
-      method: "POST",
+      method: 'POST',
       body: formData,
       headers: {
         Authorization: `Bearer ${tokenId}`,
@@ -107,10 +107,10 @@ export function useQuestionService() {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to upload image");
+      throw new Error('Failed to upload image');
     }
 
-    console.log("Image uploaded successfully");
+    console.log('Image uploaded successfully');
     return response.json();
   }
 
@@ -123,20 +123,20 @@ export function useQuestionService() {
    */
   async function isValidQuestion(difficulties: string, topics: string) {
     const params = new URLSearchParams();
-    params.append("difficulties", difficulties);
-    params.append("topics", topics);
+    params.append('difficulties', difficulties);
+    params.append('topics', topics);
 
     const response = await fetch(
       `${API_BASE_URL}/questions/valid-config?${params.toString()}`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${tokenId}`,
         },
       }
     );
     if (!response.ok) {
-      throw new Error("Failed to validate question");
+      throw new Error('Failed to validate question');
     }
     return response.json();
   }
@@ -154,7 +154,7 @@ export function useQuestionService() {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch question stats");
+      throw new Error('Failed to fetch question stats');
     }
 
     return response.json();
@@ -162,16 +162,16 @@ export function useQuestionService() {
 
   async function updateQuestion(question: Question, id: string) {
     const response = await fetch(`${API_BASE_URL}/questions/${id}`, {
-      method: "PUT",
+      method: 'PUT',
       headers: {
         Authorization: `Bearer ${tokenId}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(question),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to update question");
+      throw new Error('Failed to update question');
     }
 
     return response.json();
@@ -190,16 +190,89 @@ export function useQuestionService() {
       {
         headers: {
           Authorization: `Bearer ${tokenId}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch questions");
+      throw new Error('Failed to fetch questions');
     }
 
     return response.json();
+  }
+
+  /**
+   * Get a paginated list of questions from the backend by userid
+   * @param page - Page number for pagination
+   * @param userId - Questions history based off userid
+   * @returns List of questions and total count
+   * @throws Error if the fetch fails
+   */
+  async function getQuestionsListByUser(page: number, userId: string) {
+    const response = await fetch(
+      `${API_BASE_URL}/questions/history?page=${page}&userId=${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokenId}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch questions');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Insert or update a question attempt.
+   * If an attempt exists for the same (userId, questionId, collabId),
+   * it updates the submitted solution. Otherwise, it inserts a new entry.
+   *
+   * @param userId - User's ID
+   * @param questionId - Questions's ID
+   * @param collabId - Collaboration session ID
+   * @param submitted_solution - User's current solution
+   * @returns The updated or newly created attempt
+   * @throws Error if insert or update fails
+   */
+  async function insertAttempt(
+    userId: string,
+    questionId: string,
+    collabId: string,
+    language: string,
+    collaboratorId: string,
+    submitted_solution: string
+  ) {
+    const response = await fetch(`${API_BASE_URL}/questions/attempt`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${tokenId}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        question_id: questionId,
+        collab_id: collabId,
+        language: language,
+        collaborator_id: collaboratorId,
+        submitted_solution,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      const errorMsg =
+        errorData?.detail || `Request failed with status ${response.status}`;
+      throw new Error(errorMsg);
+    }
+
+    const data = await response.json();
+    console.log(data);
+    return data;
   }
 
   /**
@@ -210,14 +283,14 @@ export function useQuestionService() {
    */
   async function deleteQuestion(id: string) {
     const response = await fetch(`${API_BASE_URL}/questions/${id}`, {
-      method: "DELETE",
+      method: 'DELETE',
       headers: {
         Authorization: `Bearer ${tokenId}`,
       },
     });
 
     if (!response.ok) {
-      throw new Error("Failed to delete question");
+      throw new Error('Failed to delete question');
     }
 
     return response.json();
@@ -233,5 +306,7 @@ export function useQuestionService() {
     updateQuestion,
     getQuestionsList,
     deleteQuestion,
+    getQuestionsListByUser,
+    insertAttempt,
   };
 }

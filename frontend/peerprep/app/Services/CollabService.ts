@@ -1,4 +1,4 @@
-import { useAuth } from "~/Context/AuthContext";
+import { useAuth } from '~/Context/AuthContext';
 
 export type SessionMetadata = {
   language: string;
@@ -26,7 +26,7 @@ export function useCollabService() {
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${tokenId}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -36,7 +36,7 @@ export function useCollabService() {
     }
 
     if (!response.ok) {
-      throw new Error("Failed to check existing session");
+      throw new Error('Failed to check existing session');
     }
 
     return response.json();
@@ -54,13 +54,13 @@ export function useCollabService() {
       {
         headers: {
           Authorization: `Bearer ${tokenId}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
 
     if (!response.ok) {
-      throw new Error("Failed to get session question");
+      throw new Error('Failed to get session question');
     }
     return response.json();
   }
@@ -73,15 +73,15 @@ export function useCollabService() {
   async function getSessionByUser() {
     const url = `${API_BASE_URL}/sessions?user_id=${userId}`;
     const response = await fetch(url, {
-      method: "GET",
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${tokenId}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      throw new Error("Failed to get session for user");
+      throw new Error('Failed to get session for user');
     }
 
     return response.json();
@@ -98,7 +98,7 @@ export function useCollabService() {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch session metadata");
+      throw new Error('Failed to fetch session metadata');
     }
 
     return response.json();

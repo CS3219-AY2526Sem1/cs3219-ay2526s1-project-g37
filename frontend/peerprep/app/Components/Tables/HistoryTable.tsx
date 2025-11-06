@@ -6,28 +6,40 @@ import {
   Text,
   Pagination,
   Group,
-} from "@mantine/core";
-import classes from "./Table.module.css";
+} from '@mantine/core';
+import classes from './Table.module.css';
 
 /**
  * Interview History type definition
  */
 export type InterviewHistory = {
+  id: string;
   question: string;
   completionDate: string;
   difficulty: string;
   topic: string;
   language: string;
+  question_id: string;
 };
+
+interface HistoryTableProps {
+  data: InterviewHistory[];
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
 
 /**
  * HistoryTable component to display interview history
  * @param data - Array of InterviewHistory objects
  * @returns JSX.Element
  */
-export default function HistoryTable({ data }: { data: InterviewHistory[] }) {
+export default function HistoryTable({
+  data,
+  totalPages,
+  onPageChange,
+}: HistoryTableProps) {
   const rows = data.map((row) => (
-    <Table.Tr key={row.question}>
+    <Table.Tr key={row.id}>
       <Table.Td>{row.question}</Table.Td>
       <Table.Td ta="right">{row.completionDate}</Table.Td>
       <Table.Td ta="right">{row.difficulty}</Table.Td>
@@ -40,12 +52,12 @@ export default function HistoryTable({ data }: { data: InterviewHistory[] }) {
   ));
   return (
     <Card shadow="sm" padding="lg">
-      <Text fw={1000} size="xl" c="white" mb={"xs"}>
+      <Text fw={1000} size="xl" c="white" mb={'xs'}>
         Interviews
       </Text>
       <Divider />
       <Table.ScrollContainer minWidth={500}>
-        <Table c={"white"} highlightOnHover>
+        <Table c={'white'} highlightOnHover>
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Question</Table.Th>
@@ -60,7 +72,12 @@ export default function HistoryTable({ data }: { data: InterviewHistory[] }) {
         </Table>
       </Table.ScrollContainer>
       <Group justify="center">
-        <Pagination total={5} siblings={3} defaultValue={1} />
+        <Pagination
+          total={totalPages}
+          siblings={3}
+          defaultValue={1}
+          onChange={onPageChange}
+        />
       </Group>
     </Card>
   );
