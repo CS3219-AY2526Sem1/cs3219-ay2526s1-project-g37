@@ -161,10 +161,10 @@ export default function CollabPage() {
 
   return (
     <>
-      {checkingSession ? (
+      {checkingSession || sessionMetadata === null ? (
         <Text ta={"center"}>Verifying session...</Text>
       ) : (
-        <CollabProvider sessionId={sessionId} collabRef={collabRef}>
+        <CollabProvider sessionId={sessionId} collabRef={collabRef} language={sessionMetadata.language}>
           <Grid>
             <Grid.Col span={{ base: 12 }}>
               <SessionControlBar
