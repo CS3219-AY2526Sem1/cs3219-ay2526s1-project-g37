@@ -46,5 +46,8 @@ export const FIREBASE_AUTH_ERROR_CODES: Record<string, string> = {
 
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+// Pagination constants
+export const PAGE_SIZE = 10;
+
 // Duration in seconds before showing disconnect modal when collaborator is inactive
 export const COLLAB_DURATION_S = 15; 

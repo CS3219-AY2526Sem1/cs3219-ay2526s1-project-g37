@@ -14,6 +14,7 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { useQuestionService } from "~/Services/QuestionService";
 import { notifications } from "@mantine/notifications";
 import DifficultyCards from "~/Components/DifficultyCards/DifficultyCards";
+import { PAGE_SIZE } from "~/Constants/Constants";
 
 export function meta() {
   return [
@@ -21,7 +22,6 @@ export function meta() {
     { name: "description", content: "Welcome to PeerPrep!" },
   ];
 }
-const PAGE_SIZE = 20;
 
 /**
  * Questions Page component
@@ -54,7 +54,7 @@ export default function QuestionsPage() {
     // Fetch the questions list from the API
     const fetchQuestionsList = async () => {
       try {
-        const data = await getQuestionsList(currentPage, debouncedSearchQuery);
+        const data = await getQuestionsList(currentPage, PAGE_SIZE, debouncedSearchQuery);
         const questionsList: QuestionHistory[] = data.questions;
         console.log("Fetched questions:", questionsList);
         setData(questionsList);
