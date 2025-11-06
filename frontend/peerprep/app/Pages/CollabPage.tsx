@@ -239,16 +239,29 @@ export default function CollabPage() {
                 >
                   {sessionMetadata && (
                     <>
-                        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px", paddingBottom: "8px"}}>
-                          <Text>Collaborator:</Text>
-                          <Badge
-                            color={isConnected ? "darkgreen" : "red"}
-                            variant="filled"
-                            size="lg"
-                            style={{ marginBottom: "0" }}
-                          >
-                            {isConnected ? "Connected" : "Disconnected"}
-                          </Badge>
+                        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", marginBottom: "8px" }}>
+                          <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px", paddingBottom: "8px", paddingRight: "16px" }}>
+                            <Text>Collaborator:</Text>
+                            <Badge
+                              color={isConnected ? "darkgreen" : "red"}
+                              variant="filled"
+                              size="lg"
+                              style={{ marginBottom: "0" }}
+                            >
+                              {isConnected ? "Connected" : "Disconnected"}
+                            </Badge>
+                          </div>                        
+                          <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px", paddingBottom: "8px"}}>
+                            <Text>Language:</Text>
+                            <Badge
+                              color="grey"
+                              variant="filled"
+                              size="lg"
+                              style={{ marginBottom: "0" }}
+                            >
+                              {sessionMetadata.language}
+                            </Badge>
+                          </div>
                         </div>
                         <CodeEditor
                           language={CODE_EDITOR_LANGUAGES[sessionMetadata.language]}
