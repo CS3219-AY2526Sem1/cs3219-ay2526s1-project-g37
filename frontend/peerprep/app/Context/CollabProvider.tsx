@@ -168,9 +168,14 @@ export function CollabProvider({
     );
     wsProvider.on("sync", () => {
       console.log("y-websocket: init sync complete");
-      if (monacoText.length === 0) {
-        console.log("Inserting default template:", ENTRY_POINTS[language]);
-        monacoText.insert(0, ENTRY_POINTS[language]);
+      ydocInstance.transact(() => {
+        if (monacoText.length === 0) {
+          console.log("Inserting default template:", ENTRY_POINTS[language]);
+          monacoText.insert(0, ENTRY_POINTS[language]);
+        }
+      });
+      // Only log if the document now starts with the template
+      if (monacoText.toString().startsWith(ENTRY_POINTS[language])) {
         console.log("Initialized document with default template.");
       }
     });
