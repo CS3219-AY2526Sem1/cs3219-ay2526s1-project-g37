@@ -3,6 +3,16 @@
  */
 export const LANGUAGES = ["C++", "Python", "Java", "JavaScript"];
 
+/**
+ * Default code templates for each programming language
+ */
+export const ENTRY_POINTS = {
+  "C++": "int main() {\n    return 0;\n}",
+  "Python": "",
+  "Java": "public class Main {\n    public static void main(String[] args) {\n    }\n}",
+  "JavaScript": "",
+};
+
 export const CODE_EDITOR_LANGUAGES: Record<string, string> = {
   "C++": "cpp",
   "Python": "python",
