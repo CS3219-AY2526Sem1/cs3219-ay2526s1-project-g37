@@ -5,7 +5,7 @@ from app.ws import sessions as ws_sessions
 from app.rest import sessions
 from dotenv import load_dotenv
 
-DEFAULT_CORS_ORIGINS = ["http://localhost:5173"]
+DEFAULT_CORS_ORIGINS = "http://localhost:5173"
 
 load_dotenv()  # Load environment variables from .env file
 

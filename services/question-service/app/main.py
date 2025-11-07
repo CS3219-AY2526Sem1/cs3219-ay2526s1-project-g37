@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from app.routers import questions_router, labels_router, images_router
 from fastapi.middleware.cors import CORSMiddleware  
 
-DEFAULT_CORS_ORIGINS = ["http://localhost:5173"]
+DEFAULT_CORS_ORIGINS = "http://localhost:5173"
 
 load_dotenv()
 

@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 
-DEFAULT_CORS_ORIGINS = ["http://localhost:5173"]
+DEFAULT_CORS_ORIGINS = "http://localhost:5173"
 
 load_dotenv()  
 
