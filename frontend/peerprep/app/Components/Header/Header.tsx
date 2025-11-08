@@ -7,6 +7,7 @@ import classes from "./Header.module.css";
 import logo from "../../assets/images/logo.svg";
 import { useAuth } from "../../Context/AuthContext";
 import { doSignOut } from "~/Firebase/helper";
+import EditProfileModal from "../EditProfileModal/EditProfileModal";
 
 /**
  * Header component
@@ -43,7 +44,7 @@ export default function Header() {
           />
         </Group>
         <Group gap={5}>
-          <Text>{displayName || "Empty Name"}</Text>
+          <EditProfileModal displayName={displayName} />
           <Button 
             type="button"
             style={{
