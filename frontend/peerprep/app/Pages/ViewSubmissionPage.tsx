@@ -87,7 +87,7 @@ export default function ViewSubmissionPage() {
                   <Grid.Col span={12}>
                     <CustomBadge
                       label="Language"
-                      value={CODE_EDITOR_LANGUAGES[submission.language]}
+                      value={submission.language}
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
@@ -98,7 +98,7 @@ export default function ViewSubmissionPage() {
                       }}
                     >
                       <Editor
-                        language={CODE_EDITOR_LANGUAGES[submission.language]}
+                        language={submission.language}
                         theme="vs-dark"
                         width="100%"
                         height="100%"
