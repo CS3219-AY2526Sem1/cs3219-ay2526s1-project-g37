@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router";
 import { Card, Grid, Loader, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import type { InterviewHistory } from "~/Components/Tables/HistoryTable";
-import { CARDHEIGHT, CODE_EDITOR_LANGUAGES } from "~/Constants/Constants";
+import { CARDHEIGHT } from "~/Constants/Constants";
 import HtmlRender from "~/Components/HtmlRender/HtmlRender";
 import { Editor } from "@monaco-editor/react";
 import CustomBadge from "~/Components/LanguageBadge/LanguageBadge";
