@@ -8,14 +8,15 @@ import { CollabProvider } from "~/Context/CollabProvider";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../Context/AuthContext";
-import type { Question } from "~/Services/QuestionService";
+import { useQuestionService, type GetQuestion, type Question } from "~/Services/QuestionService";
 import HtmlRender from "~/Components/HtmlRender/HtmlRender";
 import {
   useCollabService,
   type SessionMetadata,
 } from "~/Services/CollabService";
-import { useUserService  } from "~/Services/UserService";
-
+import { useUserService } from "~/Services/UserService";
+import { isLessThanOneMinuteOld } from "~/Utils/Utils";
+import * as Y from "yjs";
 
 /**
  * Collaboration Page component
@@ -25,16 +26,20 @@ export default function CollabPage() {
   const navigate = useNavigate();
   const params = useParams();
   const { sessionId } = params;
-  
+
   const { getSessionQuestion, getSessionByUser, getSessionMetadata } =
     useCollabService();
   const { getUserDetails } = useUserService();
+  const { insertAttempt } = useQuestionService();
 
-  const [question, setQuestion] = useState<Question | null>(null);
-  const collabRef = useRef<{ destroySession: () => void }>(null);
+  const [question, setQuestion] = useState<GetQuestion | null>(null);
+  const collabRef = useRef<{
+    destroySession: () => void;
+    ydoc: Y.Doc | null;
+  }>(null);
 
   const { userId } = useAuth();
-  const [ collaboratorName, setCollaboratorName ] = useState<string>("");
+  const [collaboratorName, setCollaboratorName] = useState<string>("");
 
   const [checkingSession, setCheckingSession] = useState(true);
   const [sessionMetadata, setSessionMetadata] =
@@ -94,7 +99,6 @@ export default function CollabPage() {
     }
   }, [sessionMetadata]);
 
-
   // Handle incoming WebSocket messages
   useEffect(() => {
     if (lastMessage !== null) {
@@ -102,7 +106,16 @@ export default function CollabPage() {
       const jsonData = JSON.parse(lastMessage.data);
       if (jsonData.type === "collaborator_ended") {
         console.log("py-collab: Collaborator ended the session.");
-        handleEndSession();
+        if (sessionMetadata) {
+          const isLessThanOneMinute = isLessThanOneMinuteOld(sessionMetadata?.created_at);
+          if (isLessThanOneMinute) {
+            handleAbandonSession();
+            return;
+          } else {
+            handleEndSession();
+            return;
+          }
+        }
       }
     }
   }, [lastMessage]);
@@ -117,7 +130,7 @@ export default function CollabPage() {
     try {
       const data = await getSessionQuestion(sessionId!);
       setQuestion(data);
-      console.log("Fetched question successfully:", data.name);
+      console.log("Fetched question successfully:", data);
     } catch (error) {
       console.error("Failed to fetch question:", error);
       // Handle error, maybe set an error state
@@ -137,10 +150,7 @@ export default function CollabPage() {
     }
   };
 
-  /**
-   * Handle ending the collaboration session
-   */
-  const handleEndSession = () => {
+  const endSessionAndNavigate = () => {
     // send end session signal to server
     console.log("End session signal sent.");
 
@@ -155,21 +165,70 @@ export default function CollabPage() {
     navigate("/user", { replace: true });
   };
 
-  if (!sessionId) {
-    return <div>Loading session...</div>;
+  /**
+   * Get editor string from CodeEditor synchronously
+   */
+  const getEditorString = () => {
+    console.log(collabRef.current?.ydoc?.getText("monaco-code").toString());
+    return collabRef.current?.ydoc?.getText("monaco-code").toString() || "";
+  };
+
+  /**
+   * Add attempt record before ending session
+   */
+  const addAttemptRecord = async () => {
+    if (!sessionId) return;
+    try {
+      const string = getEditorString();
+
+      console.log("Ydoc string to be submitted:", string);
+      if (question && question.id && sessionMetadata && question.language && string !== undefined && string !== "") {
+        await insertAttempt(
+          question.id,
+          sessionId,
+          question.language,
+          sessionMetadata.collaborator_id,
+          string
+        );
+        console.log("Attempt record added successfully.");
+      } else {
+        console.log("Skipping attempt record - missing data or empty string");
+      }
+    } catch (error) {
+      console.error("Failed to add attempt record:", error);
+    }
+  };
+
+  /**
+   * Handle abandoning the collaboration session
+   */
+  function handleAbandonSession() {
+    endSessionAndNavigate();
+  }
+
+  /**
+   * Handle ending the collaboration session
+   */
+  async function handleEndSession() {
+    console.log("Handling end session...");
+    await addAttemptRecord();
+    endSessionAndNavigate();
   }
 
   return (
     <>
-      {checkingSession ? (
+      {checkingSession || !sessionMetadata || !sessionId ? (
         <Text ta={"center"}>Verifying session...</Text>
       ) : (
         <CollabProvider sessionId={sessionId} collabRef={collabRef}>
+          <button onClick={getEditorString}>test</button>
           <Grid>
             <Grid.Col span={{ base: 12 }}>
               <SessionControlBar
                 user={collaboratorName}
                 onEndSession={handleEndSession}
+                onAbandonSession={handleAbandonSession}
+                metadata={sessionMetadata}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
@@ -233,4 +292,3 @@ export default function CollabPage() {
     </>
   );
 }
-

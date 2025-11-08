@@ -21,34 +21,34 @@ export default function TestCaseBar() {
 
   // To update attempt history
   async function handleRun() {
-    try {
-      setIsRunning(true);
+    // try {
+    //   setIsRunning(true);
 
-      const session = await checkExistingSession(userId);
-      if (!session?.session_id) {
-        throw new Error('Failed to retrieve question details');
-      }
+    //   const session = await checkExistingSession(userId);
+    //   if (!session?.session_id) {
+    //     throw new Error('Failed to retrieve question details');
+    //   }
 
-      const question = await getSessionQuestion(session.session_id);
-      if (!question?.id) {
-        throw new Error('Failed to retrieve question details');
-      }
+    //   const question = await getSessionQuestion(session.session_id);
+    //   if (!question?.id) {
+    //     throw new Error('Failed to retrieve question details');
+    //   }
 
-      const metadata = await getSessionMetadata(session.session_id, userId);
+    //   const metadata = await getSessionMetadata(session.session_id, userId);
 
-      const response = await insertAttempt(
-        userId,
-        question.id,
-        session.session_id,
-        question.language,
-        metadata.collaborator_id,
-        submittedSolution
-      );
-    } catch (error) {
-      console.error('Error running code:', error);
-    } finally {
-      setIsRunning(false);
-    }
+    //   const response = await insertAttempt(
+    //     userId,
+    //     question.id,
+    //     session.session_id,
+    //     question.language,
+    //     metadata.collaborator_id,
+    //     submittedSolution
+    //   );
+    // } catch (error) {
+    //   console.error('Error running code:', error);
+    // } finally {
+    //   setIsRunning(false);
+    // }
   }
 
   //  container scroll when mouse wheel scrolls

@@ -4,6 +4,18 @@ import { useAuth } from '~/Context/AuthContext';
  * Question type defining the structure of a question
  */
 export type Question = {
+  id?: string | null;
+  body?: string | null;
+  name: string;
+  description: string;
+  difficulty: string;
+  topic: string;
+};
+
+export type GetQuestion = {
+  id: string | null;
+  created_at?: string | number;
+  language: string | null;
   name: string;
   description: string;
   difficulty: string;
@@ -25,7 +37,7 @@ const API_BASE_URL = `${import.meta.env.VITE_AUTH_ROUTER_URL}/questions`;
  * @returns Object containing methods to interact with question service
  */
 export function useQuestionService() {
-  const { tokenId } = useAuth();
+  const { tokenId, userId } = useAuth();
 
   /**
    * Add a new question to the backend
@@ -33,6 +45,9 @@ export function useQuestionService() {
    * @returns Response from the backend after adding the question
    */
   async function addQuestion(question: Question) {
+    console.log(JSON.stringify(question))
+    question.id = "";
+    question.body = "";
     const response = await fetch(`${API_BASE_URL}/questions`, {
       method: 'POST',
       headers: {
@@ -161,6 +176,8 @@ export function useQuestionService() {
   }
 
   async function updateQuestion(question: Question, id: string) {
+    question.id = id;
+    question.body = "";
     const response = await fetch(`${API_BASE_URL}/questions/${id}`, {
       method: 'PUT',
       headers: {
@@ -240,7 +257,6 @@ export function useQuestionService() {
    * @throws Error if insert or update fails
    */
   async function insertAttempt(
-    userId: string,
     questionId: string,
     collabId: string,
     language: string,

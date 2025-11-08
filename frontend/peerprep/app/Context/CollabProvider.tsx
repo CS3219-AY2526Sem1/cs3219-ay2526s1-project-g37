@@ -21,6 +21,7 @@ const CollabContext = createContext<{
   sessionId: string;
   ydoc: Y.Doc | null;
   clearWebsocketSession: () => void;
+  editorRef?: React.MutableRefObject<any>;
 } | null>(null);
 
 /**
@@ -93,6 +94,7 @@ export function CollabProvider({
   const [provider, setProvider] = useState<WebsocketProvider | null>(null);
   const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
   const [searchParams] = useSearchParams();
+  const editorRef = useRef<any>(null);
 
   const USER = useRef(
     searchParams.get("user_id") || `User-${Math.floor(Math.random() * 1000)}`
@@ -122,6 +124,7 @@ export function CollabProvider({
     collabRef,
     () => ({
       destroySession: clearWebsocketSession,
+      ydoc: ydoc,
     }),
     [clearWebsocketSession]
   );
@@ -176,7 +179,7 @@ export function CollabProvider({
 
   return (
     <CollabContext.Provider
-      value={{ provider, sessionId, ydoc, clearWebsocketSession }}
+      value={{ provider, sessionId, ydoc, clearWebsocketSession, editorRef }}
     >
       {children}
     </CollabContext.Provider>
