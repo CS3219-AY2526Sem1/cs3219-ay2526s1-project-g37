@@ -1,6 +1,5 @@
 import { Grid, Modal, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 
 const TIMER_SECS = 3;
 
