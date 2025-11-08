@@ -3,7 +3,7 @@ import {
   Button
 } from "@mantine/core";
 
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 import QuestionsTable from "~/Components/Tables/QuestionsTable";
 import type {QuestionHistory} from "../Components/Tables/QuestionsTable";
@@ -104,9 +104,13 @@ export default function QuestionsPage() {
         <Grid gutter="md" align="center">
           <DifficultyCards />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
-            <Link to="/questions/add">
-              <Button fullWidth>Add Question</Button>
-            </Link>
+            <Button 
+              color="lightgrey" 
+              fullWidth 
+              style={{ marginBottom: "0.5rem" }} 
+              onClick={() => navigation("/user")}
+            > Back to Homepage</Button>
+            <Button fullWidth onClick={() => navigation("/questions/add")}>Add Question</Button>
           </Grid.Col>
         </Grid>
       </Grid.Col>
