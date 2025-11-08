@@ -1,12 +1,13 @@
 // With reference from official Mantine documentation
 // https://ui.mantine.dev/category/headers/
 
-import { Button, Container, Group, Text } from "@mantine/core";
+import { Button, Container, Group } from "@mantine/core";
 import { useNavigate } from "react-router";
 import classes from "./Header.module.css";
 import logo from "../../assets/images/logo.svg";
 import { useAuth } from "../../Context/AuthContext";
 import { doSignOut } from "~/Firebase/helper";
+import EditProfileModal from "../EditProfileModal/EditProfileModal";
 
 /**
  * Header component
@@ -43,7 +44,7 @@ export default function Header() {
           />
         </Group>
         <Group gap={5}>
-          <Text>{displayName || "Empty Name"}</Text>
+          <EditProfileModal displayName={displayName} />
           <Button 
             type="button"
             style={{

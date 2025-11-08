@@ -201,9 +201,9 @@ export function useQuestionService() {
    * @returns List of questions and total count
    * @throws Error if the fetch fails
    */
-  async function getQuestionsList(page: number, searchQuery: string) {
+  async function getQuestionsList(page: number, size: number, searchQuery: string) {
     const response = await fetch(
-      `${API_BASE_URL}/questions?page=${page}&search=${searchQuery}`,
+      `${API_BASE_URL}/questions?page=${page}&size=${size}&search=${searchQuery}`,
       {
         headers: {
           Authorization: `Bearer ${tokenId}`,

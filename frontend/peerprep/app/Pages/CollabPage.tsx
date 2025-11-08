@@ -1,5 +1,5 @@
-import { Grid, Card, Text } from "@mantine/core";
-import { CODE_EDITOR_LANGUAGES, COLLABCARDHEIGHT } from "~/Constants/Constants";
+import { Grid, Card, Text, Badge } from "@mantine/core";
+import { CODE_EDITOR_LANGUAGES, COLLABCARDHEIGHT, COLLAB_DURATION_S } from "~/Constants/Constants";
 import SessionControlBar from "../Components/SessionControlBar/SessionControlBar";
 import TestCase from "../Components/TestCase/TestCase";
 import { CodeEditor } from "../Components/CodeEditor/CodeEditor";
@@ -14,9 +14,14 @@ import {
   useCollabService,
   type SessionMetadata,
 } from "~/Services/CollabService";
-import { useUserService } from "~/Services/UserService";
 import { isLessThanOneMinuteOld } from "~/Utils/Utils";
 import * as Y from "yjs";
+import { useUserService  } from "~/Services/UserService";
+import CollabDisconnectModal from "~/Components/CollabDisconnectModal/CollabDisconnectModal";
+import RedirectModal from "~/Components/CollabModals/RedirectModal";
+import { useDisclosure } from "@mantine/hooks";
+import CustomBadge from "~/Components/LanguageBadge/LanguageBadge";
+
 
 /**
  * Collaboration Page component
@@ -44,6 +49,13 @@ export default function CollabPage() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [sessionMetadata, setSessionMetadata] =
     useState<SessionMetadata | null>(null);
+
+  // Get WebSocket readyState from useWebSocket
+  const [ isConnected, setIsConnected ] = useState<boolean>(false);
+  const [ lastConnectedTime, setLastConnectedTime ] = useState<Date | null>(null);
+  const [ isDisconnectModalOpen, setIsDisconnectModalOpen ] = useState(false);
+
+  const [ redirectOpened, { open: redirectOpen } ] = useDisclosure(false);
 
   // check user belongs to sessionId
   useEffect(() => {
@@ -107,6 +119,7 @@ export default function CollabPage() {
       if (jsonData.type === "collaborator_ended") {
         console.log("py-collab: Collaborator ended the session.");
         if (sessionMetadata) {
+          redirectOpen();
           const isLessThanOneMinute = isLessThanOneMinuteOld(sessionMetadata?.created_at);
           if (isLessThanOneMinute) {
             handleAbandonSession();
@@ -116,13 +129,33 @@ export default function CollabPage() {
             return;
           }
         }
+      } else if (jsonData.type === "collaborator_connect") {
+        setIsConnected(true);
+        setLastConnectedTime(null); // Reset disconnect time
+        setIsDisconnectModalOpen(false); // Close modal if reconnected
+      } else if (jsonData.type === "collaborator_disconnect") {
+        setLastConnectedTime(new Date());
+        setIsConnected(false);
       }
     }
   }, [lastMessage]);
 
-  // useEffect(() => {
-  //    const data = fetch(`${import.meta.env.VITE_AUTH_ROUTER_URL}/users/${}`)
-  // })
+  // Open disconnect modal if COLLAB_DURATION_S seconds have passed
+  useEffect(() => {
+    if (!isConnected && lastConnectedTime) {
+      const remainingTime = Math.max(
+        0,
+        COLLAB_DURATION_S * 1000 - (Date.now() - lastConnectedTime.getTime())
+      );
+
+      const timer = setTimeout(() => {
+        setIsDisconnectModalOpen(true);
+      }, remainingTime);
+
+      return () => clearTimeout(timer); // Cleanup timer on unmount or reconnect
+    }
+  }, [isConnected, lastConnectedTime]);
+
   /**
    * Fetch question details for the session
    */
@@ -161,8 +194,8 @@ export default function CollabPage() {
       collabRef.current.destroySession();
     }
 
+
     sessionStorage.setItem("sessionEnded", "true");
-    navigate("/user", { replace: true });
   };
 
   /**
@@ -220,7 +253,13 @@ export default function CollabPage() {
       {checkingSession || !sessionMetadata || !sessionId ? (
         <Text ta={"center"}>Verifying session...</Text>
       ) : (
-        <CollabProvider sessionId={sessionId} collabRef={collabRef}>
+        <CollabProvider sessionId={sessionId} collabRef={collabRef} language={sessionMetadata.language}>
+          <CollabDisconnectModal
+            durationInS={COLLAB_DURATION_S}
+            opened={isDisconnectModalOpen}
+            onTerminate={handleEndSession}
+            onClose={() => setIsDisconnectModalOpen(false)}
+          />
           <Grid>
             <Grid.Col span={{ base: 12 }}>
               <SessionControlBar
@@ -264,12 +303,26 @@ export default function CollabPage() {
                   c={"white"}
                 >
                   {sessionMetadata && (
-                    <CodeEditor
-                      language={CODE_EDITOR_LANGUAGES[sessionMetadata.language]}
-                      theme="vs-dark"
-                      width="100%"
-                      height="100%"
-                    />
+                    <>
+                        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", marginBottom: "8px" }}>
+                          <CustomBadge 
+                            label="Collaborator" 
+                            value={isConnected ? "Connected" : "Disconnected"}
+                            color={isConnected ? "darkgreen" : "red"}
+                            paddingRight="16px"
+                          />
+                          <CustomBadge 
+                            label="Language" 
+                            value={sessionMetadata.language}
+                          />
+                        </div>
+                        <CodeEditor
+                          language={CODE_EDITOR_LANGUAGES[sessionMetadata.language]}
+                          theme="vs-dark"
+                          width="100%"
+                          height="100%"
+                        />
+                    </>
                   )}
                 </Card>
 
@@ -286,6 +339,7 @@ export default function CollabPage() {
               </div>
             </Grid.Col>
           </Grid>
+          <RedirectModal opened={redirectOpened} onRedirect={() => navigate("/user", { replace: true })} />
         </CollabProvider>
       )}
     </>

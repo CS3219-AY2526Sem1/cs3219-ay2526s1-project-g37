@@ -10,6 +10,7 @@ import { useQuestionService } from '~/Services/QuestionService';
 import { useNavigate } from 'react-router';
 import DifficultyCards from '~/Components/DifficultyCards/DifficultyCards';
 import { useAuth } from '~/Context/AuthContext';
+import { useUserService, type UserDetails } from '~/Services/UserService';
 
 export function meta() {
   return [
@@ -33,15 +34,10 @@ export default function UserPage() {
   const { userId, tokenId } = useAuth();
 
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [data, setData] = useState<InterviewHistory[]>([
-    {
-      question: 'Two Sum',
-      completionDate: '2024-10-01',
-      difficulty: 'Easy',
-      topic: 'Array',
-      language: 'JavaScript',
-    },
-  ]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const { getCurrentUserDetails } = useUserService();
+
+  const [data, setData] = useState<InterviewHistory[]>([]);
 
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -81,6 +77,20 @@ export default function UserPage() {
   }, []);
 
   /**
+   * Effect to fetch current user details and determine admin status on component mount.
+   */
+  useEffect(() => {
+    getCurrentUserDetails()
+      .then((userData: UserDetails) => {
+        setIsAdmin(userData.role === 1);
+      })
+      .catch((error: Error) => {
+        console.error("Error fetching user details:", error);
+        setIsAdmin(false);
+      });
+  }, [getCurrentUserDetails]);
+
+  /**
    * Handle reconnecting to an active session
    */
   const handleReconnect = () => {
@@ -95,13 +105,15 @@ export default function UserPage() {
         <Grid gutter="md" align="center">
           <DifficultyCards />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
-            {inSession ? (
-              <Button fullWidth onClick={handleReconnect}>
-                Reconnect
-              </Button>
-            ) : (
-              <QueueModal />
-            )}
+            {isAdmin && <Button 
+              color="#dfdfdf" 
+              style={{ marginBottom: "0.5rem" }} 
+              fullWidth 
+              onClick={() => navigation("/questions")}
+            >
+              Edit Questions
+            </Button>}
+            {inSession ? <Button color="orange" fullWidth onClick={handleReconnect}>Reconnect</Button> : <QueueModal />}
           </Grid.Col>
         </Grid>
       </Grid.Col>
