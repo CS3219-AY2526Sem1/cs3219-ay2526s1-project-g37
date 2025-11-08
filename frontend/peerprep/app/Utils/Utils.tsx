@@ -74,5 +74,5 @@ export const isLessThanOneMinuteOld = (raw: string | number | null) => {
 
   if (Number.isNaN(created.getTime())) return false;
   const diffMs = Date.now() - created.getTime();
-  return diffMs >= 0 && diffMs < 1_000;
+  return diffMs >= 0 && diffMs < 60_000;
 };

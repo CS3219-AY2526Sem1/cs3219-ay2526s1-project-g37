@@ -1,9 +1,6 @@
 import { Button } from '@mantine/core';
 import classes from './TestCase.module.css';
 import { useRef, useEffect, useState } from 'react';
-import { useQuestionService } from '~/Services/QuestionService';
-import { useCollabService } from '~/Services/CollabService';
-import { useAuth } from '~/Context/AuthContext';
 
 /**
  * TestCaseBar component for displaying and selecting test cases
@@ -12,44 +9,14 @@ import { useAuth } from '~/Context/AuthContext';
 export default function TestCaseBar() {
   const [selectedCase, setSelectedCase] = useState<number | null>(null);
   const TestCases = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // Example test case numbers
-  const { insertAttempt } = useQuestionService();
-  const { getSessionQuestion, checkExistingSession, getSessionMetadata } =
-    useCollabService();
-  const { userId, tokenId } = useAuth();
-  const [isRunning, setIsRunning] = useState(false);
-  const [submittedSolution, setSubmittedSolution] = useState<String>('Test');
 
-  // To update attempt history
-  async function handleRun() {
-    // try {
-    //   setIsRunning(true);
-
-    //   const session = await checkExistingSession(userId);
-    //   if (!session?.session_id) {
-    //     throw new Error('Failed to retrieve question details');
-    //   }
-
-    //   const question = await getSessionQuestion(session.session_id);
-    //   if (!question?.id) {
-    //     throw new Error('Failed to retrieve question details');
-    //   }
-
-    //   const metadata = await getSessionMetadata(session.session_id, userId);
-
-    //   const response = await insertAttempt(
-    //     userId,
-    //     question.id,
-    //     session.session_id,
-    //     question.language,
-    //     metadata.collaborator_id,
-    //     submittedSolution
-    //   );
-    // } catch (error) {
-    //   console.error('Error running code:', error);
-    // } finally {
-    //   setIsRunning(false);
-    // }
-  }
+  /**
+   * Handle Run button click
+   */
+  const handleRun = () => {
+    console.log(`Running test case ${selectedCase}`);
+    // Add logic to run the selected test case
+  };
 
   //  container scroll when mouse wheel scrolls
   const containerRef = useRef<HTMLDivElement>(null);

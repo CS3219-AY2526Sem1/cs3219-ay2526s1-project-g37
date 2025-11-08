@@ -21,10 +21,7 @@ export default function EndSessionModal({ onAbandonSession }: { onAbandonSession
 
   return (
     <>
-      <Modal opened={opened} onClose={close} centered>
-        <Text size="xl" fw={700}>
-          End Session
-        </Text>
+      <Modal opened={opened} onClose={close} centered title="Abandon Session">
         <Text mt={10}>
           This session has been less than 1 minute old. Are you sure you want to end this session? Session will not be saved.
         </Text>
@@ -32,6 +29,7 @@ export default function EndSessionModal({ onAbandonSession }: { onAbandonSession
           <Button
             color="red"
             onClick={handleEndSession}
+            c="white"
           >
             Abandon Session
           </Button>
@@ -40,7 +38,7 @@ export default function EndSessionModal({ onAbandonSession }: { onAbandonSession
           </Button>
         </Group>
       </Modal>
-      <Button color="red" onClick={open}>Abandon Session</Button>
+      <Button color="red" onClick={open} c="white">Abandon Session</Button>
     </>
   );
 }

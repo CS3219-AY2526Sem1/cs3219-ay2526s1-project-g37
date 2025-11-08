@@ -233,7 +233,15 @@ def get_attempt_by_id(attempt_id: str):
         row = cur.fetchone()
         if not row:
             return None
-        return row
+        return {
+            "id": row[0],
+            "user_id": row[1],
+            "question_id": row[2],
+            "collab_id": row[3],
+            "language": row[4],
+            "attempt_timestamp": row[5],
+            "submitted_solution": row[6]
+        }
 
 def get_random_question_by_difficulty_and_topic(difficulty: str, topic: str):
     """

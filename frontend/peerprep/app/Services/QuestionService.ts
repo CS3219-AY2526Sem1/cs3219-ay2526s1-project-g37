@@ -312,6 +312,20 @@ export function useQuestionService() {
     return response.json();
   }
 
+  async function getAttempt(submissionId: string) {
+    const response = await fetch(`${API_BASE_URL}/questions/attempt/${submissionId}`, {
+      headers: {
+        Authorization: `Bearer ${tokenId}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch attempt');
+    }
+
+    return response.json();
+  }
+
   return {
     addQuestion,
     getQuestion,
@@ -324,5 +338,6 @@ export function useQuestionService() {
     deleteQuestion,
     getQuestionsListByUser,
     insertAttempt,
+    getAttempt,
   };
 }

@@ -8,7 +8,7 @@ import { CollabProvider } from "~/Context/CollabProvider";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../Context/AuthContext";
-import { useQuestionService, type GetQuestion, type Question } from "~/Services/QuestionService";
+import { useQuestionService, type GetQuestion } from "~/Services/QuestionService";
 import HtmlRender from "~/Components/HtmlRender/HtmlRender";
 import {
   useCollabService,
@@ -221,7 +221,6 @@ export default function CollabPage() {
         <Text ta={"center"}>Verifying session...</Text>
       ) : (
         <CollabProvider sessionId={sessionId} collabRef={collabRef}>
-          <button onClick={getEditorString}>test</button>
           <Grid>
             <Grid.Col span={{ base: 12 }}>
               <SessionControlBar

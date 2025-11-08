@@ -8,6 +8,7 @@ import {
   Group,
 } from '@mantine/core';
 import classes from './Table.module.css';
+import { useNavigate } from 'react-router';
 
 /**
  * Interview History type definition
@@ -20,6 +21,7 @@ export type InterviewHistory = {
   topic: string;
   language: string;
   question_id: string;
+  submitted_solution?: string;
 };
 
 interface HistoryTableProps {
@@ -38,6 +40,11 @@ export default function HistoryTable({
   totalPages,
   onPageChange,
 }: HistoryTableProps) {
+  const navigate = useNavigate();
+  const viewSubmission = (id: string) => {
+    navigate(`/user/submissions/${id}`);
+  };
+
   const rows = data.map((row) => (
     <Table.Tr key={row.id}>
       <Table.Td>{row.question}</Table.Td>
@@ -46,7 +53,7 @@ export default function HistoryTable({
       <Table.Td ta="right">{row.topic}</Table.Td>
       <Table.Td ta="right">{row.language}</Table.Td>
       <Table.Td ta="right" style={{ width: 100 }}>
-        <Button>View</Button>
+        <Button onClick={() => viewSubmission(row.id)}>View</Button>
       </Table.Td>
     </Table.Tr>
   ));
