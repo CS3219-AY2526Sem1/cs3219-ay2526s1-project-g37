@@ -1,4 +1,4 @@
-import { Grid, Card, Text, Badge } from "@mantine/core";
+import { Grid, Card, Text } from "@mantine/core";
 import { CODE_EDITOR_LANGUAGES, COLLABCARDHEIGHT, COLLAB_DURATION_S } from "~/Constants/Constants";
 import SessionControlBar from "../Components/SessionControlBar/SessionControlBar";
 import TestCase from "../Components/TestCase/TestCase";
