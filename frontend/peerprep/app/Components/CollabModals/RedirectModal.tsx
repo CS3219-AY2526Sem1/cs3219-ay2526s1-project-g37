@@ -6,7 +6,6 @@ const TIMER_SECS = 3;
 
 export default function RedirectModal(props: { opened: boolean, onRedirect: () => void }) {
     const [redirectCountdown, setRedirectCountdown] = useState(TIMER_SECS);
-    const navigate = useNavigate();
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
@@ -18,7 +17,7 @@ export default function RedirectModal(props: { opened: boolean, onRedirect: () =
                 if (prev <= 1) {
                     clearInterval(timer);
                     props.onRedirect();
-                    // Redirect to the match page
+                    // Redirect to user page
                 }
                 return prev - 1;
                 });
@@ -28,7 +27,7 @@ export default function RedirectModal(props: { opened: boolean, onRedirect: () =
                 clearInterval(timer);
             };
         };
-    }, [props.opened, navigate]);
+    }, [props.opened, props.onRedirect]);
 
     return (
     <Modal opened={props.opened} onClose={() => {}} centered>
