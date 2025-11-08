@@ -10,7 +10,7 @@ import { useNavigate } from "react-router";
  */
 export default function EndSessionModal({ onEndSession }: { onEndSession: () => void }) {
   const [opened, { open, close }] = useDisclosure(false);
-  const [redirectOpened, { open: redirectOpen, close: redirectClose }] = useDisclosure(false);
+  const [redirectOpened, { open: redirectOpen }] = useDisclosure(false);
   const navigate = useNavigate();
 
   /**

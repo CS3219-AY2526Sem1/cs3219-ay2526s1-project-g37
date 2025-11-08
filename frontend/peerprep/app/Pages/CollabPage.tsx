@@ -6,7 +6,7 @@ import { CodeEditor } from "../Components/CodeEditor/CodeEditor";
 import { useEffect, useRef, useState } from "react";
 import { CollabProvider } from "~/Context/CollabProvider";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { useParams, useNavigate, redirect } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../Context/AuthContext";
 import type { Question } from "~/Services/QuestionService";
 import HtmlRender from "~/Components/HtmlRender/HtmlRender";

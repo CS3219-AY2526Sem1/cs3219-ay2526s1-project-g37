@@ -5,8 +5,8 @@ import { useNavigate } from "react-router";
 const TIMER_SECS = 3;
 
 export default function RedirectModal(props: { opened: boolean, onRedirect: () => void }) {
-    let [redirectCountdown, setRedirectCountdown] = useState(TIMER_SECS);
-    let navigate = useNavigate();
+    const [redirectCountdown, setRedirectCountdown] = useState(TIMER_SECS);
+    const navigate = useNavigate();
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
