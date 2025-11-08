@@ -24,7 +24,8 @@ export default function UserPage() {
   const { getSessionByUser } = useCollabService();
   const [inSession, setInSession] = useState(false);
   const [userSessionId, setUserSessionId] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(true);
+
+  const [isAdmin, setIsAdmin] = useState(false);
   const { getCurrentUserDetails } = useUserService();
 
   const [data, ] = useState<InterviewHistory[]>([
@@ -51,19 +52,19 @@ export default function UserPage() {
     });
   }, []);
 
-  /***
+  /**
    * Effect to fetch current user details and determine admin status on component mount.
    */
   useEffect(() => {
     getCurrentUserDetails()
       .then((userData: UserDetails) => {
-        setIsAdmin(userData.role === 1)
+        setIsAdmin(userData.role === 1);
       })
       .catch((error: Error) => {
         console.error("Error fetching user details:", error);
         setIsAdmin(false);
       });
-  }, []);
+  }, [getCurrentUserDetails]);
 
   /**
    * Handle reconnecting to an active session

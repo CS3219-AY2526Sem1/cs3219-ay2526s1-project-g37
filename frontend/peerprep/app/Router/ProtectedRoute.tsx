@@ -27,7 +27,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     if (userLoggedIn) {
       getCurrentUserDetails()
         .then((userData: UserDetails) => {
-          setIsAdmin(userData.role === 1)
+          setIsAdmin(userData.role === 1);
         })
         .catch((error) => {
           console.error("Error fetching user details:", error);
