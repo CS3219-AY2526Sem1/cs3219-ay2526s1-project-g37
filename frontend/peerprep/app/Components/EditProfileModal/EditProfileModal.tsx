@@ -12,7 +12,7 @@ export default function EditProfileModal(props: { displayName: string | null }) 
 
   const form = useForm({
     initialValues: {
-      username: username || "",
+      username: username,
       password: "",
       confirmPassword: "",
     },
@@ -21,7 +21,7 @@ export default function EditProfileModal(props: { displayName: string | null }) 
       username: (value) =>
         value.length < 3 ? "Username must be at least 3 characters" : null,
       password: (value) =>
-        // if password is not empty and does not meets length requirement
+        // if password is not empty and does not meet length requirement
         value.length !== 0 && value.length < 6 ? "Password must be at least 6 characters" : null,
       confirmPassword: (value, values) =>
         value !== values.password ? "Passwords do not match" : null,
@@ -37,7 +37,7 @@ export default function EditProfileModal(props: { displayName: string | null }) 
           message: "Username updated successfully!",
           color: "green",
           withBorder: true,
-        })
+        });
         setUsername(values.username);
       }  
       if (values.password) {
@@ -47,16 +47,13 @@ export default function EditProfileModal(props: { displayName: string | null }) 
           message: "Password updated successfully!",
           color: "green",
           withBorder: true,
-        })
+        });
       }
 
       close(); // Close modal on success
       form.reset(); // Reset form
     } catch (error) {
       console.error("Failed to update profile:", error);
-      form.setErrors({
-        username: "Failed to update username",
-      });
     }
   };
 
@@ -65,7 +62,7 @@ export default function EditProfileModal(props: { displayName: string | null }) 
     if (opened) {
       form.setFieldValue("username", username);
     }
-  }, [opened]); 
+  }, [opened, form, username]); 
 
   return (
     <>
