@@ -7,6 +7,7 @@ import type { InterviewHistory } from "~/Components/Tables/HistoryTable";
 import { CARDHEIGHT, CODE_EDITOR_LANGUAGES } from "~/Constants/Constants";
 import HtmlRender from "~/Components/HtmlRender/HtmlRender";
 import { Editor } from "@monaco-editor/react";
+import CustomBadge from "~/Components/LanguageBadge/LanguageBadge";
 
 export default function ViewSubmissionPage() {
   const params = useParams();
@@ -50,8 +51,8 @@ export default function ViewSubmissionPage() {
       {loading ? (
         <Loader />
       ) : (
-        <Grid>
-          <Grid.Col span={{ base: 12, md: 6 }}>
+        <Grid gutter="md" justify="center" align="flex-start">
+          <Grid.Col span={{ base: 12, md: 5 }}>
             <Card style={{ height: CARDHEIGHT, overflowY: "auto" }} c={"white"}>
               <Grid gutter="sm">
                 <Grid.Col span={12}>
@@ -74,32 +75,45 @@ export default function ViewSubmissionPage() {
               </Grid>
             </Card>
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6 }} style={{ height: CARDHEIGHT }}>
+          <Grid.Col span={{ base: 12, md: 5 }} style={{ height: CARDHEIGHT }}>
             <Card style={{ height: CARDHEIGHT, overflowY: "auto" }} c={"white"}>
-              <Grid gutter="sm">
-                <Grid.Col span={12}>
-                    <Text fw={700} size="xl">Submitted Solution</Text>
-                </Grid.Col>
-                <Grid.Col span={12}>
-                    {submission ? (
-                  <div style={{ height: "calc(100vh - 175px)", minHeight: "500px" }}>
-                    <Editor
-                    language={CODE_EDITOR_LANGUAGES[submission.language]}
-                    theme="vs-dark"
-                    width="100%"
-                    height="100%"
-                    value={submission.submitted_solution}
-                    options={{
-                      readOnly: true,
-                      domReadOnly: true,
-                    }}
+              {submission ? (
+                <Grid gutter="sm">
+                  <Grid.Col span={12}>
+                    <Text fw={700} size="xl">
+                      Submitted Solution
+                    </Text>
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <CustomBadge
+                      label="Language"
+                      value={CODE_EDITOR_LANGUAGES[submission.language]}
                     />
-                  </div>
-                  ) : (
-                  <Text>Loading...</Text>
-                  )}
-                </Grid.Col>
-              </Grid>
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <div
+                      style={{
+                        height: "calc(100vh - 220px)",
+                        minHeight: "500px",
+                      }}
+                    >
+                      <Editor
+                        language={CODE_EDITOR_LANGUAGES[submission.language]}
+                        theme="vs-dark"
+                        width="100%"
+                        height="100%"
+                        value={submission.submitted_solution}
+                        options={{
+                          readOnly: true,
+                          domReadOnly: true,
+                        }}
+                      />
+                    </div>
+                  </Grid.Col>
+                </Grid>
+              ) : (
+                <Text>Loading...</Text>
+              )}
             </Card>
           </Grid.Col>
         </Grid>
