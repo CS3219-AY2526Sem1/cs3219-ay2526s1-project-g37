@@ -3,7 +3,7 @@ import {
   Button
 } from "@mantine/core";
 
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 import QuestionsTable from "~/Components/Tables/QuestionsTable";
 import type {QuestionHistory} from "../Components/Tables/QuestionsTable";
@@ -14,6 +14,7 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { useQuestionService } from "~/Services/QuestionService";
 import { notifications } from "@mantine/notifications";
 import DifficultyCards from "~/Components/DifficultyCards/DifficultyCards";
+import { PAGE_SIZE } from "~/Constants/Constants";
 
 export function meta() {
   return [
@@ -21,7 +22,6 @@ export function meta() {
     { name: "description", content: "Welcome to PeerPrep!" },
   ];
 }
-const PAGE_SIZE = 20;
 
 /**
  * Questions Page component
@@ -54,7 +54,7 @@ export default function QuestionsPage() {
     // Fetch the questions list from the API
     const fetchQuestionsList = async () => {
       try {
-        const data = await getQuestionsList(currentPage, debouncedSearchQuery);
+        const data = await getQuestionsList(currentPage, PAGE_SIZE, debouncedSearchQuery);
         const questionsList: QuestionHistory[] = data.questions;
         console.log("Fetched questions:", questionsList);
         setData(questionsList);
@@ -104,9 +104,13 @@ export default function QuestionsPage() {
         <Grid gutter="md" align="center">
           <DifficultyCards />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
-            <Link to="/questions/add">
-              <Button fullWidth>Add Question</Button>
-            </Link>
+            <Button 
+              color="lightgrey" 
+              fullWidth 
+              style={{ marginBottom: "0.5rem" }} 
+              onClick={() => navigation("/user")}
+            > Back to Homepage</Button>
+            <Button fullWidth onClick={() => navigation("/questions/add")}>Add Question</Button>
           </Grid.Col>
         </Grid>
       </Grid.Col>

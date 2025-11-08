@@ -1,5 +1,7 @@
 import { Modal, Button, Text, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import RedirectModal from "./RedirectModal";
+import { useNavigate } from "react-router";
 
 /**
  * End Session Modal component
@@ -8,14 +10,15 @@ import { useDisclosure } from "@mantine/hooks";
  */
 export default function EndSessionModal({ onEndSession }: { onEndSession: () => void }) {
   const [opened, { open, close }] = useDisclosure(false);
+  const [redirectOpened, { open: redirectOpen }] = useDisclosure(false);
+  const navigate = useNavigate();
 
   /**
    * Handle end session action
    */
   function handleEndSession() {
-    if (onEndSession) {
-      onEndSession();
-    }
+    onEndSession();
+    redirectOpen();
     close();
   }
 
@@ -40,6 +43,7 @@ export default function EndSessionModal({ onEndSession }: { onEndSession: () => 
           </Button>
         </Group>
       </Modal>
+      <RedirectModal opened={redirectOpened} onRedirect={() => navigate("/user", { replace: true })} />
       <Button color="red" onClick={open}>End Session</Button>
     </>
   );
