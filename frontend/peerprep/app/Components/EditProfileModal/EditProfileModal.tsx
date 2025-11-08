@@ -54,6 +54,12 @@ export default function EditProfileModal(props: { displayName: string | null }) 
       form.reset(); // Reset form
     } catch (error) {
       console.error("Failed to update profile:", error);
+      notifications.show({
+        title: "Error",
+        message: `Failed to update profile: ${error}`,
+        color: "red",
+        withBorder: true,
+      });
     }
   };
 
