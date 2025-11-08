@@ -1,7 +1,7 @@
 // With reference from official Mantine documentation
 // https://ui.mantine.dev/category/headers/
 
-import { Button, Container, Group, Text } from "@mantine/core";
+import { Button, Container, Group } from "@mantine/core";
 import { useNavigate } from "react-router";
 import classes from "./Header.module.css";
 import logo from "../../assets/images/logo.svg";
