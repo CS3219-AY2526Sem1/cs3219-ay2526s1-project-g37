@@ -24,7 +24,9 @@ export default function RedirectModal(props: { opened: boolean, onRedirect: () =
             }, 1000);
 
             return () => {
-                clearInterval(timer);
+                if (timer) {
+                    clearInterval(timer);
+                }
             };
         };
     }, [props.opened, props.onRedirect]);
