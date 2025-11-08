@@ -9,6 +9,7 @@
       context: .
       dockerfile: Dockerfile
     container_name: question-service-prod
+    image: question-service:latest
     ports:
       - "${QUESTIONS_PORT}:${QUESTIONS_PORT}" 
     environment:
@@ -23,9 +24,7 @@
       - S3_BUCKET_NAME=${S3_BUCKET_NAME}
       - AWS_REGION=${AWS_REGION}
     command: uvicorn app.main:app --host 0.0.0.0 --port ${QUESTIONS_PORT}
-    depends_on:
-      postgres-service:
-        condition: service_healthy
+
     healthcheck:
       test: ["CMD", "curl", "-f", "-s", "http://localhost:${QUESTIONS_PORT}/docs"]
       interval: 10s

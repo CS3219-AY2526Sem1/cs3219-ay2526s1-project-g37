@@ -12,7 +12,7 @@ import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { useSearchParams } from "react-router";
 import { stringToPaletteColor } from "~/Utils/Utils";
-import { ENTRY_POINTS } from "~/constants/constants";
+import { ENTRY_POINTS } from "~/Constants/Constants";
 
 /**
  * Collab context definition

@@ -3,7 +3,7 @@ services:
   postgres-service-dev:
     image: postgres:latest
     profiles: ["dev"]
-    container_name: postgres-service-dev
+    container_name: user-postgres-service-dev
     restart: always
     ports:
       - "${USER_DB_PORT}:5432"
@@ -39,3 +39,20 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${USER_DB_NAME}
       - POSTGRES_PORT=5432
+
+  user-service-prod:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: user-service:latest
+    container_name: user-service-prod
+    ports:
+      - "${USER_PORT}:8003"
+    environment:
+      - USER_PORT=8003
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${USER_DB_NAME}
+      - POSTGRES_PORT=5432    

@@ -8,6 +8,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: collaboration-service:latest
     container_name: collaboration-service-prod
     ports:
       - "8000:8000"
