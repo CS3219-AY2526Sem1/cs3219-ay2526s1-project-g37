@@ -291,7 +291,7 @@ export default function CollabPage() {
               </div>
             </Grid.Col>
           </Grid>
-          <RedirectModal opened={redirectOpened} onRedirect={() => navigate("/user", { replace: true })} clientOnly={true} />
+          <RedirectModal opened={redirectOpened} onRedirect={() => navigate("/user", { replace: true })} />
         </CollabProvider>
       )}
     </>
