@@ -82,10 +82,7 @@ export default function EditProfileModal(props: { displayName: string | null }) 
         <Text style={{ color: "white" }}>{username || "Edit Profile"}</Text>
       </Button>
       
-      <Modal opened={opened} onClose={close} centered>
-        <Text size="xl" fw={700} mb={15}>
-          Edit Profile
-        </Text>
+      <Modal opened={opened} onClose={close} centered title="Edit Profile">
         <Box component="form" onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
             label="Username"
