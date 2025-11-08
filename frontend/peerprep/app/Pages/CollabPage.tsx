@@ -16,6 +16,8 @@ import {
 } from "~/Services/CollabService";
 import { useUserService  } from "~/Services/UserService";
 import CollabDisconnectModal from "~/Components/CollabDisconnectModal/CollabDisconnectModal";
+import RedirectModal from "~/Components/CollabModals/RedirectModal";
+import { useDisclosure } from "@mantine/hooks";
 
 
 /**
@@ -45,6 +47,8 @@ export default function CollabPage() {
   const [ isConnected, setIsConnected ] = useState<boolean>(false);
   const [ lastConnectedTime, setLastConnectedTime ] = useState<Date | null>(null);
   const [ isDisconnectModalOpen, setIsDisconnectModalOpen ] = useState(false);
+
+  const [ redirectOpened, { open: redirectOpen } ] = useDisclosure(false);
 
   // check user belongs to sessionId
   useEffect(() => {
@@ -108,6 +112,7 @@ export default function CollabPage() {
       const jsonData = JSON.parse(lastMessage.data);
       if (jsonData.type === "collaborator_ended") {
         console.log("py-collab: Collaborator ended the session.");
+        redirectOpen();
         handleEndSession();
       } else if (jsonData.type === "collaborator_connect") {
         setIsConnected(true);
@@ -177,8 +182,8 @@ export default function CollabPage() {
       collabRef.current.destroySession();
     }
 
+
     sessionStorage.setItem("sessionEnded", "true");
-    navigate("/user", { replace: true });
   };
 
   if (!sessionId) {
@@ -286,6 +291,7 @@ export default function CollabPage() {
               </div>
             </Grid.Col>
           </Grid>
+          <RedirectModal opened={redirectOpened} onRedirect={() => navigate("/user", { replace: true })} />
         </CollabProvider>
       )}
     </>
