@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useCollabService } from "~/Services/CollabService";
 import { useNavigate } from "react-router";
 import DifficultyCards from "~/Components/DifficultyCards/DifficultyCards";
+import { useUserService, type UserDetails } from "~/Services/UserService";
 
 export function meta() {
     return [{ title: "PeerPrep - Homepage" }, { name: "description", content: "Welcome to PeerPrep!" }];
@@ -23,6 +24,8 @@ export default function UserPage() {
   const { getSessionByUser } = useCollabService();
   const [inSession, setInSession] = useState(false);
   const [userSessionId, setUserSessionId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(true);
+  const { getCurrentUserDetails } = useUserService();
 
   const [data, ] = useState<InterviewHistory[]>([
     {
@@ -48,6 +51,20 @@ export default function UserPage() {
     });
   }, []);
 
+  /***
+   * Effect to fetch current user details and determine admin status on component mount.
+   */
+  useEffect(() => {
+    getCurrentUserDetails()
+      .then((userData: UserDetails) => {
+        setIsAdmin(userData.role === 1)
+      })
+      .catch((error: Error) => {
+        console.error("Error fetching user details:", error);
+        setIsAdmin(false);
+      });
+  }, []);
+
   /**
    * Handle reconnecting to an active session
    */
@@ -63,6 +80,7 @@ export default function UserPage() {
         <Grid gutter="md" align="center">
           <DifficultyCards />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
+            {isAdmin && <Button color="lightgrey" style={{ marginBottom: "0.5rem" }} fullWidth onClick={() => navigation("/questions")}>Edit Questions</Button>}
             {inSession ? <Button color="orange" fullWidth onClick={handleReconnect}>Reconnect</Button> : <QueueModal />}
           </Grid.Col>
         </Grid>
