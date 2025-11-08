@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "~/Context/AuthContext";
+import { useUserService, type UserDetails } from "~/Services/UserService";
 
 export type AccessType = "USER" | "ADMIN";
 
@@ -18,8 +19,22 @@ interface ProtectedRouteProps {
  */
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { userLoggedIn } = useAuth();
-  const [isAdmin] = useState(true);
+  const { getCurrentUserDetails } = useUserService();
+  const [isAdmin, setIsAdmin] = useState(true);
   const location = useLocation();
+
+  useEffect(() => {
+    if (userLoggedIn) {
+      getCurrentUserDetails()
+        .then((userData: UserDetails) => {
+          setIsAdmin(userData.role === 1)
+        })
+        .catch((error) => {
+          console.error("Error fetching user details:", error);
+          setIsAdmin(false);
+        });
+    }
+  }, [userLoggedIn]);
 
   // Check if route requires admin access or authentication
   const adminLinks = ["/questions"].some((path) =>

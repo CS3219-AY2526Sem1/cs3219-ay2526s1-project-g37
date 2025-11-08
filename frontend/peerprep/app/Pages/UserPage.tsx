@@ -96,7 +96,7 @@ export default function UserPage() {
           <DifficultyCards />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
             {inSession ? (
-              <Button fullWidth onClick={handleReconnect}>
+              <Button color="orange" fullWidth onClick={handleReconnect}>
                 Reconnect
               </Button>
             ) : (
