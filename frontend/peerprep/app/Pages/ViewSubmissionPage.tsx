@@ -41,7 +41,7 @@ export default function ViewSubmissionPage() {
           });
         });
     }
-  }, [id, getAttempt, getQuestion, navigate]);
+  }, []);
 
   const handleBack = () => {
     navigate("/user", { replace: true });

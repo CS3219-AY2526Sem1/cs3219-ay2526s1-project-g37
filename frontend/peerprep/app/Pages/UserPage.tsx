@@ -58,7 +58,7 @@ export default function UserPage() {
       }
     };
     fetchQuestionsListByUser();
-  }, [currentPage, tokenId, getQuestionsListByUser, userId]);
+  }, [currentPage, tokenId]);
 
   /**
    * Effect to check if user is in an active session on component mount.
