@@ -5,6 +5,7 @@ import { doCreateUserWithEmailAndPassword, doUpdateUserProfile } from "../Fireba
 import { useAuth } from "../Context/AuthContext";
 import logo from "../assets/images/logo.svg";
 import { useState } from "react";
+import { FirebaseError } from "@firebase/app";
 
 export function meta() {
     return [{ title: "PeerPrep - Signup" }, { name: "description", content: "Welcome to PeerPrep!" }];
@@ -13,7 +14,7 @@ export function meta() {
 export default function Signup() {
     const { userLoggedIn } = useAuth();
     const [isRegistering, setIsRegistering] = useState(false);
-    const [setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const form = useForm({
         initialValues: {
@@ -34,9 +35,17 @@ export default function Signup() {
             try {
                 await doCreateUserWithEmailAndPassword(values.email, values.password, values.username);
                 await doUpdateUserProfile(values.username);
-            } catch (error) {
+            } catch (error: unknown) {
                 setIsRegistering(false);
-                setError(error instanceof Error ? error.message : String(error));
+                if (error instanceof FirebaseError) {
+                    if (error.code === "auth/email-already-exists") {
+                        setError("Email already exists, Please try logging in.");
+                    } else {
+                        setError(error.message);
+                    }
+                } else {
+                    setError(String(error));
+                }
             }
         }
     };
@@ -78,6 +87,11 @@ export default function Signup() {
                     >
                         Sign Up
                     </Button>
+                    {error && (
+                        <Text color="red" size="sm" mt="md" style={{ textAlign: "center" }}>
+                            {error}
+                        </Text>
+                    )}
                 </form>
                 <Divider my="xs" />
                 <Group justify="center">
