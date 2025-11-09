@@ -12,6 +12,10 @@ export default function EditProfileModal(props: { displayName: string | null }) 
     const [username, setUsername] = useState(props.displayName || "");
     const { updateUsername } = useUserService();
 
+    useEffect(() => {
+        setUsername(props.displayName || "");
+    }, [props.displayName]);
+
     const form = useForm({
         initialValues: {
             username: username,

@@ -3,11 +3,12 @@
 
 import { Button, Container, Group } from "@mantine/core";
 import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 import classes from "./Header.module.css";
 import logo from "../../assets/images/logo.svg";
 import { doSignOut } from "~/Firebase/helper";
 import EditProfileModal from "../EditProfileModal/EditProfileModal";
-import { useAuth } from "~/Context/AuthContext";
+import { useUserService } from "~/Services/UserService";
 
 /**
  * Header component
@@ -15,8 +16,26 @@ import { useAuth } from "~/Context/AuthContext";
  */
 export default function Header() {
   const navigate = useNavigate();
-  const { displayName } = useAuth();
+  const { getCurrentUserDetails } = useUserService();
+  const [username, setUsername] = useState<string | null>(null);
 
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const userDetails = await getCurrentUserDetails();
+        console.log("Fetched user details:", userDetails);
+        setUsername(userDetails.username);
+      } catch (error) {
+        console.error("Error fetching username:", error);
+      }
+    };
+    
+    fetchUsername();
+  }, []);
+
+  useEffect(() => {
+    console.log("Header username updated:", username);
+  }, [username]);
   /**
    * Handle sign out action and navigate to login page
    */
@@ -44,7 +63,9 @@ export default function Header() {
           />
         </Group>
         <Group gap={5}>
-          <EditProfileModal displayName={displayName} />
+          <EditProfileModal 
+            displayName={username} 
+          />
           <Button 
             type="button"
             style={{
