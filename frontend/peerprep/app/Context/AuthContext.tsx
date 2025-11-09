@@ -12,7 +12,6 @@ interface AuthContextType {
     isEmailUser: boolean;
     isGoogleUser: boolean;
     currentUser: User | null;
-    displayName: string | null;
     userId: string | null;
     tokenId: string | null;
     setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
@@ -26,7 +25,6 @@ const AuthContext = React.createContext<AuthContextType>({
     isEmailUser: false,
     isGoogleUser: false,
     currentUser: null,
-    displayName: null,
     userId: null,
     tokenId: null,
     setCurrentUser: () => {},
@@ -51,10 +49,8 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
     const [userId, setUserId] = useState<string | null>(null);
     const [isEmailUser, setIsEmailUser] = useState(false);
     const [isGoogleUser, setIsGoogleUser] = useState(false);
-    const [displayName, setDisplayName] = useState<string | null>(null);
     const [tokenId, setTokenId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const { getUserDetails } = useUserService();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, initializeUser);
@@ -74,14 +70,6 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
             const token = await user.getIdToken();
             setTokenId(token);
 
-            getUserDetails(user.uid, token)
-              .then((userDetails) => {
-                setDisplayName(userDetails.username);
-              })
-              .catch((error) => {
-                console.error("Error fetching user details:", error);
-              }); 
-
             // check if provider is email and password login
             const isEmail = user.providerData.some((provider: UserInfo) => provider.providerId === "password");
             setIsEmailUser(isEmail);
@@ -95,7 +83,6 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
             setUserLoggedIn(true);
         } else {
             setCurrentUser(null);
-            setDisplayName(null);
             setUserId(null);
             setUserLoggedIn(false);
         }
@@ -108,7 +95,6 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
         isEmailUser,
         isGoogleUser,
         currentUser,
-        displayName,
         userId,
         tokenId,
         setCurrentUser,
