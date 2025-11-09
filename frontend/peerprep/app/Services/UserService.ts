@@ -16,10 +16,12 @@ export type UserDetails = {
 export function useUserService() {
     const { tokenId, userId } = useAuth();
 
-    async function getUserDetails(userId: string) {
+    async function getUserDetails(userId: string, token?: string) {
+        const useToken = token || tokenId;
+
         const response = await fetch(`${API_BASE_URL}/${userId}`, {
             headers: {
-                Authorization: `Bearer ${tokenId}`,
+                Authorization: `Bearer ${useToken}`,
             },
         });
 

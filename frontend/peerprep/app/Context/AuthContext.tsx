@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { auth } from "../Firebase/init";
 import { GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 import type { User, UserInfo } from "firebase/auth";
+import { useUserService } from "../Services/UserService";
 
 /**
  * Authentication context type definition
@@ -53,6 +54,7 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
     const [displayName, setDisplayName] = useState<string | null>(null);
     const [tokenId, setTokenId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const { getUserDetails } = useUserService();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, initializeUser);
@@ -66,11 +68,19 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
     async function initializeUser(user: User | null) {
         if (user) {
             setCurrentUser(user);
-            setDisplayName(user.displayName);
+
             setUserId(user.uid);
 
             const token = await user.getIdToken();
             setTokenId(token);
+
+            getUserDetails(user.uid, token)
+              .then((userDetails) => {
+                setDisplayName(userDetails.username);
+              })
+              .catch((error) => {
+                console.error("Error fetching user details:", error);
+              }); 
 
             // check if provider is email and password login
             const isEmail = user.providerData.some((provider: UserInfo) => provider.providerId === "password");

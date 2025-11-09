@@ -5,9 +5,9 @@ import { Button, Container, Group } from "@mantine/core";
 import { useNavigate } from "react-router";
 import classes from "./Header.module.css";
 import logo from "../../assets/images/logo.svg";
-import { useAuth } from "../../Context/AuthContext";
 import { doSignOut } from "~/Firebase/helper";
 import EditProfileModal from "../EditProfileModal/EditProfileModal";
+import { useAuth } from "~/Context/AuthContext";
 
 /**
  * Header component
