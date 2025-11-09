@@ -125,6 +125,7 @@ export function CollabProvider({
     collabRef,
     () => ({
       destroySession: clearWebsocketSession,
+      ydoc: ydoc,
     }),
     [clearWebsocketSession]
   );

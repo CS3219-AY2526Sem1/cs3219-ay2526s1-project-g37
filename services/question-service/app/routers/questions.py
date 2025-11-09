@@ -1,6 +1,6 @@
 from typing import Dict
 from fastapi import APIRouter, HTTPException, Query
-from app.models.endpoint_models import QuestionBrief, QuestionRequest, Question, QuestionsList
+from app.models.endpoint_models import QuestionRequest, Question, QuestionsList, AttemptRequest, AttemptList
 from app.models.exceptions import QuestionNotFoundException
 from app.core.crud import (
     create_question,
@@ -11,6 +11,9 @@ from app.core.crud import (
     get_random_question_by_difficulty_and_topic,
     override_question,
     delete_question,
+    get_user_attempted_questions,
+    update_question_attempt,
+    get_attempt_by_id
 )
 
 
@@ -65,6 +68,45 @@ def get_questions_list_endpoint(
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to retrieve questions list")
     return {"questions": questions_list, "total_count": total_count}
+
+@router.get("/history", response_model=AttemptList)
+def get_user_question_history(
+    userId: str,
+    page: int = Query(1, description="Page number", ge=1),
+    size: int = Query(20, description="Number of items per page", ge=1, le=100)
+):
+    """Get a paginated list of questions attempted by a specific user"""
+    try:
+        questions_list, total_count = get_user_attempted_questions(userId, page, size)
+        return {"questions": questions_list, "total_count": total_count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve question history for user {userId}")
+    
+@router.post("/attempt")
+def update_question_attempt_endpoint(payload: AttemptRequest):
+    try:
+        updated_attempt = update_question_attempt(
+            user_id=payload.user_id,
+            question_id=payload.question_id,
+            collab_id=payload.collab_id,
+            language=payload.language,
+            collaborator_id=payload.collaborator_id,
+            submitted_solution=payload.submitted_solution
+        )
+        if not updated_attempt:
+            raise HTTPException(status_code=404, detail="Attempt not found or no fields provided")
+        return{"message": "Question attempt updated successfully", "attempt": updated_attempt}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Failed to update question attempt")
+    
+@router.get("/attempt/{attempt_id}")
+def get_submitted_solution(attempt_id: str):
+    attempt = get_attempt_by_id(attempt_id)
+    if attempt is None:
+        raise HTTPException(status_code=404, detail="Attempt not found")    
+    return attempt
+        
 
 @router.get("/stats", response_model=Dict[str, int])
 def get_questions_stats_endpoint():

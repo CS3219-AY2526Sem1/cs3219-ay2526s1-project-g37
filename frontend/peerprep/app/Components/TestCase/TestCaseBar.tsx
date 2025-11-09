@@ -1,6 +1,6 @@
-import { Button } from "@mantine/core";
-import classes from "./TestCase.module.css";
-import { useRef, useEffect, useState } from "react";
+import { Button } from '@mantine/core';
+import classes from './TestCase.module.css';
+import { useRef, useEffect, useState } from 'react';
 
 /**
  * TestCaseBar component for displaying and selecting test cases
@@ -9,6 +9,14 @@ import { useRef, useEffect, useState } from "react";
 export default function TestCaseBar() {
   const [selectedCase, setSelectedCase] = useState<number | null>(null);
   const TestCases = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // Example test case numbers
+
+  /**
+   * Handle Run button click
+   */
+  const handleRun = () => {
+    console.log(`Running test case ${selectedCase}`);
+    // Add logic to run the selected test case
+  };
 
   //  container scroll when mouse wheel scrolls
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,12 +28,12 @@ export default function TestCaseBar() {
       e.preventDefault();
       container.scrollTo({
         left: container.scrollLeft + e.deltaY,
-        behavior: "smooth",
+        behavior: 'smooth',
       });
     };
-    container.addEventListener("wheel", handleWheel, { passive: false });
+    container.addEventListener('wheel', handleWheel, { passive: false });
     return () => {
-      container.removeEventListener("wheel", handleWheel);
+      container.removeEventListener('wheel', handleWheel);
     };
   }, []);
 
@@ -38,21 +46,25 @@ export default function TestCaseBar() {
               key={testCase}
               size="compact-md"
               classNames={{ root: classes.CaseButton }}
-              c={"white"}
+              c={'white'}
               style={{
                 backgroundColor:
                   selectedCase === testCase
-                    ? "var(--mantine-color-dark-7)"
-                    : "var(--mantine-color-dark-6)",
+                    ? 'var(--mantine-color-dark-7)'
+                    : 'var(--mantine-color-dark-6)',
               }}
               onClick={() => setSelectedCase(testCase)}
             >
-              <span style={{ color: "var(--mantine-color-green-5)" }}>•</span>
+              <span style={{ color: 'var(--mantine-color-green-5)' }}>•</span>
               &nbsp;Case {testCase}
             </Button>
           ))}
         </div>
-        <Button size="compact-md" classNames={{ root: classes.RunButton }}>
+        <Button
+          size="compact-md"
+          classNames={{ root: classes.RunButton }}
+          onClick={handleRun}
+        >
           Run
         </Button>
       </div>

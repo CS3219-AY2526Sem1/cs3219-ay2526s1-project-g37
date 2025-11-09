@@ -86,9 +86,10 @@ class ConnectionManager:
         await collaborator_q.put(msg)
 
     def generate_uuid(self, user1: str, user2: str) -> str:
-        namespace = uuid.NAMESPACE_DNS  
-        seed = ''.join(sorted([user1, user2]))
-        return str(uuid.uuid5(namespace, seed))
+        # namespace = uuid.NAMESPACE_DNS  
+        # seed = ''.join(sorted([user1, user2]))
+        # return str(uuid.uuid5(namespace, seed))
+        return str(uuid.uuid4())
     
     def get_question(self, session_id: str) -> QuestionBase64Images:
         if session_id not in self.questions:
