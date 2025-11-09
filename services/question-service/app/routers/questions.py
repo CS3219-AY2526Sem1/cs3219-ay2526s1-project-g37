@@ -104,7 +104,7 @@ def update_question_attempt_endpoint(payload: AttemptRequest):
 def get_submitted_solution(attempt_id: str):
     attempt = get_attempt_by_id(attempt_id)
     if attempt is None:
-        return None
+        raise HTTPException(status_code=404, detail="Attempt not found")    
     return attempt
         
 
