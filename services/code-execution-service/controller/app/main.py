@@ -164,28 +164,7 @@ async def execute_code(request: ExecutionRequest):
         if pods.items:
             pod_name = pods.items[0].metadata.name
             
-            # Get stdout logs
-            try:
-                stdout = core_v1.read_namespaced_pod_log(name=pod_name, namespace=NAMESPACE)
-            except ApiException as e:
-                logger.error(f"Failed to get stdout logs for {pod_name}: {e}")
-            
-            # Get stderr logs separately
-            try:
-                pod_logs = core_v1.read_namespaced_pod_log(
-                    name=pod_name, 
-                    namespace=NAMESPACE,
-                    container="runner",
-                    follow=False,
-                    _preload_content=False
-                )
-                stderr = pod_logs.read().decode('utf-8')
-                # If there are errors, they would be in the logs
-                # The runner scripts write errors to stderr which get captured in pod logs
-            except ApiException as e:
-                logger.error(f"Failed to get stderr logs for {pod_name}: {e}")
-            
-            # Get pod status to check exit code
+            # Get pod status to check exit code first
             try:
                 pod_status = core_v1.read_namespaced_pod_status(name=pod_name, namespace=NAMESPACE)
                 if pod_status.status.container_statuses:
@@ -193,21 +172,49 @@ async def execute_code(request: ExecutionRequest):
                     if container_status.state.terminated:
                         exit_code = container_status.state.terminated.exit_code
                         logger.info(f"Container exit code: {exit_code}")
-                        
-                        # If exit code is non-zero, the logs contain the error
-                        if exit_code != 0:
-                            stderr = stdout if stdout else "Execution failed with no output"
-                            stdout = ""
-                            
-                            # Provide context based on exit code
-                            if exit_code == 124:
-                                stderr = f"Execution timed out after {actual_timeout} seconds\n{stderr}"
-                            elif exit_code == 137:
-                                stderr = "Execution killed (possibly out of memory or timeout)\n" + stderr
-                            elif exit_code == 1:
-                                stderr = "Runtime error:\n" + stderr
             except ApiException as e:
                 logger.error(f"Failed to get pod status for {pod_name}: {e}")
+            
+            # Get pod logs - runner scripts use markers to separate stdout/stderr
+            try:
+                all_logs = core_v1.read_namespaced_pod_log(
+                    name=pod_name, 
+                    namespace=NAMESPACE,
+                    container="runner"
+                )
+                
+                # Parse marked output from runner scripts
+                # Format: ===STDOUT_START=== ... ===STDOUT_END=== ===STDERR_START=== ... ===STDERR_END===
+                if '===STDOUT_START===' in all_logs and '===STDOUT_END===' in all_logs:
+                    stdout_start = all_logs.find('===STDOUT_START===') + len('===STDOUT_START===')
+                    stdout_end = all_logs.find('===STDOUT_END===')
+                    stdout = all_logs[stdout_start:stdout_end].strip()
+                    
+                if '===STDERR_START===' in all_logs and '===STDERR_END===' in all_logs:
+                    stderr_start = all_logs.find('===STDERR_START===') + len('===STDERR_START===')
+                    stderr_end = all_logs.find('===STDERR_END===')
+                    stderr = all_logs[stderr_start:stderr_end].strip()
+                
+                # Fallback if markers not found (shouldn't happen with updated runners)
+                if not ('===STDOUT_START===' in all_logs):
+                    logger.warning(f"Markers not found in logs, using fallback parsing")
+                    if exit_code == 0:
+                        stdout = all_logs
+                        stderr = ""
+                    else:
+                        stdout = ""
+                        stderr = all_logs if all_logs else "Execution failed with no output"
+                
+                # Add context based on exit code
+                if exit_code == 124 and not stderr:
+                    stderr = f"Execution timed out after {actual_timeout} seconds"
+                elif exit_code == 137 and not stderr:
+                    stderr = "Execution killed (possibly out of memory or timeout)"
+                        
+            except ApiException as e:
+                logger.error(f"Failed to get pod logs for {pod_name}: {e}")
+                if exit_code != 0:
+                    stderr = f"Failed to retrieve execution logs: {str(e)}"
 
         execution_time = time.time() - start_time
 

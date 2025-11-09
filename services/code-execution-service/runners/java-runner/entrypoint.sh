@@ -17,22 +17,37 @@ STDIN_DATA=$(echo "$STDIN_B64" | base64 -d 2>/dev/null || echo "")
 # Write code to file
 echo "$CODE" > /tmp/Solution.java
 
-# Compile and capture errors
-COMPILE_OUTPUT=$(timeout "$TIMEOUT" javac /tmp/Solution.java 2>&1)
+# Compile and capture errors separately
+timeout "$TIMEOUT" javac /tmp/Solution.java > /tmp/compile_stdout.txt 2> /tmp/compile_stderr.txt
 COMPILE_EXIT=$?
 
 if [ $COMPILE_EXIT -ne 0 ]; then
-  echo "$COMPILE_OUTPUT" >&2
+  # Output compilation error with markers
+  echo "===STDOUT_START==="
+  echo ""
+  echo "===STDOUT_END==="
+  echo "===STDERR_START==="
+  cat /tmp/compile_stderr.txt 2>/dev/null || echo "Compilation failed"
+  echo "===STDERR_END==="
   exit 1
 fi
 
 # Execute with timeout (assumes class name is Solution)
 cd /tmp
-echo "$STDIN_DATA" | timeout "$TIMEOUT" java Solution
+echo "$STDIN_DATA" | timeout "$TIMEOUT" java Solution > /tmp/stdout.txt 2> /tmp/stderr.txt
 EXIT_CODE=$?
 
+# Output with markers so the controller can separate them
+echo "===STDOUT_START==="
+cat /tmp/stdout.txt 2>/dev/null || echo ""
+echo "===STDOUT_END==="
+
+echo "===STDERR_START==="
 if [ $EXIT_CODE -eq 124 ]; then
-  echo "Execution timed out" >&2
+  echo "Execution timed out"
+elif [ $EXIT_CODE -ne 0 ]; then
+  cat /tmp/stderr.txt 2>/dev/null || echo ""
 fi
+echo "===STDERR_END==="
 
 exit $EXIT_CODE

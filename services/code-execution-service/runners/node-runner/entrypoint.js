@@ -30,23 +30,33 @@ fs.writeFileSync(tmpFile, code);
 
 // Execute with timeout
 const child = exec(`node ${tmpFile}`, { timeout }, (error, stdout, stderr) => {
+  // Output with markers so the controller can separate them
+  console.log('===STDOUT_START===');
+  if (stdout) {
+    process.stdout.write(stdout);
+  }
+  console.log('===STDOUT_END===');
+  
+  console.log('===STDERR_START===');
   if (error) {
     if (error.killed) {
-      console.error('Execution timed out');
+      console.log('Execution timed out');
       process.exit(124);
     } else {
-      // Output the actual error details including stderr
+      // Output the actual error details
       if (stderr) {
-        process.stderr.write(stderr);
+        process.stdout.write(stderr);
       } else {
-        console.error(error.message);
+        console.log(error.message);
       }
-      process.exit(1);
     }
+  } else if (stderr) {
+    // Even on success, if there's stderr, output it
+    process.stdout.write(stderr);
   }
+  console.log('===STDERR_END===');
   
-  if (stdout) process.stdout.write(stdout);
-  if (stderr) process.stderr.write(stderr);
+  process.exit(error ? (error.code || 1) : 0);
 });
 
 // Provide stdin if available
