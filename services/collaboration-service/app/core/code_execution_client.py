@@ -13,18 +13,19 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 CODE_EXEC_SERVICE_URL = os.getenv("CODE_EXEC_SERVICE_URL", "http://code-execution-controller:8000")
+CODE_EXEC_TIMEOUT = os.getenv("JOB_TIMEOUT", 30)
 
 class CodeExecutionClient:
     def __init__(self, base_url: str = CODE_EXEC_SERVICE_URL):
         self.base_url = base_url
-        self.timeout = httpx.Timeout(60.0, connect=5.0)  # 60s total, 5s connect timeout
+        self.timeout = httpx.Timeout(CODE_EXEC_TIMEOUT, connect=5.0)
     
     async def execute_code(
         self, 
         language: str, 
         b64_code: str, 
         b64_stdin: Optional[str] = "",
-        timeout: Optional[int] = 10
+        timeout: Optional[int] = CODE_EXEC_TIMEOUT
     ) -> dict:
         """
         Execute code via the code execution service
@@ -97,7 +98,7 @@ class CodeExecutionClient:
         language: str,
         code: str,
         stdin: str = "",
-        timeout: int = 20
+        timeout: int = CODE_EXEC_TIMEOUT
     ):
         """
         Execute code and broadcast the result to all users in the session

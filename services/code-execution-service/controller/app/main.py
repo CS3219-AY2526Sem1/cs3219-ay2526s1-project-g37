@@ -59,7 +59,7 @@ NAMESPACE = os.getenv("RUNNER_NAMESPACE")
 ECR_REGISTRY = os.getenv("ECR_REGISTRY")
 ECR_REPO_NAMESPACE = os.getenv("ECR_REPO_NAMESPACE")
 IMAGE_TAG = os.getenv("IMAGE_TAG", "latest")
-JOB_TIMEOUT = int(os.getenv("JOB_TIMEOUT"))
+JOB_TIMEOUT = int(os.getenv("JOB_TIMEOUT", ))
 
 # Language to runner image mapping
 LANGUAGE_IMAGES = {
@@ -74,7 +74,7 @@ class ExecutionRequest(BaseModel):
     language: str
     code: str
     stdin: Optional[str] = ""
-    timeout: Optional[int] = 10
+    timeout: Optional[int] = JOB_TIMEOUT
 
 
 class ExecutionResponse(BaseModel):
