@@ -23,6 +23,7 @@ class DisplayMessage(Message):
     
 class RunCodeMessage(Message):
     type: str = "run_code"
+    language: str
     code: Optional[str] = "" 
     stdin: Optional[str] = ""
 
@@ -35,3 +36,4 @@ class CodeResultMessage(Message):
     status: str  # "success" or "failed"
     code_output: str
     execution_time: float
+    exit_code: Optional[int] = None
