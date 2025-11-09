@@ -1,13 +1,11 @@
-version: "3.8"
-
 services:
-  controller:
+  code-exec-service-dev:
+    container_name: code-exec-service-dev
     build:
       context: ./controller
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
-      - "5678:5678" # Port for debugpy
+      - "${CODE_EXEC_PORT}:${CODE_EXEC_PORT}" 
     env_file:
       - .env
     environment:
@@ -26,10 +24,4 @@ services:
       - ECR_REGISTRY=${ECR_REGISTRY}
       - ECR_REPO_NAMESPACE=${ECR_REPO_NAMESPACE}
       - JOB_TIMEOUT=${JOB_TIMEOUT}
-
-    networks:
-      - code-exec-network
-
-networks:
-  code-exec-network:
-    driver: bridge
+    command: uvicorn app.main:app --host 0.0.0.0 --port ${CODE_EXEC_PORT}

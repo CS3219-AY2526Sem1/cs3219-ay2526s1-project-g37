@@ -2,6 +2,7 @@ include:
   - services/collaboration-service/docker-compose.yml
   - services/matching-service/docker-compose.yml
   - services/question-service/docker-compose.yml
+  - services/code-execution-service/docker-compose.yml
   - services/auth-router/docker-compose.yml
   - services/user-service/docker-compose.yml
   - frontend/peerprep/docker-compose.yml

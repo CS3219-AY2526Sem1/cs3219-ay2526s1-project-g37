@@ -26,10 +26,9 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Code Execution Service")
 
-# CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

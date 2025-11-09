@@ -26,6 +26,7 @@ class RunCodeMessage(Message):
     language: str
     code: Optional[str] = "" 
     stdin: Optional[str] = ""
+    timeout: Optional[int] = 20
 
 class CodeRunningMessage(Message):
     type: str = "code_running"

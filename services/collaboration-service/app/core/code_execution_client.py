@@ -10,6 +10,8 @@ from app.schemas.messages import CodeResultMessage
 
 logger = logging.getLogger(__name__)
 
+logger.setLevel(logging.INFO)
+
 CODE_EXEC_SERVICE_URL = os.getenv("CODE_EXEC_SERVICE_URL", "http://code-execution-controller:8000")
 
 class CodeExecutionClient:
@@ -43,13 +45,18 @@ class CodeExecutionClient:
                 "stdin": b64_stdin,
                 "timeout": timeout
             }
-            
+
+            logger.info(f"Sending payload to code execution service at {self.base_url}/execute: {payload}")
+
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 logger.info(f"Sending code execution request to {self.base_url}/execute")
                 response = await client.post(
                     f"{self.base_url}/execute",
                     json=payload
                 )
+
+                logger.info(f"Received response from code execution service: {response.status_code}, {response.text}")
+
                 response.raise_for_status()
                 
                 result = response.json()
@@ -90,7 +97,7 @@ class CodeExecutionClient:
         language: str,
         code: str,
         stdin: str = "",
-        timeout: int = 10
+        timeout: int = 20
     ):
         """
         Execute code and broadcast the result to all users in the session
@@ -98,41 +105,42 @@ class CodeExecutionClient:
         Args:
             session_id: The collaboration session ID
             language: Programming language (python, cpp, java, javascript)
-            code: Source code to execute
-            stdin: Standard input for the program
+            code: Base64-encoded source code to execute
+            stdin: Base64-encoded standard input for the program
             timeout: Execution timeout in seconds
         """
         # Import here to avoid circular dependency
         from app.core.connection_manager import connection_manager
         
         try:
-            # Call the code execution service
+            # Call the code execution service (code and stdin are already base64-encoded from frontend)
+            logger.info(f"Calling the code execution service with language={language}, timeout={timeout}")
             result = await self.execute_code(
                 language=language,
-                code=code,
-                stdin=stdin,
+                b64_code=code,
+                b64_stdin=stdin,
                 timeout=timeout
             )
+            logger.info(f"Code execution result: {result}")
             
             # Create result message
             result_msg = CodeResultMessage(
                 status=result.get("status", "failed"),
-                stdout=result.get("stdout", ""),
-                stderr=result.get("stderr", ""),
-                execution_time=result.get("execution_time", 0.0)
+                code_output=result.get("stdout", "") + result.get("stderr", ""),
+                execution_time=result.get("execution_time", 0.0),
+                exit_code=result.get("exit_code")
             )
             
             # Broadcast result to both users
+            logger.info(f"Broadcast code execution result to session {session_id}: {result_msg.status}")
             await connection_manager.broadcast_to_session(session_id, result_msg)
-            logger.info(f"Broadcast code execution result to session {session_id}")
             
         except Exception as e:
             logger.error(f"Error executing code for session {session_id}: {e}")
             # Send error message to both users
             error_msg = CodeResultMessage(
                 status="failed",
-                stdout="",
-                stderr=f"Internal error: {str(e)}",
+                code_output="",
                 execution_time=0.0,
                 exit_code=-1
             )
