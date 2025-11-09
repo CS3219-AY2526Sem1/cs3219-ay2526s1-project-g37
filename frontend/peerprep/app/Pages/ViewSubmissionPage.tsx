@@ -8,6 +8,7 @@ import { CARDHEIGHT } from "~/Constants/Constants";
 import HtmlRender from "~/Components/HtmlRender/HtmlRender";
 import { Editor } from "@monaco-editor/react";
 import CustomBadge from "~/Components/LanguageBadge/LanguageBadge";
+import { CODE_EDITOR_LANGUAGES } from "~/Constants/Constants";
 
 export default function ViewSubmissionPage() {
   const params = useParams();
@@ -98,7 +99,7 @@ export default function ViewSubmissionPage() {
                       }}
                     >
                       <Editor
-                        language={submission.language}
+                        language={CODE_EDITOR_LANGUAGES[submission.language]}
                         theme="vs-dark"
                         width="100%"
                         height="100%"
