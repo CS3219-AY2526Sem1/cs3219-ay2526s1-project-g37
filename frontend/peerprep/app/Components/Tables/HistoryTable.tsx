@@ -63,29 +63,37 @@ export default function HistoryTable({
         Interviews
       </Text>
       <Divider />
-      <Table.ScrollContainer minWidth={500}>
-        <Table c={'white'} highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Question</Table.Th>
-              <Table.Th className={classes.cell}>Completion Date</Table.Th>
-              <Table.Th className={classes.cell}>Difficulty</Table.Th>
-              <Table.Th className={classes.cell}>Topic</Table.Th>
-              <Table.Th className={classes.cell}>Language</Table.Th>
-              <Table.Th className={classes.cell}></Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>{rows}</Table.Tbody>
-        </Table>
-      </Table.ScrollContainer>
-      <Group justify="center">
-        <Pagination
-          total={totalPages}
-          siblings={3}
-          defaultValue={1}
-          onChange={onPageChange}
-        />
-      </Group>
+      { data.length === 0 ? (
+        <Text align="center" mt="md">
+          No interview history found, start a new session today!
+        </Text>
+      ) : (
+        <>
+          <Table.ScrollContainer minWidth={500}>
+            <Table c={'white'} highlightOnHover>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Question</Table.Th>
+                  <Table.Th className={classes.cell}>Completion Date</Table.Th>
+                  <Table.Th className={classes.cell}>Difficulty</Table.Th>
+                  <Table.Th className={classes.cell}>Topic</Table.Th>
+                  <Table.Th className={classes.cell}>Language</Table.Th>
+                  <Table.Th className={classes.cell}></Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>{rows}</Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
+          <Group justify="center">
+            <Pagination
+              total={totalPages}
+              siblings={3}
+              defaultValue={1}
+              onChange={onPageChange}
+            />
+          </Group>
+        </>
+      )}
     </Card>
   );
 }
