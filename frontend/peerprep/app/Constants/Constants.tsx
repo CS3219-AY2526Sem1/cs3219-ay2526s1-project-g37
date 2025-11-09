@@ -9,7 +9,7 @@ export const LANGUAGES = ["C++", "Python", "Java", "JavaScript"];
 export const ENTRY_POINTS = {
   "C++": "int main() {\n    return 0;\n}",
   "Python": "",
-  "Java": "public class Main {\n    public static void main(String[] args) {\n    }\n}",
+  "Java": "public class Solution {\n    public static void main(String[] args) {\n    }\n}",
   "JavaScript": "",
 };
 
