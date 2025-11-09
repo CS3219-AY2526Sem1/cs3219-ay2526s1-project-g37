@@ -35,6 +35,7 @@ class CodeRunningMessage(Message):
 class CodeResultMessage(Message):
     type: str = "code_result"
     status: str  # "success" or "failed"
-    code_output: str
+    stdout: str
+    stderr: str
     execution_time: float
     exit_code: Optional[int] = None

@@ -126,11 +126,12 @@ class CodeExecutionClient:
             # Create result message
             result_msg = CodeResultMessage(
                 status=result.get("status", "failed"),
-                code_output=result.get("stdout", "") + result.get("stderr", ""),
+                stdout=result.get("stdout", ""),
+                stderr=result.get("stderr", ""),
                 execution_time=result.get("execution_time", 0.0),
                 exit_code=result.get("exit_code")
             )
-            
+
             # Broadcast result to both users
             logger.info(f"Broadcast code execution result to session {session_id}: {result_msg.status}")
             await connection_manager.broadcast_to_session(session_id, result_msg)
@@ -140,7 +141,8 @@ class CodeExecutionClient:
             # Send error message to both users
             error_msg = CodeResultMessage(
                 status="failed",
-                code_output="",
+                stdout="",
+                stderr=str(e),
                 execution_time=0.0,
                 exit_code=-1
             )
