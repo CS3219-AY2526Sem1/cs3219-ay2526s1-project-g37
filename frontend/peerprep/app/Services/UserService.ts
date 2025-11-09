@@ -44,8 +44,26 @@ export function useUserService() {
         return response.json();
     }
 
+    async function updateUsername(newUsername: string) {
+        const response = await fetch(`${API_BASE_URL}/update/${userId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${tokenId}`,
+            },
+            body: JSON.stringify({ username: newUsername }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to update username");
+        }
+
+        return response.json();
+    }
+
     return {
         getUserDetails,
         getCurrentUserDetails,
+        updateUsername,
     };
 }
