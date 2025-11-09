@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
     
 
 class Message(BaseModel):
@@ -20,3 +21,17 @@ class DisplayMessage(Message):
     type: str = "display"
     msg: str 
     
+class RunCodeMessage(Message):
+    type: str = "run_code"
+    code: Optional[str] = "" 
+    stdin: Optional[str] = ""
+
+class CodeRunningMessage(Message):
+    type: str = "code_running"
+    message: str = "Code execution in progress..."
+
+class CodeResultMessage(Message):
+    type: str = "code_result"
+    status: str  # "success" or "failed"
+    code_output: str
+    execution_time: float
