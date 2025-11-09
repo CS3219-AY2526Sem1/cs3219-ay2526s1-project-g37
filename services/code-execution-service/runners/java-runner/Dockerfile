@@ -5,9 +5,10 @@ WORKDIR /tmp
 # Install dependencies
 RUN apk add --no-cache bash coreutils
 
-# Copy entrypoint
+# Copy entrypoint and fix line endings
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh && \
+    sed -i 's/\r$//' /usr/local/bin/entrypoint.sh
 
 # Create non-root user
 RUN adduser -D -u 1001 runner && \
