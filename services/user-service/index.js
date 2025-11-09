@@ -37,6 +37,27 @@ app.post("/register", async (req, res) => {
     }
 });
 
+app.post("/login", async (req, res) => {
+    const { uuid, username, role } = req.body;
+    try {
+        const client = await pool.connect();
+        const checkQuery = "SELECT * FROM users WHERE uuid = $1;";
+        const checkResult = await client.query(checkQuery, [uuid]);
+        if (checkResult.rows.length === 0) {
+            const insertQuery = "INSERT INTO users (uuid, username, role) VALUES ($1, $2, $3) RETURNING *;";
+            const insertResult = await client.query(insertQuery, [uuid, username, role || 0]);
+            client.release();
+            res.status(201).json(insertResult.rows[0]);
+        } else {
+            client.release();
+            res.status(200).json(checkResult.rows[0]);
+        }
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
 app.put("/update/:uuid", async (req, res) => {
     const { uuid } = req.params;
     const { username } = req.body;
@@ -57,4 +78,3 @@ const PORT = process.env.USER_PORT || 8003;
 app.listen(PORT, () => {
     console.log(`User Service is running on port ${PORT}`);
 });
-
