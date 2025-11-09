@@ -1,0 +1,5 @@
+fastapi[standard]
+kubernetes
+pydantic
+boto3
+debugpy
