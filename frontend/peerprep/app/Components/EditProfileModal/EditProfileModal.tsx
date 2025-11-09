@@ -2,7 +2,7 @@ import { Modal, Button, PasswordInput, TextInput, Box, Text } from "@mantine/cor
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import userCircle from "../../assets/images/user-circle-svgrepo-com.svg";
-import { doPasswordChange, doUpdateUserProfile } from "../../Firebase/helper";
+import { doPasswordChange } from "../../Firebase/helper";
 import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { useUserService } from "../../Services/UserService";

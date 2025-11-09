@@ -2,7 +2,6 @@ import React, { useContext, useState, useEffect } from "react";
 import { auth } from "../Firebase/init";
 import { GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 import type { User, UserInfo } from "firebase/auth";
-import { useUserService } from "../Services/UserService";
 
 /**
  * Authentication context type definition
