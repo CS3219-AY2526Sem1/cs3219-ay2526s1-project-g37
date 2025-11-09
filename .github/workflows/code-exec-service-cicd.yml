@@ -134,15 +134,11 @@ jobs:
       - name: Setup Kubernetes infrastructure
         run: |
           kubectl apply -f services/code-execution-service/k8s/namespace.yaml
-          kubectl apply -f services/code-execution-service/k8s/serviceaccount.yaml
-          kubectl apply -f services/code-execution-service/k8s/role.yaml
-          kubectl apply -f services/code-execution-service/k8s/rolebinding.yaml
           kubectl apply -f services/code-execution-service/k8s/resourcequota.yaml
-          kubectl apply -f services/code-execution-service/k8s/networkpolicy.yaml
 
       - name: Verify setup
         run: |
           NAMESPACE=${{ github.ref == 'refs/heads/master' && 'runner-prod' || 'runner-dev' }}
           kubectl get namespace $NAMESPACE
-          kubectl get role,rolebinding -n $NAMESPACE
+          kubectl get resourcequota -n $NAMESPACE
           echo "Kubernetes infrastructure ready for controller"
