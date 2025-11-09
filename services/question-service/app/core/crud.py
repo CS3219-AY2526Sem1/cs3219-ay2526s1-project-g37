@@ -4,6 +4,7 @@ import mimetypes
 from typing import List, Dict, Optional
 from app.core.utils import get_conn, upload_to_s3
 from app.models.exceptions import QuestionNotFoundException
+from datetime import timedelta
 
 def list_difficulties_and_topics() -> Dict[str, List[str]]:
     """
@@ -202,10 +203,12 @@ def get_user_attempted_questions(userId, page, size):
 
         questions = []
         for row in rows:
+            local_time = row[2] + timedelta(hours=8) 
+    
             questions.append({
                 "id": str(row[0]),
                 "question": row[1],
-                "completionDate": row[2].strftime("%Y-%m-%d"),
+                "completionDate": local_time.strftime("%Y-%m-%d %I:%M%p"),
                 "difficulty": row[3],
                 "topic": row[4],
                 "language": row[5],

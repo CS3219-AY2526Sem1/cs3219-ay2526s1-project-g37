@@ -48,7 +48,7 @@ export default function HistoryTable({
   const rows = data.map((row) => (
     <Table.Tr key={row.id}>
       <Table.Td>{row.question}</Table.Td>
-      <Table.Td ta="right">{row.completionDate}</Table.Td>
+      <Table.Td ta="right" width="200px">{row.completionDate}</Table.Td>
       <Table.Td ta="right">{row.difficulty}</Table.Td>
       <Table.Td ta="right">{row.topic}</Table.Td>
       <Table.Td ta="right">{row.language}</Table.Td>
