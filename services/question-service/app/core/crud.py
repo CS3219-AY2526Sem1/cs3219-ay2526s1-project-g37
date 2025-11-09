@@ -4,6 +4,7 @@ import mimetypes
 from typing import List, Dict, Optional
 from app.core.utils import get_conn, upload_to_s3
 from app.models.exceptions import QuestionNotFoundException
+from datetime import timedelta
 
 def list_difficulties_and_topics() -> Dict[str, List[str]]:
     """
@@ -171,6 +172,79 @@ def get_questions_list(page, size, search):
         total_count = cur.fetchone()[0]
 
         return questions, total_count
+    
+def get_user_attempted_questions(userId, page, size):
+    """
+    Retrieves all questions that is attempted by the user from the database.
+    
+    Returns:
+        list[dict]: A list of question data dictionaries, each including id, user_id, name, topic, difficulty and attempted_timestamp
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        offset = (page - 1) * size
+        
+        cur.execute("""
+            SELECT qa.id AS id,
+                    q.name AS question,
+                    qa.attempt_timestamp AS completionDate,
+                    q.difficulty AS difficulty, 
+                    q.topic AS topic,
+                    qa.language AS language,
+                    qa.question_id AS question_id
+            FROM question_attempts qa
+            JOIN questions q ON qa.question_id = q.id
+            WHERE qa.user_id = %s
+            ORDER BY qa.attempt_timestamp DESC
+            LIMIT %s OFFSET %s
+            """,
+            (userId, size, offset))
+        
+        rows = cur.fetchall()
+
+        questions = []
+        for row in rows:
+            local_time = row[2] + timedelta(hours=8) 
+    
+            questions.append({
+                "id": str(row[0]),
+                "question": row[1],
+                "completionDate": local_time.strftime("%Y-%m-%d %I:%M%p"),
+                "difficulty": row[3],
+                "topic": row[4],
+                "language": row[5],
+                "question_id": str(row[6])
+            })
+
+        cur.execute(
+            """
+            SELECT COUNT(*) AS total_count
+            FROM question_attempts
+            WHERE user_id = %s
+            """, (userId,)
+        )
+        total_count = cur.fetchone()[0]
+        
+        return questions, total_count
+    
+def get_attempt_by_id(attempt_id: str):
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("""
+                    SELECT id, user_id, question_id, collab_id, language, attempt_timestamp, submitted_solution
+                    FROM question_attempts
+                    WHERE id = %s
+                    """, (attempt_id,))
+        row = cur.fetchone()
+        if not row:
+            return None
+        return {
+            "id": row[0],
+            "user_id": row[1],
+            "question_id": row[2],
+            "collab_id": row[3],
+            "language": row[4],
+            "attempt_timestamp": row[5],
+            "submitted_solution": row[6]
+        }
 
 def get_random_question_by_difficulty_and_topic(difficulty: str, topic: str):
     """
@@ -206,12 +280,69 @@ def get_random_question_by_difficulty_and_topic(difficulty: str, topic: str):
 
         qid = row[0]
         return {
-            "id": qid,
+            "id": str(qid),
             "name": row[1],
             "description": row[2],
             "difficulty": row[3],
             "topic": row[4],
         }
+    
+def update_question_attempt(user_id=None, question_id=None, collab_id=None, submitted_solution=None, collaborator_id=None, language=None):
+    if not all([user_id, question_id, collab_id, collaborator_id]):
+        return None
+    
+    base_fields = ["user_id", "question_id", "collab_id", "language", "attempt_timestamp"]
+    base_placeholders = ["%s", "%s", "%s", "%s","CURRENT_TIMESTAMP"]
+    base_values = [user_id, question_id, collab_id, language]
+
+    update_fields = ["attempt_timestamp = CURRENT_TIMESTAMP"]
+
+    if submitted_solution is not None:
+        base_fields.append("submitted_solution")
+        base_placeholders.append("%s")
+        base_values.append(submitted_solution)
+        update_fields.append("submitted_solution = EXCLUDED.submitted_solution")
+
+    conflict_target = "(user_id, question_id, collab_id)"
+
+    def build_query():
+        return f"""
+            INSERT INTO question_attempts ({','.join(base_fields)})
+            VALUES ({','.join(base_placeholders)})
+            ON CONFLICT {conflict_target} DO UPDATE
+            SET {','.join(update_fields)}
+            RETURNING id, user_id, question_id, collab_id, language, attempt_timestamp, submitted_solution;
+        """
+
+    user_query = build_query()
+    collaborator_query = None
+
+    if collaborator_id:
+        base_values_collab = base_values.copy()
+        base_values_collab[0] = collaborator_id
+        collaborator_query = build_query()
+
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(user_query, tuple(v for v in base_values if v not in ("CURRENT_TIMESTAMP", "NULL")))
+        updated_row = cur.fetchone()
+
+        if collaborator_query:
+            cur.execute(collaborator_query, tuple(v for v in base_values_collab if v not in ("CURRENT_TIMESTAMP", "NULL")))
+
+        conn.commit()
+
+        if updated_row:
+            return {
+                "id": updated_row[0],
+                "user_id": updated_row[1],
+                "question_id": updated_row[2],
+                "collab_id": updated_row[3],
+                "language": updated_row[4],
+                "attempt_timestamp": updated_row[5],
+                "submitted_solution": updated_row[6]
+            }
+        
+        return None
 
 def get_questions_stats() -> Dict[str, int]:
     """
