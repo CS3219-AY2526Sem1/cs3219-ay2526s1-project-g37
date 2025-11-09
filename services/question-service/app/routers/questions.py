@@ -1,6 +1,6 @@
 from typing import Dict
 from fastapi import APIRouter, HTTPException, Query
-from app.models.endpoint_models import QuestionBrief, QuestionRequest, Question, QuestionsList, AttemptRequest, AttemptList
+from app.models.endpoint_models import QuestionRequest, Question, QuestionsList, AttemptRequest, AttemptList
 from app.models.exceptions import QuestionNotFoundException
 from app.core.crud import (
     create_question,
