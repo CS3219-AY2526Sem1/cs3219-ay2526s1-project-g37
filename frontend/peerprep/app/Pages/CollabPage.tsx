@@ -1,7 +1,6 @@
 import { Grid, Card, Text } from "@mantine/core";
 import { CODE_EDITOR_LANGUAGES, COLLABCARDHEIGHT, COLLAB_DURATION_S } from "~/Constants/Constants";
 import SessionControlBar from "../Components/SessionControlBar/SessionControlBar";
-import TestCase from "../Components/TestCase/TestCase";
 import { CodeEditor } from "../Components/CodeEditor/CodeEditor";
 import { useEffect, useRef, useState } from "react";
 import { CollabProvider } from "~/Context/CollabProvider";
