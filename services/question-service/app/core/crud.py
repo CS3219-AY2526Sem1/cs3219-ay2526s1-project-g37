@@ -344,6 +344,31 @@ def update_question_attempt(user_id=None, question_id=None, collab_id=None, subm
         
         return None
 
+def get_user_question_history_stats(user_id: str) -> Dict[str, int]:
+    """
+    Retrieves statistics about user question attempts in the database.
+    
+    Returns:
+        dict: A dictionary containing count of unique users and total attempts
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT q.difficulty, COUNT(*)
+            FROM question_attempts qa
+            JOIN questions q ON q.id = qa.question_id 
+            WHERE user_id=%s OR collaborator_id=%s
+            GROUP BY q.difficulty
+            """,
+            (user_id, user_id),
+        )
+        rows = cur.fetchall()
+
+        stats = {
+            row[0]: row[1] for row in rows
+        }
+        return stats
+
 def get_questions_stats() -> Dict[str, int]:
     """
     Retrieves statistics about the questions in the database.
