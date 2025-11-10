@@ -31,7 +31,6 @@ type RunCodeButtonProps = {
  * @returns JSX.Element
  */
 export function RunCodeButton({ 
-  language, 
   getCode, 
   onRunCode,
   executionResult,
