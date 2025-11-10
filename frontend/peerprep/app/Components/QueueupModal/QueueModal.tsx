@@ -233,7 +233,7 @@ export default function QueueModal() {
 
   return (
     <>
-      <Modal opened={opened} onClose={unloadModal} c="white" title={getTitle()}>
+      <Modal opened={opened} onClose={() => {queueStatus != "found" && unloadModal()}} c="white" title={getTitle()}>
         {queueStatus === "idle" && (
           <SelectionModal form={form} handleQueue={handleQueue} />
         )}
