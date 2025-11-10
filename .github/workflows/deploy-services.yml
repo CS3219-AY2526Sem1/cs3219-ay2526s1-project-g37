@@ -1,0 +1,202 @@
+# Written in assistance with ai
+
+name: Deploy Services to ECS
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service to deploy (or all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - question
+          - user
+          - frontend
+          - ywebsocket
+          - collaboration
+          - matching
+          - middleware
+
+env:
+  AWS_REGION: ap-southeast-1
+  ECS_CLUSTER_NAME: peerprep-cluster
+
+jobs:
+  deploy:
+    name: Deploy to ECS
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        service: ${{ github.event.inputs.service == 'all' && fromJson('["question", "user", "frontend", "ywebsocket", "collaboration", "matching", "middleware"]') || fromJson(format('["{0}"]', github.event.inputs.service)) }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      
+      - name: Set service configuration
+        id: config
+        run: |
+          case "${{ matrix.service }}" in
+            question)
+              echo "ecr_repo=peerprep-question-service" >> $GITHUB_OUTPUT
+              echo "ecs_service=peerprep-question-service-jc8mlx7a" >> $GITHUB_OUTPUT
+              echo "task_family=peerprep-question" >> $GITHUB_OUTPUT
+              echo "container_name=question-service" >> $GITHUB_OUTPUT
+              echo "local_image=question-service:latest" >> $GITHUB_OUTPUT
+              ;;
+            user)
+              echo "ecr_repo=peerprep-user-service" >> $GITHUB_OUTPUT
+              echo "ecs_service=peerprep-user-service-7io9fm4w" >> $GITHUB_OUTPUT
+              echo "task_family=peerprep-user" >> $GITHUB_OUTPUT
+              echo "container_name=user-service" >> $GITHUB_OUTPUT
+              echo "local_image=user-service:latest" >> $GITHUB_OUTPUT
+              ;;
+            frontend)
+              echo "ecr_repo=peerprep-frontend" >> $GITHUB_OUTPUT
+              echo "ecs_service=peerprep-frontend-service-q0vi9fg7" >> $GITHUB_OUTPUT
+              echo "task_family=peerprep-frontend" >> $GITHUB_OUTPUT
+              echo "container_name=peerprep-frontend" >> $GITHUB_OUTPUT
+              echo "local_image=peerprep-frontend:latest" >> $GITHUB_OUTPUT
+              ;;
+            ywebsocket)
+              echo "ecr_repo=peerprep-y-websocket-server" >> $GITHUB_OUTPUT
+              echo "ecs_service=peerprep-ywebsocket-service-kgoh594z" >> $GITHUB_OUTPUT
+              echo "task_family=peerprep-ywebsocket" >> $GITHUB_OUTPUT
+              echo "container_name=y-websocket-server" >> $GITHUB_OUTPUT
+              echo "local_image=alokinplc/y-websocket:latest" >> $GITHUB_OUTPUT
+              ;;
+            collaboration)
+              echo "ecr_repo=peerprep-collaboration-service" >> $GITHUB_OUTPUT
+              echo "ecs_service=peerprep-collaboration-service-3ass1arq" >> $GITHUB_OUTPUT
+              echo "task_family=peerprep-collaboration" >> $GITHUB_OUTPUT
+              echo "container_name=collaboration-service" >> $GITHUB_OUTPUT
+              echo "local_image=collaboration-service:latest" >> $GITHUB_OUTPUT
+              ;;
+            matching)
+              echo "ecr_repo=peerprep-matching-service" >> $GITHUB_OUTPUT
+              echo "ecs_service=peerprep-matching-service-fm7d6s0v" >> $GITHUB_OUTPUT
+              echo "task_family=peerprep-matching" >> $GITHUB_OUTPUT
+              echo "container_name=matching-service" >> $GITHUB_OUTPUT
+              echo "local_image=matching-service:latest" >> $GITHUB_OUTPUT
+              ;;
+            middleware)
+              echo "ecr_repo=peerprep-middleware-service" >> $GITHUB_OUTPUT
+              echo "ecs_service=peerprep-middleware-service-9c288i3p" >> $GITHUB_OUTPUT
+              echo "task_family=peerprep-middleware" >> $GITHUB_OUTPUT
+              echo "container_name=middleware-service" >> $GITHUB_OUTPUT
+              echo "local_image=middleware-service:latest" >> $GITHUB_OUTPUT
+              ;;
+          esac
+      
+      - name: Create .env.prod file
+        run: |
+          # Add all your environment variables here
+          echo "QUESTIONS_PORT=${{ secrets.QUESTIONS_PORT }}" >> .env.prod
+          echo "QUESTION_DB_NAME=${{ secrets.QUESTION_DB_NAME }}" >> .env.prod
+          echo "QUESTION_DB_USER=${{ secrets.QUESTION_DB_USER }}" >> .env.prod
+          echo "QUESTION_DB_PASSWORD=${{ secrets.QUESTION_DB_PASSWORD }}" >> .env.prod
+          echo "QUESTION_DB_HOST=${{ secrets.QUESTION_DB_HOST }}" >> .env.prod
+          echo "QUESTION_DB_PORT=${{ secrets.QUESTION_DB_PORT }}" >> .env.prod
+          echo "QUESTION_AWS_ACCESS_KEY_ID=${{ secrets.QUESTION_AWS_ACCESS_KEY_ID }}" >> .env.prod
+          echo "QUESTION_AWS_SECRET_ACCESS_KEY=${{ secrets.QUESTION_AWS_SECRET_ACCESS_KEY }}" >> .env.prod
+          echo "QUESTION_S3_BUCKET_NAME=${{ secrets.QUESTION_S3_BUCKET_NAME }}" >> .env.prod
+          echo "QUESTION_AWS_REGION=${{ secrets.QUESTION_AWS_REGION }}" >> .env.prod
+          echo "QUESTION_CLOUDFRONT_DOMAIN=${{ secrets.QUESTION_CLOUDFRONT_DOMAIN }}" >> .env.prod
+          # Add more secrets as needed for other services
+      
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPO: ${{ steps.config.outputs.ecr_repo }}
+          LOCAL_IMAGE: ${{ steps.config.outputs.local_image }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build with docker compose
+          docker compose --profile prod --env-file .env.prod build
+          
+          # Tag for ECR
+          docker tag $LOCAL_IMAGE $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+          docker tag $LOCAL_IMAGE $ECR_REGISTRY/$ECR_REPO:latest
+          
+          # Push both tags
+          docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPO:latest
+          
+          echo "image=$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" >> $GITHUB_OUTPUT
+      
+      - name: Download current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ steps.config.outputs.task_family }} \
+            --region ${{ env.AWS_REGION }} \
+            --query 'taskDefinition' \
+            --output json > task-definition.json
+      
+      - name: Update task definition with new image
+        id: task-def
+        run: |
+          # Update the image in task definition
+          jq --arg IMAGE "${{ steps.build-image.outputs.image }}" \
+             --arg CONTAINER "${{ steps.config.outputs.container_name }}" \
+             '{
+               family: .family,
+               taskRoleArn: .taskRoleArn,
+               executionRoleArn: .executionRoleArn,
+               networkMode: .networkMode,
+               containerDefinitions: [
+                 .containerDefinitions[] | 
+                 if .name == $CONTAINER then
+                   .image = $IMAGE
+                 else
+                   .
+                 end
+               ],
+               volumes: .volumes,
+               requiresCompatibilities: .requiresCompatibilities,
+               cpu: .cpu,
+               memory: .memory
+             }' task-definition.json > new-task-definition.json
+          
+          # Register new task definition
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://new-task-definition.json \
+            --region ${{ env.AWS_REGION }} \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          
+          echo "task-def-arn=$NEW_TASK_DEF_ARN" >> $GITHUB_OUTPUT
+      
+      - name: Deploy to Amazon ECS
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER_NAME }} \
+            --service ${{ steps.config.outputs.ecs_service }} \
+            --task-definition ${{ steps.task-def.outputs.task-def-arn }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+      
+      - name: Wait for service to stabilize
+        run: |
+          echo "Waiting for ECS service to stabilize..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER_NAME }} \
+            --services ${{ steps.config.outputs.ecs_service }} \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "✅ ${{ matrix.service }} service deployment completed successfully!"
