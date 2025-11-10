@@ -69,7 +69,7 @@ export function RunCodeButton({
           onClick={handleRunCode}
           loading={isExecuting}
           disabled={disabled}
-          color="green"
+          color="#FFC01E"
         >
           {isExecuting ? "Running..." : "Run Code"}
         </Button>
