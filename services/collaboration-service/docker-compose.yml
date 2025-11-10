@@ -8,11 +8,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: collaboration-service:latest
     container_name: collaboration-service-prod
     ports:
       - "8000:8000"
-    environment:
-      - COLLAB_CORS_ORIGINS=${COLLAB_CORS_ORIGINS}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
   # ----------------------------------------------------------------------
@@ -27,8 +26,6 @@ services:
     container_name: collaboration-service-dev
     ports:
       - "8000:8000"
-    environment:
-      - COLLAB_CORS_ORIGINS=${COLLAB_CORS_ORIGINS}
     volumes:
       - .:/app
 

@@ -1,9 +1,10 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 const express = require("express");
 const { pool } = require("./db-config");
 const app = express();
 app.use(express.json());
-const dotenv = require("dotenv");
-dotenv.config();
 
 app.get("/health", (req, res) => {
     res.send("User Service is healthy");

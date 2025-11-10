@@ -24,7 +24,7 @@ export const doCreateUserWithEmailAndPassword = async (
 ): Promise<import("firebase/auth").UserCredential> => {
     return createUserWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
-            await fetch("http://localhost:4000/users/register", {
+            await fetch(`${import.meta.env.VITE_AUTH_ROUTER_URL}/users/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -58,7 +58,7 @@ export const doSignInWithGoogle = async () => {
     return signInWithPopup(auth, provider).then(async (result) => {
         const isNewUser = getAdditionalUserInfo(result)?.isNewUser;
         if (isNewUser) {
-            await fetch("http://localhost:4000/users/register", {
+            await fetch(`${import.meta.env.VITE_AUTH_ROUTER_URL}/users/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
