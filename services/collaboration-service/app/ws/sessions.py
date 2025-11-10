@@ -1,9 +1,17 @@
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 from app.core.connection_manager import connection_manager
 from app.core.users import UserState
-from app.schemas.messages import CollaboratorEndedMessage, Message, CollaboratorConnectMessage, CollaboratorDisconnectMessage, DisplayMessage
+from app.core.code_execution_client import code_execution_client
+from app.schemas.messages import (
+    CollaboratorEndedMessage,
+    CollaboratorConnectMessage,
+    CollaboratorDisconnectMessage,
+    DisplayMessage,
+    RunCodeMessage,
+    CodeRunningMessage,
+    CodeResultMessage,
+)
 
-from datetime import datetime
 import asyncio
 import json
 
@@ -35,10 +43,28 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, user_id: str = Quer
                 print(msg)
 
                 json_msg = json.loads(msg)
-                if json_msg.get("type") == "collaborator_ended":
+                msg_type = json_msg.get("type")
+                
+                if msg_type == "collaborator_ended":
                     payload = CollaboratorEndedMessage()
                     await connection_manager.on_message(session_id, user_id, payload)
                     await connection_manager.on_session_ended(session_id)
+                
+                elif msg_type == "run_code":
+                    run_code_msg = RunCodeMessage(**json_msg)
+                    
+                    # Send "code running" message to both users
+                    running_msg = CodeRunningMessage()
+                    await connection_manager.broadcast_to_session(session_id, running_msg)
+                    
+                    # Execute code asynchronously
+                    asyncio.create_task(code_execution_client.execute_and_broadcast_result(
+                        session_id=session_id,
+                        language=run_code_msg.language,
+                        code=run_code_msg.code,
+                        stdin=run_code_msg.stdin,
+                        timeout=run_code_msg.timeout
+                    ))
                 
         except WebSocketDisconnect:
             try:
@@ -62,6 +88,10 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, user_id: str = Quer
                 user_status = UserState.AWAIT_CONNECT
                 await ws.send_text(json.dumps(msg.model_dump()))
             elif isinstance(msg, DisplayMessage):
+                await ws.send_text(json.dumps(msg.model_dump()))
+            elif isinstance(msg, CodeRunningMessage):
+                await ws.send_text(json.dumps(msg.model_dump()))
+            elif isinstance(msg, CodeResultMessage):
                 await ws.send_text(json.dumps(msg.model_dump()))
             else:
                 await ws.send_text(f"Unknown message type received.")

@@ -1,0 +1,27 @@
+services:
+  code-exec-service-dev:
+    container_name: code-exec-service-dev
+    build:
+      context: ./controller
+      dockerfile: Dockerfile
+    ports:
+      - "${CODE_EXEC_PORT}:${CODE_EXEC_PORT}" 
+    env_file:
+      - .env
+    environment:
+      - LOCAL_DEV=${LOCAL_DEV}
+
+      # EKS authentication
+      - EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
+      - AWS_REGION=${AWS_REGION}
+
+      # AWS credentials (for local development with EKS)
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_CODEEXEC}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_CODEEXEC}
+
+      # Runner configuration
+      - RUNNER_NAMESPACE=${RUNNER_NAMESPACE}
+      - ECR_REGISTRY=${ECR_REGISTRY}
+      - ECR_REPO_NAMESPACE=${ECR_REPO_NAMESPACE}
+      - JOB_TIMEOUT=${JOB_TIMEOUT}
+    command: uvicorn app.main:app --host 0.0.0.0 --port ${CODE_EXEC_PORT}

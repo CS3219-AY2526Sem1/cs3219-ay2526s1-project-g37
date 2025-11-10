@@ -1,7 +1,6 @@
 import { Grid, Card, Text } from "@mantine/core";
 import { CODE_EDITOR_LANGUAGES, COLLABCARDHEIGHT, COLLAB_DURATION_S } from "~/Constants/Constants";
 import SessionControlBar from "../Components/SessionControlBar/SessionControlBar";
-import TestCase from "../Components/TestCase/TestCase";
 import { CodeEditor } from "../Components/CodeEditor/CodeEditor";
 import { useEffect, useRef, useState } from "react";
 import { CollabProvider } from "~/Context/CollabProvider";
@@ -21,6 +20,8 @@ import CollabDisconnectModal from "~/Components/CollabDisconnectModal/CollabDisc
 import RedirectModal from "~/Components/CollabModals/RedirectModal";
 import { useDisclosure } from "@mantine/hooks";
 import CustomBadge from "~/Components/LanguageBadge/LanguageBadge";
+import { RunCodeButton, type CodeExecutionResult } from "~/Components/RunCodeButton/RunCodeButton";
+import { encode } from 'js-base64';
 
 
 /**
@@ -56,6 +57,10 @@ export default function CollabPage() {
   const [ isDisconnectModalOpen, setIsDisconnectModalOpen ] = useState(false);
 
   const [ redirectOpened, { open: redirectOpen } ] = useDisclosure(false);
+
+  // Code execution state
+  const [isCodeExecuting, setIsCodeExecuting] = useState(false);
+  const [codeExecutionResult, setCodeExecutionResult] = useState<CodeExecutionResult | null>(null);
 
   // check user belongs to sessionId
   useEffect(() => {
@@ -136,6 +141,20 @@ export default function CollabPage() {
       } else if (jsonData.type === "collaborator_disconnect") {
         setLastConnectedTime(new Date());
         setIsConnected(false);
+      } else if (jsonData.type === "code_running") {
+        // Code execution started
+        setIsCodeExecuting(true);
+        setCodeExecutionResult(null);
+      } else if (jsonData.type === "code_result") {
+        // Code execution completed
+        setIsCodeExecuting(false);
+        setCodeExecutionResult({
+          status: jsonData.status,
+          stdout: jsonData.stdout,
+          stderr: jsonData.stderr,
+          execution_time: jsonData.execution_time,
+          exit_code: jsonData.exit_code,
+        });
       }
     }
   }, [lastMessage]);
@@ -167,6 +186,26 @@ export default function CollabPage() {
     } catch (error) {
       console.error("Failed to fetch question:", error);
       // Handle error, maybe set an error state
+    }
+  };
+
+  /**
+   * Send code execution request via WebSocket
+   */
+  const handleRunCode = (code: string, stdin: string) => {
+    if (readyState === ReadyState.OPEN && sessionMetadata) {
+      // Base64 encode code and stdin
+      const b64Code = encode(code);
+      const b64Stdin = encode(stdin);
+
+      sendJsonMessage({
+        type: "run_code",
+        language:CODE_EDITOR_LANGUAGES[sessionMetadata.language],
+        code: b64Code,
+        stdin: b64Stdin
+      });
+    } else {
+      console.error("WebSocket is not open or session metadata is missing");
     }
   };
 
@@ -334,7 +373,16 @@ export default function CollabPage() {
                   }}
                   c={"white"}
                 >
-                  <TestCase />
+                  {sessionMetadata && (
+                    <RunCodeButton 
+                      language={CODE_EDITOR_LANGUAGES[sessionMetadata.language]}
+                      getCode={getEditorString}
+                      onRunCode={handleRunCode}
+                      executionResult={codeExecutionResult}
+                      isExecuting={isCodeExecuting}
+                      disabled={!isConnected}
+                    />
+                  )}
                 </Card>
               </div>
             </Grid.Col>
