@@ -21,6 +21,7 @@ import RedirectModal from "~/Components/CollabModals/RedirectModal";
 import { useDisclosure } from "@mantine/hooks";
 import CustomBadge from "~/Components/LanguageBadge/LanguageBadge";
 import { RunCodeButton, type CodeExecutionResult } from "~/Components/RunCodeButton/RunCodeButton";
+import { encode } from 'js-base64';
 
 
 /**
@@ -194,9 +195,9 @@ export default function CollabPage() {
   const handleRunCode = (code: string, stdin: string) => {
     if (readyState === ReadyState.OPEN && sessionMetadata) {
       // Base64 encode code and stdin
-      const b64Code = btoa(unescape(encodeURIComponent(code)));
-      const b64Stdin = btoa(unescape(encodeURIComponent(stdin)));
-      
+      const b64Code = encode(code);
+      const b64Stdin = encode(stdin);
+
       sendJsonMessage({
         type: "run_code",
         language:CODE_EDITOR_LANGUAGES[sessionMetadata.language],

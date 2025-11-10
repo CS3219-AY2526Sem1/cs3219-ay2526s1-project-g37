@@ -67,11 +67,23 @@ A scalable, secure code execution service that runs untrusted code in isolated K
 
 ### Prerequisites
 
-- Kubernetes cluster (EKS, GKE, or any K8s cluster) for running jobs
-- kubectl configured with access to the cluster
-- Docker
-- Python 3.11+
-- Valid kubeconfig with appropriate RBAC permissions
+- **AWS Account** with EKS cluster running
+- **AWS CLI** configured with appropriate profile
+- **kubectl** configured with access to the cluster
+- **Docker** with buildx support
+- **Python 3.13+** for local controller development
+- **ECR repositories** created for runner images
+
+### Makefile Commands
+
+Available make targets:
+
+```bash
+make help                    # Show available targets
+make create-ecr-repos       # Create ECR repositories for all runners
+make build-push-runners     # Build and push all runner images to ECR
+make login-ecr              # Login to AWS ECR
+```
 
 ### Local Development
 
@@ -83,98 +95,94 @@ pip install -r requirements.txt
 
 2. **Configure environment:**
 ```bash
-export RUNNER_NAMESPACE=runner-dev
-export ECR_REGISTRY=your-registry.dkr.ecr.us-east-1.amazonaws.com
-export IMAGE_TAG=dev-latest
+# Copy the example environment file
+cp .env.example .env
+
+# Edit .env with your configuration:
+# LOCAL_DEV=true
+# AWS_ACCESS_KEY_ID=<your-access-key>
+# AWS_SECRET_ACCESS_KEY=<your-secret-key>
+# AWS_REGION=ap-southeast-1
+# EKS_CLUSTER_NAME=<your-cluster-name>
+# ECR_REGISTRY=<your-registry>.dkr.ecr.ap-southeast-1.amazonaws.com
+# ECR_REPO_NAMESPACE=peerprep-code-exec-runners-dev
+# RUNNER_NAMESPACE=runner-dev
+# JOB_TIMEOUT=30
 ```
 
 3. **Run controller locally:**
 ```bash
-make run-controller-local
+cd controller
+uvicorn app.main:app --reload --port 8000
 ```
 
-
-2. **Configure Kubernetes access:**
-```bash
-# Ensure kubectl is configured for your cluster
-kubectl get nodes
-
-# Set environment variables
-export RUNNER_NAMESPACE=runner-dev
-export ECR_REGISTRY=your-registry.dkr.ecr.us-east-1.amazonaws.com
-export IMAGE_TAG=dev-latest
-```
-
-3. **Run controller locally:**
-```bash
-make run-controller-local
-# Or manually:
-cd controller && uvicorn app.main:app --reload --port 8000
-```
-
-> **Important**: The controller connects to your Kubernetes cluster via kubeconfig. See [EXTERNAL_CONTROLLER.md](EXTERNAL_CONTROLLER.md) for detailed configuration options including custom kubeconfig paths and contexts.
+> **Important**: In local development mode (`LOCAL_DEV=true`), the controller connects to your EKS cluster using AWS credentials. Ensure your AWS credentials have appropriate permissions to access the EKS cluster and create jobs in the runner namespace.
 
 4. **Test the API:**
 ```bash
+# Note: code and stdin must be base64 encoded
 curl -X POST http://localhost:8000/execute \
   -H "Content-Type: application/json" \
   -d '{
     "language": "python",
-    "code": "print(\"Hello, World!\")",
+    "code": "cHJpbnQoIkhlbGxvLCBXb3JsZCEiKQ==",
+    "stdin": "",
     "timeout": 10
+  }'
 ```
 
 ## 📦 Deployment
 
-### Development Environment
+### Building and Pushing Runner Images
 
-1. **Create ECR repositories:**
+1. **Login to AWS ECR:**
+```bash
+# Configure AWS profile (if not already done)
+aws configure --profile peerprep
+
+# Login is handled automatically by the Makefile
+```
+
+2. **Create ECR repositories (first time only):**
 ```bash
 make create-ecr-repos
 ```
 
-2. **Build and push images:**
+3. **Build and push runner images:**
 ```bash
-export ECR_REGISTRY=your-registry.dkr.ecr.us-east-1.amazonaws.com
-make build-all
-make push-all
+# Build and push all runner images (python, node, cpp, java)
+# Images are built for linux/amd64 platform (EKS compatible)
+make build-push-runners
+
+# To use a specific tag:
+make build-push-runners IMAGE_TAG=v1.0.0
+
+# To use a specific Git SHA:
+make build-push-runners IMAGE_TAG=$(git rev-parse --short HEAD)
 ```
 
-3. **Deploy to dev:**
-```bash
-make deploy-dev
-```
+### Kubernetes Deployment
 
-4. **Run integration tests:**
-```bash
-kubectl port-forward -n runner-dev svc/code-execution-controller 8000:80
-make test-integration
-```
+The controller can be deployed to Kubernetes or run locally:
 
-### Production Environment
+- **Local mode**: Set `LOCAL_DEV=true` and provide AWS credentials to connect to EKS
+- **Production mode**: Deploy controller in EKS cluster using IAM roles for service accounts (IRSA)
 
-Production deployments are handled via GitHub Actions on release creation. To deploy manually:
-
-```bash
-make deploy-prod
-```
-
-This will:
-- Prompt for version tag
-- Deploy using image digests for immutability
-- Apply all security policies
-- Wait for rollout completion
+> **Note**: Production deployment with IRSA is not yet fully implemented. Currently, local development mode is the primary deployment method.
 
 ## 🔒 Security Features
 
-- **Network isolation**: NetworkPolicy blocks egress by default
+- **Network isolation**: NetworkPolicy blocks egress by default (if configured in cluster)
 - **Resource limits**: CPU/memory quotas prevent resource exhaustion
-- **Non-root execution**: All containers run as non-root user (UID 1000)
-- **Read-only filesystem**: Container filesystems are read-only
+  - CPU: 100m request, 500m limit
+  - Memory: 128Mi request, 256Mi limit
+- **Non-root execution**: All containers run as non-root user (UID 1001)
+- **Read-only filesystem**: Container filesystems are read-only (with writable /tmp)
 - **No privilege escalation**: Prevents containers from gaining additional privileges
 - **Dropped capabilities**: All Linux capabilities are dropped
-- **Timeout enforcement**: Jobs are killed after exceeding timeout
-- **Auto-cleanup**: Jobs are automatically deleted after completion
+- **Timeout enforcement**: Jobs are killed after exceeding timeout (activeDeadlineSeconds)
+- **Auto-cleanup**: Jobs are automatically deleted 60 seconds after completion (ttlSecondsAfterFinished)
+- **Base64 encoding**: Code and stdin are base64 encoded for safe transmission
 
 ## 📁 Project Structure
 
@@ -182,10 +190,10 @@ This will:
 code-execution-service/
 ├── controller/                 # FastAPI controller
 │   ├── app/
-│   │   └── main.py            # Main application code
+│   │   ├── main.py            # Main application code
+│   │   └── __init__.py        # EKS authentication helper
 │   ├── Dockerfile
-│   ├── requirements.txt
-│   └── deploy/                # Kubernetes deployments
+│   └── requirements.txt
 ├── runners/                   # Language-specific runners
 │   ├── python-runner/
 │   ├── node-runner/
@@ -193,14 +201,9 @@ code-execution-service/
 │   └── java-runner/
 ├── k8s/                       # Base Kubernetes manifests
 │   ├── namespace.yaml
-│   ├── networkpolicy.yaml
-│   ├── role.yaml
-│   ├── rolebinding.yaml
-│   ├── resourcequota.yaml
-│   └── jobs/
-├── ci/                        # CI/CD workflows
-│   └── github-actions/
-├── tests/                     # Tests
+│   └── resourcequota.yaml
+├── .env.example               # Environment variables template
+├── docker-compose.yml         # Local docker setup
 └── Makefile                   # Build/deploy helpers
 ```
 
@@ -216,11 +219,17 @@ Execute code in an isolated container.
 ```json
 {
   "language": "python",
-  "code": "print('Hello, World!')",
+  "code": "cHJpbnQoJ0hlbGxvLCBXb3JsZCEnKQ==",
   "stdin": "",
   "timeout": 10
 }
 ```
+
+> **Important**: Both `code` and `stdin` fields must be base64 encoded. Example:
+> ```javascript
+> const code = btoa("print('Hello, World!')");  // JavaScript
+> // Python: base64.b64encode(code.encode()).decode()
+> ```
 
 **Response:**
 ```json
@@ -228,15 +237,27 @@ Execute code in an isolated container.
   "status": "success",
   "stdout": "Hello, World!\n",
   "stderr": "",
-  "execution_time": 1.234
+  "execution_time": 1.234,
+  "exit_code": 0
 }
 ```
 
+**Response Fields:**
+- `status`: "success" or "failed"
+- `stdout`: Standard output from the code execution
+- `stderr`: Standard error output (includes timeout messages)
+- `execution_time`: Time taken for job execution in seconds
+- `exit_code`: Container exit code (0 for success, 124 for timeout, etc.)
+
 **Supported Languages:**
-- `python` - Python 3.11
-- `javascript` - Node.js 20
-- `cpp` - C++ (GCC 13)
-- `java` - Java 17
+- `python` - Python 3.11+
+- `javascript` - Node.js 20+
+- `cpp` - C++ (GCC 13+)
+- `java` - Java 17+
+
+**Error Codes:**
+- `400`: Invalid language or malformed base64 encoding
+- `500`: Kubernetes API error or internal server error
 
 ### Health Check
 
@@ -253,73 +274,151 @@ Returns service health status.
 
 ## 🧪 Testing
 
-### Unit Tests
+### Manual Testing
+
+Test the API endpoint manually:
+
 ```bash
-make test
+# Health check
+curl http://localhost:8000/health
+
+# Execute Python code (remember to base64 encode!)
+curl -X POST http://localhost:8000/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "language": "python",
+    "code": "cHJpbnQoIkhlbGxvLCBXb3JsZCEiKQ==",
+    "stdin": "",
+    "timeout": 10
+  }'
 ```
 
-### Integration Tests
-```bash
-# Start service locally or port-forward to cluster
-kubectl port-forward -n runner-dev svc/code-execution-controller 8000:80
+### Helper for Base64 Encoding
 
-# Run tests
-make test-integration
+```bash
+# Linux/Mac
+echo -n "print('Hello, World!')" | base64
+
+# PowerShell
+[Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("print('Hello, World!')"))
+
+# Python
+python -c "import base64; print(base64.b64encode(b\"print('Hello, World!')\").decode())"
 ```
 
 ## 🔧 Configuration
 
 ### Environment Variables
 
+Configuration is managed through a `.env` file in the root directory. See `.env.example` for template.
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `LOCAL_DEV` | Enable local development mode (`true`/`false`) | Yes | - |
+| `AWS_ACCESS_KEY_ID` | AWS access key for EKS authentication | Yes (local) | - |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key for EKS authentication | Yes (local) | - |
+| `AWS_REGION` | AWS region where EKS cluster is located | Yes | `ap-southeast-1` |
+| `EKS_CLUSTER_NAME` | Name of the EKS cluster | Yes | - |
+| `ECR_REGISTRY` | ECR registry URL | Yes | - |
+| `ECR_REPO_NAMESPACE` | ECR repository namespace | Yes | `peerprep-code-exec-runners-dev` |
+| `RUNNER_NAMESPACE` | Kubernetes namespace for jobs | Yes | `runner-dev` |
+| `IMAGE_TAG` | Docker image tag for runners | No | `latest` |
+| `JOB_TIMEOUT` | Max execution time in seconds | Yes | `30` |
+
+### Makefile Variables
+
+The Makefile supports the following variables:
+
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `RUNNER_NAMESPACE` | Kubernetes namespace for jobs | `runner-dev` |
-| `ECR_REGISTRY` | ECR registry URL | Required |
-| `IMAGE_TAG` | Docker image tag | `dev-latest` |
-| `JOB_TIMEOUT` | Max execution time (seconds) | `30` |
-| `SERVICE_ACCOUNT` | K8s service account | `controller-sa` |
+| `ECR_REGISTRY` | ECR registry URL | `742705053940.dkr.ecr.ap-southeast-1.amazonaws.com` |
+| `ECR_REPO_NAMESPACE` | ECR repository namespace | `peerprep-code-exec-runners-dev` |
+| `AWS_REGION` | AWS region | `ap-southeast-1` |
+| `AWS_PROFILE` | AWS CLI profile | `peerprep` |
+| `IMAGE_TAG` | Image tag (uses git SHA by default) | `$(git rev-parse --short HEAD)` |
+| `NAMESPACE` | Kubernetes namespace | `runner-dev` |
 
 ### Resource Limits
 
-**Dev Environment:**
-- CPU: 100m request, 500m limit
-- Memory: 128Mi request, 256Mi limit
-- Max concurrent jobs: 50
-
-**Prod Environment:**
-- CPU: 100m request, 500m limit
-- Memory: 128Mi request, 256Mi limit
-- Max concurrent jobs: 200
+Per-job resource limits (enforced by Kubernetes):
+- **CPU**: 100m request, 500m limit
+- **Memory**: 128Mi request, 256Mi limit
+- **Temporary storage**: 64Mi in-memory tmpfs
+- **Job timeout**: Configurable via `JOB_TIMEOUT` (default 30s)
+- **TTL after finished**: 60 seconds (automatic cleanup)
 
 ## 📊 Monitoring
 
 ### View Logs
 
 ```bash
-# Controller logs
+# Controller logs (if running in Kubernetes)
 kubectl logs -n runner-dev -l app=code-execution-controller -f
 
 # Runner job logs
 kubectl logs -n runner-dev <job-pod-name>
+
+# List all jobs
+kubectl get jobs -n runner-dev
+
+# Find pods for a specific job
+kubectl get pods -n runner-dev -l job-name=<job-name>
 ```
 
 ### Check Job Status
 
 ```bash
-# List all jobs
+# List all jobs with status
 kubectl get jobs -n runner-dev
 
 # Describe specific job
 kubectl describe job <job-name> -n runner-dev
+
+# Watch jobs in real-time
+kubectl get jobs -n runner-dev -w
+```
+
+### Debugging
+
+View job events and logs:
+```bash
+# Get job details
+kubectl describe job runner-python-<timestamp> -n runner-dev
+
+# Get pod logs
+kubectl logs -n runner-dev -l job-name=runner-python-<timestamp>
+
+# Get pod status
+kubectl get pod -n runner-dev -l job-name=runner-python-<timestamp> -o yaml
 ```
 
 ## 🐛 Troubleshooting
 
+### Controller Can't Connect to EKS
+
+**Symptoms**: Controller fails to start with authentication errors
+
+**Solutions**:
+1. Verify AWS credentials are correct:
+```bash
+aws sts get-caller-identity --profile peerprep
+```
+
+2. Check EKS cluster name and region in `.env`:
+```bash
+aws eks list-clusters --region ap-southeast-1 --profile peerprep
+```
+
+3. Ensure IAM user has EKS access permissions
+
 ### Jobs Not Starting
 
-1. Check RBAC permissions:
+**Symptoms**: Jobs are created but pods don't start
+
+**Solutions**:
+1. Check namespace exists:
 ```bash
-kubectl get rolebinding -n runner-dev
+kubectl get namespace runner-dev
 ```
 
 2. Check resource quotas:
@@ -327,52 +426,106 @@ kubectl get rolebinding -n runner-dev
 kubectl describe resourcequota -n runner-dev
 ```
 
-### Controller Can't Create Jobs
-
-Verify service account has correct permissions:
+3. Check if images can be pulled:
 ```bash
-kubectl auth can-i create jobs --as=system:serviceaccount:runner-dev:controller-sa -n runner-dev
+# Verify ECR login
+aws ecr get-login-password --region ap-southeast-1 --profile peerprep | docker login --username AWS --password-stdin <ecr-registry>
+
+# Check if image exists
+aws ecr describe-images --repository-name peerprep-code-exec-runners-dev/python --region ap-southeast-1 --profile peerprep
 ```
 
-### Images Not Pulling
+### Base64 Encoding Issues
 
-Ensure ECR credentials are configured:
+**Symptoms**: 400 error with "Invalid base64 encoded code or stdin"
+
+**Solutions**:
+- Ensure code and stdin are properly base64 encoded
+- Use UTF-8 encoding before base64 encoding
+- Test encoding with the helper commands in the Testing section
+
+### Timeout Issues
+
+**Symptoms**: Jobs fail with exit code 124 or are killed
+
+**Solutions**:
+1. Increase timeout in request (up to `JOB_TIMEOUT` limit)
+2. Check if code has infinite loops
+3. Verify resource limits are sufficient
+
+### ECR Authentication Errors
+
+**Symptoms**: ImagePullBackOff errors
+
+**Solutions**:
+1. Refresh ECR login:
 ```bash
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ecr-registry>
+aws ecr get-login-password --region ap-southeast-1 --profile peerprep | docker login --username AWS --password-stdin <ecr-registry>
 ```
 
-## 📝 CI/CD Pipeline
+2. Verify images exist:
+```bash
+aws ecr list-images --repository-name peerprep-code-exec-runners-dev/python --region ap-southeast-1 --profile peerprep
+```
 
-### Development Flow
+3. Check if controller has permissions to pull images (in production with IRSA)
 
-1. Push to `develop` or `main` branch
-2. GitHub Actions builds images with `dev-<git-sha>` tag
-3. Images pushed to ECR with `dev-latest` tag
-4. Deployed to `runner-dev` namespace
-5. Integration tests run automatically
+## 📝 Development Workflow
 
-### Production Flow
+### Local Development Setup
 
-1. Create GitHub release with version tag (e.g., `v1.0.0`)
-2. Workflow promotes dev images to `prod-<version>` tags
-3. Images deployed by digest to `runner-prod` namespace
-4. Smoke tests verify deployment
+1. **Clone repository and navigate to service**
+2. **Configure AWS and EKS access**
+3. **Set up environment variables in `.env`**
+4. **Build and push runner images to ECR**
+5. **Run controller locally**
+6. **Test with API calls**
 
-## 🤝 Contributing
+### Building New Runner Images
 
-1. Create feature branch
-2. Make changes and test locally
-3. Ensure tests pass: `make test`
-4. Push and create pull request
-5. CI will run automated tests
+When you update runner code:
 
-## 📄 License
+```bash
+# Build and push specific runner
+docker buildx build --platform linux/amd64 \
+  -t <ecr-registry>/peerprep-code-exec-runners-dev/python:latest \
+  ./runners/python-runner --push
 
-See LICENSE file in repository root.
+# Or use Makefile to build all
+make build-push-runners
+```
+
+### Adding a New Language
+
+1. Create new runner directory: `runners/<language>-runner/`
+2. Add Dockerfile and runner script
+3. Update `LANGUAGE_IMAGES` in `controller/app/main.py`
+4. Add to `RUNNERS` list in `Makefile`
+5. Create ECR repository: `make create-ecr-repos`
+6. Build and push: `make build-push-runners`
+
+## 🚧 Current Limitations
+
+- **Production deployment**: IRSA (IAM Roles for Service Accounts) not yet implemented
+- **CI/CD**: No automated GitHub Actions workflow yet
+- **Network policies**: Not enforced (cluster-dependent)
+- **Monitoring**: No built-in metrics or dashboards
+- **Auto-scaling**: Manual scaling only
+- **Multi-region**: Single region deployment only
 
 ## 🆘 Support
 
 For issues or questions:
-- Check troubleshooting section
-- Review logs: `kubectl logs -n runner-dev -l app=code-execution-controller`
-- Open an issue in the repository
+- Review the Troubleshooting section above
+- Check controller logs for error messages
+- Verify environment configuration in `.env`
+- Ensure AWS credentials and EKS cluster access are correct
+- Check Kubernetes job status: `kubectl get jobs -n runner-dev`
+- View job logs: `kubectl logs -n runner-dev -l job-name=<job-name>`
+
+## 📚 Additional Resources
+
+- [Kubernetes Jobs Documentation](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
+- [AWS EKS Documentation](https://docs.aws.amazon.com/eks/)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [Docker Buildx Documentation](https://docs.docker.com/buildx/working-with-buildx/)

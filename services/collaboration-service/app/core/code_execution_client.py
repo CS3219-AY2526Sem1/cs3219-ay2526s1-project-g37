@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 CODE_EXEC_SERVICE_URL = os.getenv("CODE_EXEC_SERVICE_URL", "http://code-execution-controller:8000")
-CODE_EXEC_TIMEOUT = os.getenv("JOB_TIMEOUT", 30)
+CODE_EXEC_TIMEOUT = int(os.getenv("JOB_TIMEOUT", 30))
 
 class CodeExecutionClient:
     def __init__(self, base_url: str = CODE_EXEC_SERVICE_URL):

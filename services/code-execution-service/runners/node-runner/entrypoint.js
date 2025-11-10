@@ -2,7 +2,6 @@
 
 const { exec } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
 // Get environment variables
 const codeB64 = process.env.CODE_B64 || '';

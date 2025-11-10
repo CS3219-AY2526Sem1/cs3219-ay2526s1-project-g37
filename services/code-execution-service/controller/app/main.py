@@ -9,7 +9,7 @@ import logging
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from kubernetes import client, config
+from kubernetes import client
 from kubernetes.client.rest import ApiException
 from typing import Optional
 from pydantic import BaseModel

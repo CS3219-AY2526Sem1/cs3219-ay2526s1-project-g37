@@ -5,10 +5,10 @@ metadata:
   namespace: runner-dev
 spec:
   hard:
-    requests.cpu: "1" # 5 pods × 100m = 0.5 CPU, buffer = 1 CPU
-    requests.memory: "1Gi" # 5 pods × 128Mi = 0.64Gi, buffer = 1Gi
-    limits.cpu: "3" # 5 pods × 500m = 2.5 CPU, buffer = 3 CPU
-    limits.memory: "2Gi" # 5 pods × 256Mi = 1.28Gi, buffer = 2Gi
+    requests.cpu: "1" # 5 pods × 100m = 0.5 CPU, + buffer = 1 CPU
+    requests.memory: "1Gi" # 5 pods × 128Mi = 0.64Gi, + buffer = 1Gi
+    limits.cpu: "3" # 5 pods × 500m = 2.5 CPU, + buffer = 3 CPU
+    limits.memory: "2Gi" # 5 pods × 256Mi = 1.28Gi, + buffer = 2Gi
     pods: "5"
 ---
 apiVersion: v1
