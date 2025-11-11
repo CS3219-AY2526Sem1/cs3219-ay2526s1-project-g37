@@ -74,7 +74,6 @@ cs3219-ay2526s1-project-g37/
 ```
 
 ## Credits
-This project is developed by Group G37 for the CS3219 course at NUS. Thanks to all members for their contributions to this successful project, as well as the teaching team for their support!
-
+This project is developed by Group G37 for the CS3219 course at NUS. Thanks to all members for their contributions to this successful project, as well as the teaching team for their support :)
 
 
