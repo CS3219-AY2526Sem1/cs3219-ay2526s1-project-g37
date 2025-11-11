@@ -61,6 +61,7 @@ declare -A SERVICES=(
     ["collaboration"]="peerprep-collaboration-service|peerprep-collaboration-service-3ass1arq|peerprep-collaboration|collaboration-service|collaboration-service:latest"
     ["matching"]="peerprep-matching-service|peerprep-matching-service-fm7d6s0v|peerprep-matching|matching-service|matching-service:latest"
     ["middleware"]="peerprep-middleware-service|peerprep-middleware-service-9c288i3p|peerprep-middleware|middleware-service|middleware-service:latest"
+    ["codeexec"]="peerprep-code-exec-service|peerprep-code-exec-service-ynty60d8|peerprep-code-exec|code-exec-service|code-exec-service:latest"
 )
 
 # Get AWS Account ID (do this once at the start)
