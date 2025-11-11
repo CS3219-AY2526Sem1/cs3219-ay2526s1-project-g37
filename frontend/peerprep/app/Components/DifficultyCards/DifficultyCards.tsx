@@ -1,8 +1,8 @@
 import { Grid, useMantineTheme } from "@mantine/core";
 import StatsCard from "../StatsCard";
 import { useEffect, useState } from "react";
-import { DIFFICULTYCOLOR, STAT_DIFFICULTIES } from "~/Constants/Constants";
-import { useQuestionService } from "~/Services/QuestionService";
+import { DIFFICULTYCOLOR } from "~/Constants/Constants";
+import { STAT_DIFFICULTIES } from "~/Constants/Constants";
 
 export default function DifficultyCards(props: {data?: { [key: string]: number }, objectName?: string}) {
     const theme = useMantineTheme();
@@ -27,7 +27,7 @@ export default function DifficultyCards(props: {data?: { [key: string]: number }
               color={theme.colors.gray[0]}
             />
           </Grid.Col>
-          { questionStats && Object.keys(questionStats).map((level) => (
+          { questionStats && STAT_DIFFICULTIES.map((level) => (
             <Grid.Col span={{ base: 6, md: 2 }} key={level}>
               <StatsCard 
                 title={level}
