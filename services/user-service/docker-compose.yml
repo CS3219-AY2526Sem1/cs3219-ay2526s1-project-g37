@@ -1,7 +1,7 @@
 services:
   # 1. POSTGRES SERVICE
   postgres-service-dev:
-    image: postgres:latest
+    image: postgres:16
     profiles: ["dev"]
     container_name: user-postgres-service-dev
     restart: always
@@ -15,7 +15,6 @@ services:
       test: ["CMD", "pg_isready", "-U", "${USER_DB_USER}"]
       interval: 2s
       retries: 10
-
 
   # 3. USER SERVICE
   user-service-dev:

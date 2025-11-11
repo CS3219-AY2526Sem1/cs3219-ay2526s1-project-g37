@@ -11,7 +11,6 @@ interface AuthContextType {
     isEmailUser: boolean;
     isGoogleUser: boolean;
     currentUser: User | null;
-    displayName: string | null;
     userId: string | null;
     tokenId: string | null;
     setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
@@ -25,7 +24,6 @@ const AuthContext = React.createContext<AuthContextType>({
     isEmailUser: false,
     isGoogleUser: false,
     currentUser: null,
-    displayName: null,
     userId: null,
     tokenId: null,
     setCurrentUser: () => {},
@@ -50,7 +48,6 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
     const [userId, setUserId] = useState<string | null>(null);
     const [isEmailUser, setIsEmailUser] = useState(false);
     const [isGoogleUser, setIsGoogleUser] = useState(false);
-    const [displayName, setDisplayName] = useState<string | null>(null);
     const [tokenId, setTokenId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -66,7 +63,7 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
     async function initializeUser(user: User | null) {
         if (user) {
             setCurrentUser(user);
-            setDisplayName(user.displayName);
+
             setUserId(user.uid);
 
             const token = await user.getIdToken();
@@ -85,7 +82,6 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
             setUserLoggedIn(true);
         } else {
             setCurrentUser(null);
-            setDisplayName(null);
             setUserId(null);
             setUserLoggedIn(false);
         }
@@ -98,7 +94,6 @@ export function AuthProvider({ children }: React.PropsWithChildren<unknown>) {
         isEmailUser,
         isGoogleUser,
         currentUser,
-        displayName,
         userId,
         tokenId,
         setCurrentUser,

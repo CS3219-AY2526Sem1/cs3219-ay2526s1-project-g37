@@ -50,7 +50,17 @@ export const doSignInWithEmailAndPassword = (
     email: AuthCredentials["email"],
     password: AuthCredentials["password"]
 ): Promise<import("firebase/auth").UserCredential> => {
-    return signInWithEmailAndPassword(auth, email, password);
+    return signInWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
+        await fetch(`${import.meta.env.VITE_AUTH_ROUTER_URL}/users/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${await auth?.currentUser?.getIdToken()}`,
+            },
+            body: JSON.stringify({ uuid: auth?.currentUser?.uid, username: userCredential.user.displayName }),
+        });
+        return userCredential;
+    });
 };
 
 export const doSignInWithGoogle = async () => {
@@ -59,6 +69,15 @@ export const doSignInWithGoogle = async () => {
         const isNewUser = getAdditionalUserInfo(result)?.isNewUser;
         if (isNewUser) {
             await fetch(`${import.meta.env.VITE_AUTH_ROUTER_URL}/users/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${await auth?.currentUser?.getIdToken()}`,
+                },
+                body: JSON.stringify({ uuid: auth?.currentUser?.uid, username: result.user.displayName }),
+            });
+        } else {
+            await fetch(`${import.meta.env.VITE_AUTH_ROUTER_URL}/users/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

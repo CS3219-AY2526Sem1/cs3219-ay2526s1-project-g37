@@ -24,11 +24,12 @@
       - QUESTION_S3_BUCKET_NAME=${QUESTION_S3_BUCKET_NAME}
       - QUESTION_AWS_REGION=${QUESTION_AWS_REGION}
       - QUESTION_CLOUDFRONT_DOMAIN=${QUESTION_CLOUDFRONT_DOMAIN}
+      - QUESTION_CORS_ORIGINS=${QUESTION_CORS_ORIGINS}
     command: uvicorn app.main:app --host 0.0.0.0 --port ${QUESTIONS_PORT}
 
     healthcheck:
       test: ["CMD", "curl", "-f", "-s", "http://localhost:${QUESTIONS_PORT}/docs"]
-      interval: 10s
+      interval: 180s
       timeout: 3s
       retries: 3
       start_period: 5s
@@ -57,6 +58,7 @@
       - QUESTION_S3_BUCKET_NAME=${QUESTION_S3_BUCKET_NAME}
       - QUESTION_AWS_REGION=${QUESTION_AWS_REGION}
       - QUESTION_CLOUDFRONT_DOMAIN=${QUESTION_CLOUDFRONT_DOMAIN}
+      - QUESTION_CORS_ORIGINS=${QUESTION_CORS_ORIGINS}
     volumes:
       - .:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port ${QUESTIONS_PORT} --reload
@@ -65,7 +67,7 @@
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "-s", "http://localhost:${QUESTIONS_PORT}/docs"]
-      interval: 10s
+      interval: 180s
       timeout: 3s
       retries: 3
       start_period: 5s

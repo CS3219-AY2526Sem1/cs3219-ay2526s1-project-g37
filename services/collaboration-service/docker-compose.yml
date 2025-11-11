@@ -12,6 +12,9 @@ services:
     container_name: collaboration-service-prod
     ports:
       - "8000:8000"
+    environment:
+      - COLLAB_CORS_ORIGINS=${COLLAB_CORS_ORIGINS}
+      - CODE_EXEC_SERVICE_URL=${CODE_EXEC_SERVICE_URL}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
   # ----------------------------------------------------------------------
@@ -26,6 +29,9 @@ services:
     container_name: collaboration-service-dev
     ports:
       - "8000:8000"
+    environment:
+      - COLLAB_CORS_ORIGINS=${COLLAB_CORS_ORIGINS}
+      - CODE_EXEC_SERVICE_URL=${CODE_EXEC_SERVICE_URL}
     volumes:
       - .:/app
 
