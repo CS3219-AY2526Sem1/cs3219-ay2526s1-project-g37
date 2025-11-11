@@ -113,6 +113,7 @@ def get_user_question_history_stats_endpoint(user_id: str):
     try:
         stats = get_user_question_history_stats(user_id)
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Failed to retrieve user question history statistics")
     return stats
 

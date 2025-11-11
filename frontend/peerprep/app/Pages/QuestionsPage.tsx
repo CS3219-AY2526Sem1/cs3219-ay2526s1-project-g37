@@ -113,7 +113,7 @@ export default function QuestionsPage() {
       const updatedStats: { [key: string]: number } = { ...data };
       STAT_DIFFICULTIES.forEach((level) => {
         if (!updatedStats[level]) {
-          updatedStats[level] = -1;
+          updatedStats[level] = 0;
         }
       });
       setQuestionStats(updatedStats);
