@@ -2,13 +2,19 @@ import { Modal, Button, PasswordInput, TextInput, Box, Text } from "@mantine/cor
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import userCircle from "../../assets/images/user-circle-svgrepo-com.svg";
-import { doPasswordChange, doUpdateUserProfile } from "../../Firebase/helper";
+import { doPasswordChange } from "../../Firebase/helper";
 import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
+import { useUserService } from "../../Services/UserService";
 
 export default function EditProfileModal(props: { displayName: string | null }) {
     const [opened, { open, close }] = useDisclosure(false);
     const [username, setUsername] = useState(props.displayName || "");
+    const { updateUsername } = useUserService();
+
+    useEffect(() => {
+        setUsername(props.displayName || "");
+    }, [props.displayName]);
 
     const form = useForm({
         initialValues: {
@@ -29,7 +35,7 @@ export default function EditProfileModal(props: { displayName: string | null }) 
     const handleSubmit = async (values: typeof form.values) => {
         try {
             if (values.username !== username) {
-                await doUpdateUserProfile(values.username);
+                await updateUsername(values.username);
                 notifications.show({
                     title: "Success",
                     message: "Username updated successfully!",
