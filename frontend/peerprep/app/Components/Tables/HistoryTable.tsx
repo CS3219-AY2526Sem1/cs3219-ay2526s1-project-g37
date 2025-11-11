@@ -60,12 +60,12 @@ export default function HistoryTable({
   return (
     <Card shadow="sm" padding="lg">
       <Text fw={1000} size="xl" c="white" mb={'xs'}>
-        Interviews
+        Sessions 
       </Text>
       <Divider />
       { data.length === 0 ? (
         <Text align="center" mt="md">
-          No interview history found, start a new session today!
+          No session history found, start a new session today!
         </Text>
       ) : (
         <>
