@@ -15,8 +15,8 @@ import { PAGE_SIZE } from "~/Constants/Constants";
 
 export function meta() {
   return [
-    { title: "PeerPrep - Homepage" },
-    { name: "description", content: "Welcome to PeerPrep!" },
+    { title: "PeerPrep - Questions" },
+    { name: "description", content: "Browse and manage coding questions." },
   ];
 }
 
@@ -102,7 +102,7 @@ export default function QuestionsPage() {
 
   return (
     <Grid>
-      <Grid.Col span={12}>
+      <Grid.Col span={{ base: 12, md: 10 }} offset={{ md: 1 }}>
         <Grid gutter="md" align="center">
           <DifficultyCards />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
@@ -121,7 +121,7 @@ export default function QuestionsPage() {
           </Grid.Col>
         </Grid>
       </Grid.Col>
-      <Grid.Col span={12}>
+      <Grid.Col span={{ base: 12, md: 10 }} offset={{ md: 1 }}>
         <QuestionsTable
           data={data}
           totalPages={totalPages}

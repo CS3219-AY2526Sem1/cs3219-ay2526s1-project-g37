@@ -3,6 +3,12 @@ import { type Labels, useQuestionService } from "~/Services/QuestionService";
 import QuestionForm from "~/Components/QuestionForm/QuestionForm";
 import { notifications } from "@mantine/notifications";
 
+export function meta() {
+  return [
+    { title: "PeerPrep - Add Question" },
+    { name: "description", content: "Add a new question to the database." },
+  ];
+}
 
 /**
  * Add Question Page component

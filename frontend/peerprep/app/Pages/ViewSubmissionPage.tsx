@@ -10,6 +10,13 @@ import { Editor } from "@monaco-editor/react";
 import CustomBadge from "~/Components/LanguageBadge/LanguageBadge";
 import { CODE_EDITOR_LANGUAGES } from "~/Constants/Constants";
 
+export function meta() {
+  return [
+    { title: "PeerPrep - View Submission" },
+    { name: "description", content: "View details of a specific submission." },
+  ];
+}
+
 export default function ViewSubmissionPage() {
   const params = useParams();
   const navigate = useNavigate();

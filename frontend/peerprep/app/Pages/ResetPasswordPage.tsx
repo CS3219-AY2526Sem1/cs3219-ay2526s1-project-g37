@@ -3,6 +3,18 @@ import { Alert, Button, Center, Stack, TextInput, Text } from "@mantine/core";
 import { doPasswordReset } from "~/Firebase/helper";
 import { useNavigate } from "react-router";
 
+export function meta() {
+    return [
+        { title: "PeerPrep - Reset Password" },
+        { name: "description", content: "Reset your PeerPrep account password." },
+    ];
+}
+
+
+/**
+ * ResetPasswordPage component
+ * @returns JSX.Element
+ */
 export default function ResetPasswordPage() {
     const [email, setEmail] = React.useState("");
     const [passwordReset, setPasswordReset] = React.useState(false);

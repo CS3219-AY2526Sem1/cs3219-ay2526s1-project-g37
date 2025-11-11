@@ -14,8 +14,8 @@ import { useUserService, type UserDetails } from '~/Services/UserService';
 
 export function meta() {
   return [
-    { title: 'PeerPrep - Homepage' },
-    { name: 'description', content: 'Welcome to PeerPrep!' },
+    { title: "PeerPrep - User Page" },
+    { name: "description", content: "View your interview history and manage sessions." },
   ];
 }
 
@@ -101,7 +101,7 @@ export default function UserPage() {
 
   return (
     <Grid>
-      <Grid.Col span={12}>
+      <Grid.Col span={{ base: 12, md: 10 }} offset={{ md: 1 }}>
         <Grid gutter="md" align="center">
           <DifficultyCards />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
@@ -117,7 +117,7 @@ export default function UserPage() {
           </Grid.Col>
         </Grid>
       </Grid.Col>
-      <Grid.Col span={12}>
+      <Grid.Col span={{ base: 12, md: 10 }} offset={{ md: 1 }}>
         <HistoryTable
           data={data}
           totalPages={totalPages}

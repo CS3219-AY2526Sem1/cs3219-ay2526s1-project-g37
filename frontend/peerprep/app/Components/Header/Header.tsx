@@ -53,7 +53,7 @@ export default function Header() {
 
   return (
     <header className={classes.header}>
-      <Container size={"md"} className={classes.inner}>
+      <Container size={"xl"} className={classes.inner}>
         <Group>
           <img
             src={logo}
