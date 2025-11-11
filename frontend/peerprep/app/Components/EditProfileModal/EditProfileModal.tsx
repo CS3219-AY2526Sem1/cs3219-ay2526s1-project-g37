@@ -6,8 +6,10 @@ import { doPasswordChange } from "../../Firebase/helper";
 import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { useUserService } from "../../Services/UserService";
+import { useAuth } from "~/Context/AuthContext";
 
 export default function EditProfileModal(props: { displayName: string | null }) {
+    const { isGoogleUser } = useAuth();
     const [opened, { open, close }] = useDisclosure(false);
     const [username, setUsername] = useState(props.displayName || "");
     const { updateUsername } = useUserService();
@@ -89,12 +91,14 @@ export default function EditProfileModal(props: { displayName: string | null }) 
                         placeholder="Enter your password"
                         mt="md"
                         description="Leave empty to keep current password"
+                        disabled={isGoogleUser}
                         {...form.getInputProps("password")}
                     />
                     <PasswordInput
                         label="Confirm Password"
                         placeholder="Confirm your password"
                         mt="md"
+                        disabled={isGoogleUser}
                         {...form.getInputProps("confirmPassword")}
                     />
                     <Button type="submit" fullWidth mt="md">
