@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router';
 import DifficultyCards from '~/Components/DifficultyCards/DifficultyCards';
 import { useAuth } from '~/Context/AuthContext';
 import { useUserService, type UserDetails } from '~/Services/UserService';
+import { STAT_DIFFICULTIES } from '~/Constants/Constants';
 
 export function meta() {
   return [
@@ -40,6 +41,9 @@ export default function UserPage() {
   const [data, setData] = useState<InterviewHistory[]>([]);
 
   const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const [attemptStats, setAttemptStats] = useState<{ [key: string]: number }>({});
+  const { getAttemptHistoryStats } = useQuestionService();
 
   useEffect(() => {
     // Fetch questions list for user from the API
@@ -99,11 +103,27 @@ export default function UserPage() {
     }
   };
 
+  useEffect(() => {
+    (async () => {      
+      const stats = await getAttemptHistoryStats(userId);
+      console.log("Fetched attempt stats:", stats);
+            
+      //set default values for difficulties with zero questions
+      const updatedStats: { [key: string]: number } = { ...stats };
+      STAT_DIFFICULTIES.forEach((level) => {
+        if (!updatedStats[level]) {
+          updatedStats[level] = 0;
+        }
+      });
+      setAttemptStats(updatedStats);
+    })();
+  }, [userId]);
+
   return (
     <Grid>
       <Grid.Col span={12}>
         <Grid gutter="md" align="center">
-          <DifficultyCards />
+          <DifficultyCards data={attemptStats} objectName="Attempts" />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
             {isAdmin && <Button 
               color="#dfdfdf" 

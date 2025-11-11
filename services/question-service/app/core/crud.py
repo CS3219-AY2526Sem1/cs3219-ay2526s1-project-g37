@@ -357,10 +357,10 @@ def get_user_question_history_stats(user_id: str) -> Dict[str, int]:
             SELECT q.difficulty, COUNT(*)
             FROM question_attempts qa
             JOIN questions q ON q.id = qa.question_id 
-            WHERE user_id=%s OR collaborator_id=%s
+            WHERE user_id=%s
             GROUP BY q.difficulty
             """,
-            (user_id, user_id),
+            (user_id,),
         )
         rows = cur.fetchall()
 

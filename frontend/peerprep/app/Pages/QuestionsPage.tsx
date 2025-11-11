@@ -12,6 +12,7 @@ import { useQuestionService } from "~/Services/QuestionService";
 import { notifications } from "@mantine/notifications";
 import DifficultyCards from "~/Components/DifficultyCards/DifficultyCards";
 import { PAGE_SIZE } from "~/Constants/Constants";
+import { STAT_DIFFICULTIES } from "~/Constants/Constants";
 
 export function meta() {
   return [
@@ -46,6 +47,9 @@ export default function QuestionsPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearchQuery] = useDebouncedValue(searchQuery, 500);
 
+  const [questionStats, setQuestionStats] = useState<{ [key: string]: number }>({});
+  const { fetchQuestionStats } = useQuestionService();
+  
   useEffect(() => {
     // Fetch the questions list from the API
     const fetchQuestionsList = async () => {
@@ -100,11 +104,27 @@ export default function QuestionsPage() {
       });
   }
 
+  useEffect(() => {
+    (async () => {      
+      const data = await fetchQuestionStats();
+      console.log("Fetched question stats:", data);
+            
+      //set default values for difficulties with zero questions
+      const updatedStats: { [key: string]: number } = { ...data };
+      STAT_DIFFICULTIES.forEach((level) => {
+        if (!updatedStats[level]) {
+          updatedStats[level] = -1;
+        }
+      });
+      setQuestionStats(updatedStats);
+    })();
+  }, []);
+
   return (
     <Grid>
       <Grid.Col span={12}>
         <Grid gutter="md" align="center">
-          <DifficultyCards />
+          <DifficultyCards data={questionStats} />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
             <Button
               color="#dfdfdf"

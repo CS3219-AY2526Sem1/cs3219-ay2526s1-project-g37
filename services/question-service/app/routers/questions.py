@@ -133,7 +133,6 @@ def get_question_endpoint(qid: str):
         raise HTTPException(status_code=404, detail=f"Question {e.question_id} not found")
     return question_dict
 
-
 @router.put("/{qid}")
 def update_question_endpoint(qid: str, q: QuestionRequest):
     try:
