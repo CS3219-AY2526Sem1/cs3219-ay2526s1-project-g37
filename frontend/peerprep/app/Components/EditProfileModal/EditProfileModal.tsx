@@ -90,12 +90,21 @@ export default function EditProfileModal(props: { displayName: string | null }) 
                         label="Password"
                         placeholder="Enter your password"
                         mt="md"
-                        description="Leave empty to keep current password"
+                        description={
+                            isGoogleUser
+                                ? "Password change disabled for Google users"
+                                : "Leave empty to keep current password"
+                        }
                         disabled={isGoogleUser}
                         {...form.getInputProps("password")}
                     />
                     <PasswordInput
                         label="Confirm Password"
+                        description={
+                            isGoogleUser
+                                ? "Password change disabled for Google users"
+                                : "Re-enter your password to confirm"
+                        }
                         placeholder="Confirm your password"
                         mt="md"
                         disabled={isGoogleUser}
