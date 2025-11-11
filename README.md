@@ -38,7 +38,7 @@ Group Members:
    ```
 
 ## Usage
-1. Go to `http://localhost:3000` to access the PeerPrep frontend.
+1. Go to `http://localhost:5173` to access the PeerPrep frontend.
 2. Register a new account or login with Google Sign-In.
 3. Explore features like starting collaboration sessions, practicing coding questions, and viewing session history.
 
