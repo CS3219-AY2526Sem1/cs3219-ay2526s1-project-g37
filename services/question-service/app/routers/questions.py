@@ -7,6 +7,7 @@ from app.core.crud import (
     check_question_exists,
     get_question,
     get_questions_stats,
+    get_user_question_history_stats,
     get_questions_list,
     get_random_question_by_difficulty_and_topic,
     override_question,
@@ -106,7 +107,15 @@ def get_submitted_solution(attempt_id: str):
     if attempt is None:
         raise HTTPException(status_code=404, detail="Attempt not found")    
     return attempt
-        
+
+@router.get("/history/stats", response_model=Dict[str, int])
+def get_user_question_history_stats_endpoint(user_id: str):
+    try:
+        stats = get_user_question_history_stats(user_id)
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Failed to retrieve user question history statistics")
+    return stats
 
 @router.get("/stats", response_model=Dict[str, int])
 def get_questions_stats_endpoint():
@@ -124,7 +133,6 @@ def get_question_endpoint(qid: str):
     except QuestionNotFoundException as e:
         raise HTTPException(status_code=404, detail=f"Question {e.question_id} not found")
     return question_dict
-
 
 @router.put("/{qid}")
 def update_question_endpoint(qid: str, q: QuestionRequest):
@@ -153,5 +161,4 @@ def delete_question_endpoint(qid: str):
     return {
         "message": "Deleted successfully"
     }
-
 

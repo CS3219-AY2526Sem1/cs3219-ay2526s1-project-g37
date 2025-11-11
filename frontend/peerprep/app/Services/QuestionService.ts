@@ -326,6 +326,19 @@ export function useQuestionService() {
     return response.json();
   }
 
+  async function getAttemptHistoryStats(userId: string) {
+    const response = await fetch(`${API_BASE_URL}/questions/history/stats?user_id=${userId}`, {
+      headers: {
+        Authorization: `Bearer ${tokenId}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch attempt history stats');
+    } 
+    return response.json();
+  }
+
   return {
     addQuestion,
     getQuestion,
@@ -339,5 +352,6 @@ export function useQuestionService() {
     getQuestionsListByUser,
     insertAttempt,
     getAttempt,
+    getAttemptHistoryStats,
   };
 }
