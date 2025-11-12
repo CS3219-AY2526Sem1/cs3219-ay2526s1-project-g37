@@ -26,12 +26,15 @@ import Header from "./Components/Header/Header";
 import { AuthProvider } from "./Context/AuthContext";
 import ProtectedRoute from "./Router/ProtectedRoute";
 import { Notifications } from "@mantine/notifications";
+import metaicon from "./assets/images/metaicon.png";
 
 /**
  * Links function to include external stylesheets and fonts
  * @returns Array of link objects for the document head
  */
 export const links: Route.LinksFunction = () => [
+  { rel: "icon", href: metaicon, type: "image/png" },
+  { rel: "apple-touch-icon", href: metaicon },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",

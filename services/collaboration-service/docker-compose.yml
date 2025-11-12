@@ -38,8 +38,12 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   # ----------------------------------------------------------------------
-  # Yjs WebSocket Server (Shared - No Profile)
+  # PeerJS Server (Shared - No Profile)
   #    This service runs in both dev and prod environments by default.
   # ----------------------------------------------------------------------
-
-
+  peerjs-server:
+    image: peerjs/peerjs-server:latest
+    container_name: peerjs-server
+    ports:
+      - "9000:9000"
+    command: peerjs --port 9000 --key peerjs --allow_discovery

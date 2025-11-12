@@ -25,6 +25,7 @@ export default function Signup() {
 
         validate: {
             email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+            username: (value) => (value.trim().length < 3 ? "Username must be at least 3 characters" : null),
             password: (value) => (value.length < 6 ? "Password must be at least 6 characters" : null),
         },
     });

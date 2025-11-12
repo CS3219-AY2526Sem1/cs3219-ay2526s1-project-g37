@@ -1,8 +1,20 @@
 import React from "react";
 import { Alert, Button, Center, Stack, TextInput, Text } from "@mantine/core";
 import { doPasswordReset } from "~/Firebase/helper";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 
+export function meta() {
+    return [
+        { title: "PeerPrep - Reset Password" },
+        { name: "description", content: "Reset your PeerPrep account password." },
+    ];
+}
+
+
+/**
+ * ResetPasswordPage component
+ * @returns JSX.Element
+ */
 export default function ResetPasswordPage() {
     const [email, setEmail] = React.useState("");
     const [passwordReset, setPasswordReset] = React.useState(false);
@@ -38,6 +50,13 @@ export default function ResetPasswordPage() {
                         error={error ? error : ""}
                     />
                     <Button onClick={handleResetPassword}>Reset Password</Button>
+                    <Center>
+                        <Link to="/">
+                            <Text span td="underline" c="blue" className="cursor-pointer">
+                                Go back to login page
+                            </Text>
+                        </Link>
+                    </Center>
                 </Stack>
             )}
         </Center>
