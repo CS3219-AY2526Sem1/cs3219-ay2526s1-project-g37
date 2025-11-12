@@ -82,3 +82,10 @@ cs3219-ay2526s1-project-g37/
 This project is developed by Group G37 for the CS3219 course at NUS. Thanks to all members for their contributions to this successful project, as well as the teaching team for their support :)
 
 y-redis service is adapted from: [https://github.com/yjs/y-redis](https://github.com/yjs/y-redis)
+
+## AI Use Summary
+Tools Used: Github Copilot (GPT4.1)
+- Auto-complete
+- Debugging
+
+AI was used for debugging and implementation of scripts: deploy-services.yml, deploy-all-services.sh, deploy-all-services.ps1 
