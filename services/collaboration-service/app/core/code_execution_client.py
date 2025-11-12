@@ -135,7 +135,7 @@ class CodeExecutionClient:
 
             # Broadcast result to both users
             logger.info(f"Broadcast code execution result to session {session_id}: {result_msg.status}")
-            await connection_manager.broadcast_to_session(session_id, result_msg)
+            await connection_manager.broadcast_message(session_id, result_msg)
             
         except Exception as e:
             logger.error(f"Error executing code for session {session_id}: {e}")
@@ -147,7 +147,7 @@ class CodeExecutionClient:
                 execution_time=0.0,
                 exit_code=-1
             )
-            await connection_manager.broadcast_to_session(session_id, error_msg)
+            await connection_manager.broadcast_message(session_id, error_msg)
 
 # Singleton instance
 code_execution_client = CodeExecutionClient()

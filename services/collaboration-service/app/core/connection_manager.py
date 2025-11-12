@@ -199,7 +199,7 @@ class ConnectionManager:
         await collaborator_q.put(connect_msg)
         
         # Also broadcast via Redis for other instances
-        await self._broadcast_message(session_id, connect_msg, exclude_user=user_id)
+        await self.broadcast_message(session_id, connect_msg, exclude_user=user_id)
         
         # Notify this user that the other user has already connected
         await out_q.put(CollaboratorConnectMessage())
@@ -242,7 +242,7 @@ class ConnectionManager:
         await collaborator_q.put(disconnect_msg)
         
         # Broadcast via Redis
-        await self._broadcast_message(session_id, disconnect_msg, exclude_user=user_id)
+        await self.broadcast_message(session_id, disconnect_msg, exclude_user=user_id)
     
     async def on_session_ended(self, session_id: str):
         """
@@ -297,7 +297,20 @@ class ConnectionManager:
             await collaborator_q.put(msg)
         
         # Broadcast via Redis for cross-instance delivery
-        await self._broadcast_message(session_id, msg, exclude_user=user_id)
+        await self.broadcast_message(session_id, msg, exclude_user=user_id)
+
+    async def broadcast_message(self, session_id: str, msg: Message, exclude_user: str = None):
+        """Broadcast message to all users in session (local + remote)"""
+        
+        # Local delivery
+        if session_id in self.active_connections:
+            for user_id, queue in self.active_connections[session_id].items():
+                if user_id != exclude_user and queue is not None:
+                    await queue.put(msg)
+        
+        # Redis delivery
+        print(f"[broadcast_message] Publishing to Redis")
+        await self._broadcast_message(session_id, msg, exclude_user)
 
     async def _broadcast_message(self, session_id: str, msg: Message, exclude_user: str = None):
         """

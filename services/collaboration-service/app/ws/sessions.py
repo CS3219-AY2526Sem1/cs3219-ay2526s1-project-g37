@@ -55,7 +55,7 @@ async def websocket_endpoint(ws: WebSocket, session_id: str, user_id: str = Quer
                     
                     # Send "code running" message to both users
                     running_msg = CodeRunningMessage()
-                    await connection_manager.broadcast_to_session(session_id, running_msg)
+                    await connection_manager.broadcast_message(session_id, running_msg)
                     
                     # Execute code asynchronously
                     asyncio.create_task(code_execution_client.execute_and_broadcast_result(
