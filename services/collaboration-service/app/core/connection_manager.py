@@ -30,7 +30,7 @@ class ConnectionManager:
         id = next((uid for uid in session_data if uid != user_id), None)
         if id is None:
             return None
-        return session_data[id]
+        return session_data[id], id
         
     async def on_connect(self, session_id: str, user_id: str, out_q: asyncio.Queue):
         if session_id not in self.active_connections:
@@ -41,7 +41,7 @@ class ConnectionManager:
 
         self.active_connections[session_id][user_id] = out_q
 
-        collaborator_q = self._get_collaborator_q(session_id, user_id)
+        collaborator_q, _ = self._get_collaborator_q(session_id, user_id)
 
         if collaborator_q is None:
             return None
@@ -61,7 +61,7 @@ class ConnectionManager:
 
         self.active_connections[session_id][user_id] = None
 
-        collaborator_q = self._get_collaborator_q(session_id, user_id)
+        collaborator_q, _ = self._get_collaborator_q(session_id, user_id)
 
         if collaborator_q is None:
             return None
@@ -78,17 +78,28 @@ class ConnectionManager:
             del self.user_sessions[user_id]
         
     async def on_message(self, session_id: str, user_id: str, msg: Message):
-        collaborator_q = self._get_collaborator_q(session_id, user_id)
+        collaborator_q, _ = self._get_collaborator_q(session_id, user_id)
 
         if collaborator_q is None:
             return None
 
         await collaborator_q.put(msg)
+    
+    async def broadcast_to_session(self, session_id: str, msg: Message):
+        """Send a message to all users in a session"""
+        if session_id not in self.active_connections:
+            raise SessionNotFoundError()
+        
+        session_data = self.active_connections[session_id]
+        for _, queue in session_data.items():
+            if queue is not None:
+                await queue.put(msg)
 
     def generate_uuid(self, user1: str, user2: str) -> str:
-        namespace = uuid.NAMESPACE_DNS  
-        seed = ''.join(sorted([user1, user2]))
-        return str(uuid.uuid5(namespace, seed))
+        # namespace = uuid.NAMESPACE_DNS  
+        # seed = ''.join(sorted([user1, user2]))
+        # return str(uuid.uuid5(namespace, seed))
+        return str(uuid.uuid4())
     
     def get_question(self, session_id: str) -> QuestionBase64Images:
         if session_id not in self.questions:
@@ -97,9 +108,21 @@ class ConnectionManager:
     
     def get_session_id(self, user_id: str) -> str:
         if user_id not in self.user_sessions:
-            raise UserNotFoundError()
+            return ""
         return self.user_sessions[user_id]
     
+    def get_session_metadata(self, session_id: str, user_id: str):
+        if session_id not in self.questions:
+            raise SessionNotFoundError()
+
+        _, id = self._get_collaborator_q(session_id, user_id)
+
+        return {
+            "language": self.questions[session_id].language,
+            "created_at": self.questions[session_id].created_at,
+            "collaborator_id": id
+        }
+
     def __str__(self):
         return f"ConnectionManager(active_connections={self.active_connections}, questions={self.questions}, user_sessions={self.user_sessions})"
 

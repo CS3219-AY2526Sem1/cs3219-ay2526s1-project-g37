@@ -1,18 +1,58 @@
 services:
+  # 1. POSTGRES SERVICE
+  postgres-service-dev:
+    image: postgres:16
+    profiles: ["dev"]
+    container_name: user-postgres-service-dev
+    restart: always
+    ports:
+      - "${USER_DB_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${USER_DB_NAME}
+      - POSTGRES_USER=${USER_DB_USER}
+      - POSTGRES_PASSWORD=${USER_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${USER_DB_USER}"]
+      interval: 2s
+      retries: 10
+
+  # 3. USER SERVICE
   user-service-dev:
     profiles: ["dev"]
     build:
-      context: . # Build using the Dockerfile in the current folder
+      context: .
       dockerfile: Dockerfile
     container_name: user-service-dev
     ports:
-      - "4000:4000"
+      - "${USER_PORT}:8003"
     volumes:
-      - .:/app # Mount code for hot-reloading
-      - /app/node_modules # Add this anonymous volume
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      postgres-service-dev:
+        condition: service_healthy
     environment:
-      - PORT=${USER_PORT}
-      - QUESTION_SERVICE_URL=${AUTH_QUESTION_SERVICE_URL}
-      - MATCHING_SERVICE_URL=${AUTH_MATCHING_SERVICE_URL}
-      - COLLAB_SERVICE_URL=${AUTH_COLLAB_SERVICE_URL}
-      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+      - USER_PORT=8003
+      - USER_DB_HOST=postgres-service-dev
+      - USER_DB_USER=${USER_DB_USER}
+      - USER_DB_PASSWORD=${USER_DB_PASSWORD}
+      - USER_DB_NAME=${USER_DB_NAME}
+      - USER_DB_PORT=5432
+
+  user-service-prod:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: user-service:latest
+    container_name: user-service-prod
+    ports:
+      - "${USER_PORT}:8003"
+    environment:
+      - USER_PORT=8003
+      - USER_DB_HOST=${USER_DB_HOST}
+      - USER_DB_USER=${USER_DB_USER}
+      - USER_DB_PASSWORD=${USER_DB_PASSWORD}
+      - USER_DB_NAME=${USER_DB_NAME}
+      - USER_DB_PORT=${USER_DB_PORT}
+    command: ["npm", "run", "start:user"]  # Skip db:init for prod (DB already initialized on AWS RDS)    

@@ -27,8 +27,16 @@ def get_session_question(session_id: str):
 def get_sessions_by_user(
     user_id: str = Query(..., description="The user ID whose session_id we are looking for")
 ):
+    session_id = connection_manager.get_session_id(user_id)
+    return {"in_session": session_id != "", "session_id": session_id}
+
+@router.get("/{session_id}/metadata")
+def get_session_metadata(
+    session_id: str,
+    user_id: str = Query(..., description="The user ID making the request"),
+):
     try:
-        session_id = connection_manager.get_session_id(user_id)
-        return {"session_id": session_id}
-    except UserNotFoundError as err:
+        metadata = connection_manager.get_session_metadata(session_id, user_id)
+        return metadata
+    except SessionNotFoundError as err:
         raise HTTPException(status_code=404, detail=err.msg)

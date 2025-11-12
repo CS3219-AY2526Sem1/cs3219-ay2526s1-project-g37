@@ -9,26 +9,27 @@
       context: .
       dockerfile: Dockerfile
     container_name: question-service-prod
+    image: question-service:latest
     ports:
       - "${QUESTIONS_PORT}:${QUESTIONS_PORT}" 
     environment:
       - PORT=${QUESTIONS_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
-      - AWS_REGION=${AWS_REGION}
+      - QUESTION_DB_NAME=${QUESTION_DB_NAME}
+      - QUESTION_DB_USER=${QUESTION_DB_USER}
+      - QUESTION_DB_PASSWORD=${QUESTION_DB_PASSWORD}
+      - QUESTION_DB_HOST=${QUESTION_DB_HOST}
+      - QUESTION_DB_PORT=${QUESTION_DB_PORT}
+      - QUESTION_AWS_ACCESS_KEY_ID=${QUESTION_AWS_ACCESS_KEY_ID}
+      - QUESTION_AWS_SECRET_ACCESS_KEY=${QUESTION_AWS_SECRET_ACCESS_KEY}
+      - QUESTION_S3_BUCKET_NAME=${QUESTION_S3_BUCKET_NAME}
+      - QUESTION_AWS_REGION=${QUESTION_AWS_REGION}
+      - QUESTION_CLOUDFRONT_DOMAIN=${QUESTION_CLOUDFRONT_DOMAIN}
+      - QUESTION_CORS_ORIGINS=${QUESTION_CORS_ORIGINS}
     command: uvicorn app.main:app --host 0.0.0.0 --port ${QUESTIONS_PORT}
-    depends_on:
-      postgres-service:
-        condition: service_healthy
+
     healthcheck:
       test: ["CMD", "curl", "-f", "-s", "http://localhost:${QUESTIONS_PORT}/docs"]
-      interval: 10s
+      interval: 180s
       timeout: 3s
       retries: 3
       start_period: 5s
@@ -47,15 +48,17 @@
       - "${QUESTIONS_PORT}:${QUESTIONS_PORT}" 
     environment:
       - PORT=${QUESTIONS_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
-      - AWS_REGION=${AWS_REGION}
+      - QUESTION_DB_NAME=${QUESTION_DB_NAME}
+      - QUESTION_DB_USER=${QUESTION_DB_USER}
+      - QUESTION_DB_PASSWORD=${QUESTION_DB_PASSWORD}
+      - QUESTION_DB_HOST=${QUESTION_DB_HOST}
+      - QUESTION_DB_PORT=${QUESTION_DB_PORT}
+      - QUESTION_AWS_ACCESS_KEY_ID=${QUESTION_AWS_ACCESS_KEY_ID}
+      - QUESTION_AWS_SECRET_ACCESS_KEY=${QUESTION_AWS_SECRET_ACCESS_KEY}
+      - QUESTION_S3_BUCKET_NAME=${QUESTION_S3_BUCKET_NAME}
+      - QUESTION_AWS_REGION=${QUESTION_AWS_REGION}
+      - QUESTION_CLOUDFRONT_DOMAIN=${QUESTION_CLOUDFRONT_DOMAIN}
+      - QUESTION_CORS_ORIGINS=${QUESTION_CORS_ORIGINS}
     volumes:
       - .:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port ${QUESTIONS_PORT} --reload
@@ -64,7 +67,7 @@
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "-s", "http://localhost:${QUESTIONS_PORT}/docs"]
-      interval: 10s
+      interval: 180s
       timeout: 3s
       retries: 3
       start_period: 5s
@@ -77,15 +80,15 @@
     container_name: postgres-service
     restart: always
     ports:
-      - "${DB_PORT}:5432"  # Postgres database
+      - "${QUESTION_DB_PORT}:5432"  # Postgres database
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${QUESTION_DB_NAME}
+      - POSTGRES_USER=${QUESTION_DB_USER}
+      - POSTGRES_PASSWORD=${QUESTION_DB_PASSWORD}
     volumes:
       - ./local-script-db-init:/docker-entrypoint-initdb.d  # Runs populate scripts on first init
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      test: ["CMD", "pg_isready", "-U", "${QUESTION_DB_USER}"]
       interval: 2s
       retries: 10
 
@@ -100,7 +103,7 @@
     volumes:
       - ./local-script-qn-with-img:/init-scripts
     entrypoint: ["sh", "/init-scripts/post_question.sh"]
- 
+    command: uvicorn app.main:app --host 0.0.0.0 --port ${QUESTIONS_PORT} --reload
   api-caller-dev:
     profiles: ["dev"] # Only runs when 'dev' profile is active
     image: badouralix/curl-jq:latest
