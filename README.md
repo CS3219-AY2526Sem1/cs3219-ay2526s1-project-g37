@@ -67,8 +67,11 @@ cs3219-ay2526s1-project-g37/
 │   ├── question-service/      # Question database management service
 │   │   └──...                 # FastAPI server code, database models, etc.
 │   │
-│   └── user-service/          # User data management service
-│       └──...                 # Express server code, User data models, etc.
+│   ├── user-service/          # User data management service
+│   │   └──...                 # Express server code, User data models, etc.
+│   │
+│   └── y-redis/               # Yjs WebSocket server with Redis persistence
+│       └──...                 # Yjs server code, Redis integration, etc.
 │
 ├── .env.example               # Example environment variables file
 ├── docker-compose.yml         # Docker Compose configuration
@@ -78,4 +81,4 @@ cs3219-ay2526s1-project-g37/
 ## Credits
 This project is developed by Group G37 for the CS3219 course at NUS. Thanks to all members for their contributions to this successful project, as well as the teaching team for their support :)
 
-
+y-redis service is adapted from: [https://github.com/yjs/y-redis](https://github.com/yjs/y-redis)

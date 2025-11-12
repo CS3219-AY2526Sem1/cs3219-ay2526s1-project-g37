@@ -38,16 +38,6 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   # ----------------------------------------------------------------------
-  # Yjs WebSocket Server (Shared - No Profile)
-  #    This service runs in both dev and prod environments by default.
-  # ----------------------------------------------------------------------
-  y-websocket-server:
-    image: alokinplc/y-websocket:latest
-    container_name: y-websocket-server
-    ports:
-      - "1234:1234"
-
-  # ----------------------------------------------------------------------
   # PeerJS Server (Shared - No Profile)
   #    This service runs in both dev and prod environments by default.
   # ----------------------------------------------------------------------
