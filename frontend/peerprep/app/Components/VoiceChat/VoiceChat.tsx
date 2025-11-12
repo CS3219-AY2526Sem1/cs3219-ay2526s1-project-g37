@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Peer from "peerjs";
+import { type MediaConnection } from "peerjs";
 
 import unmuteIcon from '../../assets/images/mic-svgrepo-com.svg';
 import muteIcon from '../../assets/images/mic-off-svgrepo-com.svg';
@@ -15,9 +16,39 @@ export default function VoiceChat({ userId, collaboratorId, refreshRefs }: { use
     const localAudioRef = useRef<HTMLAudioElement | null>(null);
     const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
     const peerInstance = useRef<Peer | null>(null);
+    const currentCall = useRef<MediaConnection | null>(null);
+    const isReadyForCall = useRef<boolean>(false);
 
-    // Initialize PeerJS
-    useEffect(() => {
+    // Cleanup function for ending calls
+    const endCall = () => {
+        console.log("Ending call...");
+        
+        // Stop local media tracks
+        const localStream = localAudioRef.current?.srcObject as MediaStream;
+        localStream?.getTracks().forEach(track => track.stop());
+        
+        // Close the current call
+        currentCall.current?.close();
+        currentCall.current = null;
+        
+        // Clear audio sources
+        if (localAudioRef.current) localAudioRef.current.srcObject = null;
+        if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null;
+        
+        setInCall(false);
+        setIsMuted(false);
+        setIsDeafened(false);
+        isReadyForCall.current = false; // Reset ready state
+    };
+
+    // Initialize PeerJS connection
+    const initializePeer = () => {
+        // Destroy existing peer if any
+        if (peerInstance.current) {
+            peerInstance.current.destroy();
+            peerInstance.current = null;
+        }
+
         const peer = new Peer(userId, {
             host: `${import.meta.env.VITE_PEERJS_HOST}`,
             port: parseInt(import.meta.env.VITE_PEERJS_PORT) || 9000,
@@ -32,9 +63,24 @@ export default function VoiceChat({ userId, collaboratorId, refreshRefs }: { use
             console.error("PeerJS Error:", err);
         });
 
+        peer.on("disconnected", () => {
+            console.log("Peer disconnected");
+        });
+
         // Handle incoming calls
         peer.on("call", (call) => {
             console.log("Receiving a call...");
+            
+            // Only accept call if user has clicked "Start Voice Chat"
+            if (!isReadyForCall.current) {
+                console.log("Not ready for call, rejecting...");
+                call.close();
+                return;
+            }
+
+            setInCall(true);
+            currentCall.current = call;
+
             navigator.mediaDevices
                 .getUserMedia({ audio: true, video: false })
                 .then((mediaStream) => {
@@ -43,7 +89,7 @@ export default function VoiceChat({ userId, collaboratorId, refreshRefs }: { use
                         localAudioRef.current.play();
                     }
 
-                    call.answer(mediaStream); // Answer the call with the local audio stream
+                    call.answer(mediaStream);
 
                     call.on("stream", (remoteStream) => {
                         console.log("Received remote stream.");
@@ -54,27 +100,49 @@ export default function VoiceChat({ userId, collaboratorId, refreshRefs }: { use
                     });
 
                     call.on("close", () => {
-                        console.log("Call closed.");
+                        console.log("Call closed by remote peer.");
+                        endCall();
                     });
                 })
                 .catch((err) => {
                     console.error("Failed to get local audio stream:", err);
+                    setInCall(false);
                 });
         });
 
         peerInstance.current = peer;
+    };
 
+    // Initialize PeerJS on mount
+    useEffect(() => {
+        initializePeer();
+
+        // Cleanup on unmount
         return () => {
-            peer.destroy(); // Cleanup on unmount
+            endCall();
+            if (peerInstance.current) {
+                peerInstance.current.destroy();
+                peerInstance.current = null;
+            }
         };
     }, [userId]);
 
     // Handle outgoing calls
     const startCall = () => {
-        setInCall(true);
-
         if (!collaboratorId) {
             console.error("Collaborator ID is missing.");
+            return;
+        }
+
+        // Set ready state when user clicks start
+        isReadyForCall.current = true;
+
+        // Ensure peer is connected before making a call
+        if (!peerInstance.current || peerInstance.current.disconnected || peerInstance.current.destroyed) {
+            console.log("Peer not ready, reinitializing...");
+            initializePeer();
+            // Wait a bit for peer to connect
+            setTimeout(() => startCall(), 1000);
             return;
         }
 
@@ -89,6 +157,9 @@ export default function VoiceChat({ userId, collaboratorId, refreshRefs }: { use
                 const call = peerInstance.current?.call(collaboratorId, mediaStream);
 
                 if (call) {
+                    setInCall(true);
+                    currentCall.current = call;
+
                     call.on("stream", (remoteStream) => {
                         console.log("Received remote stream.");
                         if (remoteAudioRef.current) {
@@ -98,7 +169,8 @@ export default function VoiceChat({ userId, collaboratorId, refreshRefs }: { use
                     });
 
                     call.on("close", () => {
-                        console.log("Call closed.");
+                        console.log("Call closed by remote peer.");
+                        endCall();
                     });
                 }
             })
@@ -153,6 +225,7 @@ export default function VoiceChat({ userId, collaboratorId, refreshRefs }: { use
                             ? <img style={{ height: '24px', width: '24px' }} src={deafenIcon} alt="Deafen Icon" /> 
                             : <img style={{ height: '24px', width: '24px' }} src={undeafenIcon} alt="Undeafen Icon" />}
                     </button>
+                    <button onClick={endCall} style={{ marginLeft: '12px' }}>End Call</button>
                 </>
             )}
             <audio ref={localAudioRef} muted />

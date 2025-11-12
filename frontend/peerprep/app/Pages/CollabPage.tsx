@@ -16,7 +16,6 @@ import {
 import { isLessThanOneMinuteOld } from "~/Utils/Utils";
 import * as Y from "yjs";
 import { useUserService  } from "~/Services/UserService";
-import VoiceChat from "~/Components/VoiceChat/VoiceChat";
 import CollabDisconnectModal from "~/Components/CollabDisconnectModal/CollabDisconnectModal";
 import RedirectModal from "~/Components/CollabModals/RedirectModal";
 import { useDisclosure } from "@mantine/hooks";
