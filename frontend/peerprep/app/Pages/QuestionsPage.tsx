@@ -1,12 +1,9 @@
-import {
-  Grid,
-  Button
-} from "@mantine/core";
+import { Grid, Button } from "@mantine/core";
 
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 import QuestionsTable from "~/Components/Tables/QuestionsTable";
-import type {QuestionHistory} from "../Components/Tables/QuestionsTable";
+import type { QuestionHistory } from "../Components/Tables/QuestionsTable";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "~/Context/AuthContext";
@@ -14,6 +11,8 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { useQuestionService } from "~/Services/QuestionService";
 import { notifications } from "@mantine/notifications";
 import DifficultyCards from "~/Components/DifficultyCards/DifficultyCards";
+import { PAGE_SIZE } from "~/Constants/Constants";
+import { STAT_DIFFICULTIES } from "~/Constants/Constants";
 
 export function meta() {
   return [
@@ -21,7 +20,6 @@ export function meta() {
     { name: "description", content: "Welcome to PeerPrep!" },
   ];
 }
-const PAGE_SIZE = 20;
 
 /**
  * Questions Page component
@@ -32,17 +30,16 @@ export default function QuestionsPage() {
   const navigation = useNavigate();
   const { getQuestionsList, deleteQuestion } = useQuestionService();
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [data, setData] = useState<QuestionHistory[]>([    
+  const [data, setData] = useState<QuestionHistory[]>([
     {
-        id: "test-id-1",
-        name: "Two Sum",
-        dateAdded: "2024-10-01",
-        lastEdited: "2024-10-01",
-        difficulty: "Easy",
-        topic: "Array",
+      id: "test-id-1",
+      name: "Two Sum",
+      dateAdded: "2024-10-01",
+      lastEdited: "2024-10-01",
+      difficulty: "Easy",
+      topic: "Array",
     },
   ]);
-
 
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -50,11 +47,18 @@ export default function QuestionsPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearchQuery] = useDebouncedValue(searchQuery, 500);
 
+  const [questionStats, setQuestionStats] = useState<{ [key: string]: number }>({});
+  const { fetchQuestionStats } = useQuestionService();
+  
   useEffect(() => {
     // Fetch the questions list from the API
     const fetchQuestionsList = async () => {
       try {
-        const data = await getQuestionsList(currentPage, debouncedSearchQuery);
+        const data = await getQuestionsList(
+          currentPage,
+          PAGE_SIZE,
+          debouncedSearchQuery
+        );
         const questionsList: QuestionHistory[] = data.questions;
         console.log("Fetched questions:", questionsList);
         setData(questionsList);
@@ -85,7 +89,9 @@ export default function QuestionsPage() {
           withBorder: true,
         });
         // Refresh the questions list after deletion
-        setData((prevData) => prevData.filter((question) => question.id !== id));
+        setData((prevData) =>
+          prevData.filter((question) => question.id !== id)
+        );
       })
       .catch((error) => {
         console.error("Error deleting question:", error);
@@ -98,15 +104,40 @@ export default function QuestionsPage() {
       });
   }
 
+  useEffect(() => {
+    (async () => {      
+      const data = await fetchQuestionStats();
+      console.log("Fetched question stats:", data);
+            
+      //set default values for difficulties with zero questions
+      const updatedStats: { [key: string]: number } = { ...data };
+      STAT_DIFFICULTIES.forEach((level) => {
+        if (!updatedStats[level]) {
+          updatedStats[level] = 0;
+        }
+      });
+      setQuestionStats(updatedStats);
+    })();
+  }, []);
+
   return (
     <Grid>
       <Grid.Col span={12}>
         <Grid gutter="md" align="center">
-          <DifficultyCards />
+          <DifficultyCards data={questionStats} />
           <Grid.Col span={{ base: 12, md: 2 }} offset={{ md: 2 }}>
-            <Link to="/questions/add">
-              <Button fullWidth>Add Question</Button>
-            </Link>
+            <Button
+              color="#dfdfdf"
+              style={{ marginBottom: "0.5rem" }}
+              fullWidth
+              onClick={() => navigation("/user")}
+            >
+              {" "}
+              Back to Homepage
+            </Button>
+            <Button fullWidth onClick={() => navigation("/questions/add")}>
+              Add Question
+            </Button>
           </Grid.Col>
         </Grid>
       </Grid.Col>

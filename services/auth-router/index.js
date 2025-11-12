@@ -6,17 +6,17 @@ const { admin } = require("./firebase-admin-config");
 const app = express();
 app.use(cors());
 
-const COLLAB_SERVICE_URL = process.env.COLLAB_SERVICE_URL || "http://localhost:8000";
-const MATCHING_SERVICE_URL = process.env.MATCHING_SERVICE_URL || "http://localhost:8001";
-const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL || "http://localhost:8002";
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:8003";
+const COLLAB_SERVICE_URL = process.env.AUTH_COLLAB_SERVICE_URL || "http://localhost:8000";
+const MATCHING_SERVICE_URL = process.env.AUTH_MATCHING_SERVICE_URL || "http://localhost:8001";
+const QUESTION_SERVICE_URL = process.env.AUTH_QUESTION_SERVICE_URL || "http://localhost:8002";
+const USER_SERVICE_URL = process.env.AUTH_USER_SERVICE_URL || "http://localhost:8003";
 
 console.log("--- USER-SERVICE ENVIRONMENT VARIABLES ---");
 console.log("PORT:", process.env.PORT);
-console.log("QUESTION_SERVICE_URL:", process.env.QUESTION_SERVICE_URL);
-console.log("MATCHING_SERVICE_URL:", process.env.MATCHING_SERVICE_URL);
-console.log("COLLAB_SERVICE_URL:", process.env.COLLAB_SERVICE_URL);
-console.log("USER_SERVICE_URL:", process.env.USER_SERVICE_URL);
+console.log("AUTH_QUESTION_SERVICE_URL:", process.env.AUTH_QUESTION_SERVICE_URL);
+console.log("AUTH_MATCHING_SERVICE_URL:", process.env.AUTH_MATCHING_SERVICE_URL);
+console.log("AUTH_COLLAB_SERVICE_URL:", process.env.AUTH_COLLAB_SERVICE_URL);
+console.log("AUTH_USER_SERVICE_URL:", process.env.AUTH_USER_SERVICE_URL);
 console.log(
     "GOOGLE_APPLICATION_CREDENTIALS:",
     process.env.GOOGLE_APPLICATION_CREDENTIALS ? "Exists" : "Does not exist"

@@ -15,3 +15,14 @@ CREATE TABLE questions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE question_attempts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id VARCHAR(255) NOT NULL,
+    question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+    collab_id VARCHAR(255) NOT NULL,
+    attempt_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    language VARCHAR(255) NOT NULL,
+    submitted_solution TEXT,
+    CONSTRAINT uq_user_question UNIQUE(user_id, question_id, collab_id)
+);

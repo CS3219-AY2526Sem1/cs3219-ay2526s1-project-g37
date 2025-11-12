@@ -1,12 +1,14 @@
 // With reference from official Mantine documentation
 // https://ui.mantine.dev/category/headers/
 
-import { Button, Container, Group, Text } from "@mantine/core";
+import { Button, Container, Group } from "@mantine/core";
 import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 import classes from "./Header.module.css";
 import logo from "../../assets/images/logo.svg";
-import { useAuth } from "../../Context/AuthContext";
 import { doSignOut } from "~/Firebase/helper";
+import EditProfileModal from "../EditProfileModal/EditProfileModal";
+import { useUserService } from "~/Services/UserService";
 
 /**
  * Header component
@@ -14,8 +16,26 @@ import { doSignOut } from "~/Firebase/helper";
  */
 export default function Header() {
   const navigate = useNavigate();
-  const { displayName } = useAuth();
+  const { getCurrentUserDetails } = useUserService();
+  const [username, setUsername] = useState<string | null>(null);
 
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const userDetails = await getCurrentUserDetails();
+        console.log("Fetched user details:", userDetails);
+        setUsername(userDetails.username);
+      } catch (error) {
+        console.error("Error fetching username:", error);
+      }
+    };
+    
+    fetchUsername();
+  }, []);
+
+  useEffect(() => {
+    console.log("Header username updated:", username);
+  }, [username]);
   /**
    * Handle sign out action and navigate to login page
    */
@@ -43,7 +63,9 @@ export default function Header() {
           />
         </Group>
         <Group gap={5}>
-          <Text>{displayName || "Empty Name"}</Text>
+          <EditProfileModal 
+            displayName={username} 
+          />
           <Button 
             type="button"
             style={{

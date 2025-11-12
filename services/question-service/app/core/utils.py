@@ -7,13 +7,26 @@ from typing import List, Optional
 
 def get_conn():
     """Establishes and returns a new postgres database connection"""
-    return psycopg.connect(
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT"),
-    )
+    db_host = os.getenv("QUESTION_DB_HOST")
+    
+    # AWS RDS requires SSL connection
+    if db_host and 'rds.amazonaws.com' in db_host:
+        return psycopg.connect(
+            dbname=os.getenv("QUESTION_DB_NAME"),
+            user=os.getenv("QUESTION_DB_USER"),
+            password=os.getenv("QUESTION_DB_PASSWORD"),
+            host=db_host,
+            port=os.getenv("QUESTION_DB_PORT"),
+            sslmode='require'
+        )
+    else:
+        return psycopg.connect(
+            dbname=os.getenv("QUESTION_DB_NAME"),
+            user=os.getenv("QUESTION_DB_USER"),
+            password=os.getenv("QUESTION_DB_PASSWORD"),
+            host=db_host,
+            port=os.getenv("QUESTION_DB_PORT"),
+        )
 
 
 def upload_to_s3(file: bytes, key: str, content_type: Optional[str] = None):
@@ -29,11 +42,11 @@ def upload_to_s3(file: bytes, key: str, content_type: Optional[str] = None):
         raise ValueError("file and key are required")
     s3 = boto3.client(
         "s3",
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        region_name=os.getenv("AWS_REGION"),
+        aws_access_key_id=os.getenv("QUESTION_AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("QUESTION_AWS_SECRET_ACCESS_KEY"),
+        region_name=os.getenv("QUESTION_AWS_REGION"),
     )
-    bucket_name = os.getenv("S3_BUCKET_NAME")
+    bucket_name = os.getenv("QUESTION_S3_BUCKET_NAME")
     put_args = {"Bucket": bucket_name, "Key": key, "Body": file}
     if content_type:
         put_args["ContentType"] = content_type
@@ -55,11 +68,11 @@ def get_from_s3(keys: List[str]) -> List[bytes]:
     
     s3 = boto3.client(
         "s3",
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        region_name=os.getenv("AWS_REGION"),
+        aws_access_key_id=os.getenv("QUESTION_AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("QUESTION_AWS_SECRET_ACCESS_KEY"),
+        region_name=os.getenv("QUESTION_AWS_REGION"),
     )
-    bucket_name = os.getenv("S3_BUCKET_NAME")
+    bucket_name = os.getenv("QUESTION_S3_BUCKET_NAME")
     
     images = []
     for key in keys:
@@ -74,11 +87,11 @@ def delete_from_s3(keys: List[str]):
         return
     s3 = boto3.client(
         "s3",
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        region_name=os.getenv("AWS_REGION")
+        aws_access_key_id=os.getenv("QUESTION_AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("QUESTION_AWS_SECRET_ACCESS_KEY"),
+        region_name=os.getenv("QUESTION_AWS_REGION")
     )
-    bucket_name = os.getenv("S3_BUCKET_NAME")
+    bucket_name = os.getenv("QUESTION_S3_BUCKET_NAME")
     objects_to_delete = [{"Key": key} for key in keys]
     s3.delete_objects(Bucket=bucket_name, Delete={"Objects": objects_to_delete})
 

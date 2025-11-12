@@ -84,11 +84,22 @@ class ConnectionManager:
             return None
 
         await collaborator_q.put(msg)
+    
+    async def broadcast_to_session(self, session_id: str, msg: Message):
+        """Send a message to all users in a session"""
+        if session_id not in self.active_connections:
+            raise SessionNotFoundError()
+        
+        session_data = self.active_connections[session_id]
+        for _, queue in session_data.items():
+            if queue is not None:
+                await queue.put(msg)
 
     def generate_uuid(self, user1: str, user2: str) -> str:
-        namespace = uuid.NAMESPACE_DNS  
-        seed = ''.join(sorted([user1, user2]))
-        return str(uuid.uuid5(namespace, seed))
+        # namespace = uuid.NAMESPACE_DNS  
+        # seed = ''.join(sorted([user1, user2]))
+        # return str(uuid.uuid5(namespace, seed))
+        return str(uuid.uuid4())
     
     def get_question(self, session_id: str) -> QuestionBase64Images:
         if session_id not in self.questions:
