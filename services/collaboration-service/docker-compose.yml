@@ -61,3 +61,20 @@ services:
     ports:
       - "9000:9000"
     command: peerjs --port 9000 --key peerjs --allow_discovery
+
+  y-redis:
+    build:
+      context: ../y-redis
+      dockerfile: Dockerfile
+    container_name: y-redis-server
+    ports:
+      - "3002:3002"
+    command: node ./bin/server.js --no-colors
+    environment:
+      - REDIS=${REDIS}
+      - AUTH_PERM_CALLBACK=${AUTH_PERM_CALLBACK}
+      - AUTH_PUBLIC_KEY=${AUTH_PUBLIC_KEY}
+      - AUTH_PRIVATE_KEY=${AUTH_PRIVATE_KEY}
+    depends_on:
+      redis-collab:
+        condition: service_started

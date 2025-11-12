@@ -8,13 +8,13 @@ services:
     depends_on:
       # - minio
       - redis
-  worker:
-    build: .
-    command: node ./bin/worker.js --no-colors
-    env_file: .env
-    depends_on:
-      # - minio
-      - redis
+  # worker:
+  #   build: .
+  #   command: node ./bin/worker.js --no-colors
+  #   env_file: .env
+  #   depends_on:
+  #     # - minio
+  #     - redis
   redis:
     image: redis:alpine
   # minio:
