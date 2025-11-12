@@ -241,7 +241,7 @@ export default function CollabPage() {
 
     sessionStorage.setItem("sessionEnded", "true");
   };
-
+  
   /**
    * Get editor string from CodeEditor synchronously
    */
@@ -309,6 +309,8 @@ export default function CollabPage() {
               <SessionControlBar
                 user={collaboratorName}
                 onEndSession={handleEndSession}
+                userId={userId!}
+                collaboratorId={sessionMetadata?.collaborator_id ?? ""}
                 onAbandonSession={handleAbandonSession}
                 metadata={sessionMetadata}
               />
