@@ -1,0 +1,72 @@
+name: Create Release on Main Merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper version tagging
+      
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+      
+      - name: Get commit count
+        id: commit
+        run: |
+          # Count commits on main branch
+          COUNT=$(git rev-list --count main)
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+      
+      - name: Generate version tag
+        id: version
+        run: |
+          VERSION="v${{ steps.date.outputs.date }}-build.${{ steps.commit.outputs.count }}"
+          echo "tag=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Get commits since last release
+        id: commits
+        run: |
+          # Get the last release tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [ -z "$LAST_TAG" ]; then
+            # No previous release, get all commits
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            # Get commits since last release
+            COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
+          body: |
+            ## PeerPrep Release ${{ steps.version.outputs.tag }}
+            
+            🚀 Automated release created from main branch merge.
+            
+            ### Recent Changes
+            ${{ steps.commits.outputs.commits }}
+            
+            ### Deployment Information
+            - Build Date: ${{ steps.date.outputs.date }}
+            - Commit: ${{ github.sha }}
+            - Total Commits: ${{ steps.commit.outputs.count }}
+          draft: false
+          prerelease: false
