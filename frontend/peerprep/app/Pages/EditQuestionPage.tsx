@@ -9,6 +9,16 @@ import { useNavigate, useParams } from "react-router";
 import { Loader } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 
+export function meta() {
+  return [
+    { title: "PeerPrep - Edit Question", description: "Edit an existing question." },
+  ];
+}
+
+/**
+ * EditQuestionPage component
+ * @returns JSX.Element
+ */
 export default function EditQuestionPage() {
   const params = useParams();
   const navigate = useNavigate();

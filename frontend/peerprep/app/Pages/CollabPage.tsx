@@ -23,6 +23,11 @@ import CustomBadge from "~/Components/LanguageBadge/LanguageBadge";
 import { RunCodeButton, type CodeExecutionResult } from "~/Components/RunCodeButton/RunCodeButton";
 import { encode } from 'js-base64';
 
+export function meta() {
+  return [
+    { title: "PeerPrep - Collaboration", description: "Collaborate with others in real-time." },
+  ];
+}
 
 /**
  * Collaboration Page component

@@ -8,9 +8,11 @@ Group Members:
 - Foo Tzie Huang
 
 ## Table of Contents
+- [G37 PeerPrep](#g37-peerprep)
+- [Table of Contents](#table-of-contents)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
+- [Getting Started (dev)](#getting-started-dev)
 - [Usage](#usage)
 - [Folder Structure](#folder-structure)
 - [Credits](#credits)
