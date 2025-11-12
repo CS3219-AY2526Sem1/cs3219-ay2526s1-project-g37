@@ -15,7 +15,6 @@ import { isLessThanOneMinuteOld } from "~/Utils/Utils";
 export default function SessionControlBar(props: {
   userId: string;
   collaboratorId: string;
-  refreshRefs: boolean;
   user: string | null;
   onEndSession?: () => void;
   metadata: SessionMetadata;
@@ -86,7 +85,7 @@ export default function SessionControlBar(props: {
       )}
 
       <div style={{ marginLeft: "10px" }}>
-                <VoiceChat userId={props.userId} collaboratorId={props.collaboratorId} refreshRefs={props.refreshRefs} />
+                <VoiceChat userId={props.userId} collaboratorId={props.collaboratorId} />
             </div>
     </div>
   );

@@ -7,9 +7,8 @@ import muteIcon from '../../assets/images/mic-off-svgrepo-com.svg';
 import deafenIcon from '../../assets/images/headset-off-svgrepo-com.svg';
 import undeafenIcon from '../../assets/images/headset-svgrepo-com.svg';
 
-export default function VoiceChat({ userId, collaboratorId, refreshRefs }: { userId: string; collaboratorId: string, refreshRefs: boolean }) {
+export default function VoiceChat({ userId, collaboratorId }: { userId: string; collaboratorId: string }) {
     const [inCall, setInCall] = useState<boolean>(false);
-    const [peerId, setPeerId] = useState<string>("");
     const [isMuted, setIsMuted] = useState<boolean>(false);
     const [isDeafened, setIsDeafened] = useState<boolean>(false);
 
@@ -56,7 +55,6 @@ export default function VoiceChat({ userId, collaboratorId, refreshRefs }: { use
 
         peer.on("open", (id) => {
             console.log(`PeerJS: My peer ID is: ${id}`);
-            setPeerId(id);
         });
 
         peer.on("error", (err) => {
@@ -186,7 +184,7 @@ export default function VoiceChat({ userId, collaboratorId, refreshRefs }: { use
         if (remoteAudioRef.current) {
             console.log("Remote audio ref updated:", remoteAudioRef.current);
         }
-    }, [localAudioRef.current, remoteAudioRef.current, refreshRefs]);
+    }, [localAudioRef.current, remoteAudioRef.current]);
 
     const handleMute = (mute: boolean) => {
         setIsMuted(mute);

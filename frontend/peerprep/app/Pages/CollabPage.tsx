@@ -50,7 +50,6 @@ export default function CollabPage() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [sessionMetadata, setSessionMetadata] =
     useState<SessionMetadata | null>(null);
-  const [refreshRefs, setRefreshRefs] = useState<boolean>(false);
 
   // Get WebSocket readyState from useWebSocket
   const [ isConnected, setIsConnected ] = useState<boolean>(false);
@@ -156,8 +155,6 @@ export default function CollabPage() {
           execution_time: jsonData.execution_time,
           exit_code: jsonData.exit_code,
         });
-      } else if (jsonData.type === "collaborator_disconnect" || jsonData.type === "collaborator_connect") {
-        onRefreshRefs();
       }
     }
   }, [lastMessage]);
@@ -239,11 +236,6 @@ export default function CollabPage() {
 
     sessionStorage.setItem("sessionEnded", "true");
   };
-
-  const onRefreshRefs = () => {
-    console.log("Refreshing refs from CollabPage...");
-    setRefreshRefs((prev) => !prev); // Toggle the state to trigger a refresh
-  };
   
   /**
    * Get editor string from CodeEditor synchronously
@@ -313,8 +305,7 @@ export default function CollabPage() {
                 user={collaboratorName}
                 onEndSession={handleEndSession}
                 userId={userId!}
-                collaboratorId={sessionMetadata?.collaborator_id!}
-                refreshRefs={refreshRefs}
+                collaboratorId={sessionMetadata?.collaborator_id ?? ""}
                 onAbandonSession={handleAbandonSession}
                 metadata={sessionMetadata}
               />
