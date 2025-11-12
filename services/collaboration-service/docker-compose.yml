@@ -41,8 +41,5 @@ services:
   # Yjs WebSocket Server (Shared - No Profile)
   #    This service runs in both dev and prod environments by default.
   # ----------------------------------------------------------------------
-  y-websocket-server:
-    image: alokinplc/y-websocket:latest
-    container_name: y-websocket-server
-    ports:
-      - "1234:1234"
+
+
