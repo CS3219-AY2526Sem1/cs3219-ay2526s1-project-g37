@@ -23,6 +23,11 @@ import CustomBadge from "~/Components/LanguageBadge/LanguageBadge";
 import { RunCodeButton, type CodeExecutionResult } from "~/Components/RunCodeButton/RunCodeButton";
 import { encode } from 'js-base64';
 
+export function meta() {
+  return [
+    { title: "PeerPrep - Collaboration", description: "Collaborate with others in real-time." },
+  ];
+}
 
 /**
  * Collaboration Page component
@@ -236,7 +241,7 @@ export default function CollabPage() {
 
     sessionStorage.setItem("sessionEnded", "true");
   };
-
+  
   /**
    * Get editor string from CodeEditor synchronously
    */
@@ -304,6 +309,8 @@ export default function CollabPage() {
               <SessionControlBar
                 user={collaboratorName}
                 onEndSession={handleEndSession}
+                userId={userId!}
+                collaboratorId={sessionMetadata?.collaborator_id ?? ""}
                 onAbandonSession={handleAbandonSession}
                 metadata={sessionMetadata}
               />

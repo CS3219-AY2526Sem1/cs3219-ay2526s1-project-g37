@@ -1,6 +1,7 @@
 import { Text } from "@mantine/core";
 import { useCollabProvider } from "~/Context/CollabProvider";
 import EndSessionModal from "../CollabModals/EndSessionModal";
+import VoiceChat from "../VoiceChat/VoiceChat";
 import type { SessionMetadata } from "~/Services/CollabService";
 import AbandonSessionModal from "../CollabModals/AbandonSessionModal";
 import { useEffect, useState } from "react";
@@ -12,6 +13,8 @@ import { isLessThanOneMinuteOld } from "~/Utils/Utils";
  * @returns JSX.Element
  */
 export default function SessionControlBar(props: {
+  userId: string;
+  collaboratorId: string;
   user: string | null;
   onEndSession?: () => void;
   metadata: SessionMetadata;
@@ -80,6 +83,10 @@ export default function SessionControlBar(props: {
       ) : (
         <EndSessionModal onEndSession={handleEndSession} />
       )}
+
+      <div style={{ marginLeft: "10px" }}>
+                <VoiceChat userId={props.userId} collaboratorId={props.collaboratorId} />
+            </div>
     </div>
   );
 }
