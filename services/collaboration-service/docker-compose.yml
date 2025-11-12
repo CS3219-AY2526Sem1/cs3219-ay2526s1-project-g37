@@ -15,7 +15,12 @@ services:
     environment:
       - COLLAB_CORS_ORIGINS=${COLLAB_CORS_ORIGINS}
       - CODE_EXEC_SERVICE_URL=${CODE_EXEC_SERVICE_URL}
+      - COLLAB_REDIS_HOST=${COLLAB_REDIS_HOST}
+      - COLLAB_REDIS_PORT=${COLLAB_REDIS_PORT}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      redis-collab:
+        condition: service_started
 
   # ----------------------------------------------------------------------
   # Development Service (Profile: dev)
@@ -32,10 +37,19 @@ services:
     environment:
       - COLLAB_CORS_ORIGINS=${COLLAB_CORS_ORIGINS}
       - CODE_EXEC_SERVICE_URL=${CODE_EXEC_SERVICE_URL}
+      - COLLAB_REDIS_HOST=${COLLAB_REDIS_HOST}
+      - COLLAB_REDIS_PORT=${COLLAB_REDIS_PORT}
     volumes:
       - .:/app
-
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      redis-collab:
+        condition: service_started
+
+  redis-collab:
+    image: redis:latest
+    container_name: redis-collab
+    command: ["redis-server"]
 
   # ----------------------------------------------------------------------
   # PeerJS Server (Shared - No Profile)
@@ -47,3 +61,20 @@ services:
     ports:
       - "9000:9000"
     command: peerjs --port 9000 --key peerjs --allow_discovery
+
+  y-redis:
+    build:
+      context: ../y-redis
+      dockerfile: Dockerfile
+    container_name: y-redis-server
+    ports:
+      - "3002:3002"
+    command: node ./bin/server.js --no-colors
+    environment:
+      - REDIS=${REDIS}
+      - AUTH_PERM_CALLBACK=${AUTH_PERM_CALLBACK}
+      - AUTH_PUBLIC_KEY=${AUTH_PUBLIC_KEY}
+      - AUTH_PRIVATE_KEY=${AUTH_PRIVATE_KEY}
+    depends_on:
+      redis-collab:
+        condition: service_started

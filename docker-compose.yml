@@ -5,5 +5,4 @@ include:
   - services/code-execution-service/docker-compose.yml
   - services/auth-router/docker-compose.yml
   - services/user-service/docker-compose.yml
-  - services/y-redis/compose.yaml
   - frontend/peerprep/docker-compose.yml
