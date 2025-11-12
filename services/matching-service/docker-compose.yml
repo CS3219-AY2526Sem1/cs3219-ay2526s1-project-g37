@@ -8,6 +8,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: matching-service:latest
     container_name: matching-service-prod
     ports:
       - "${MATCHING_PORT}:${MATCHING_PORT}"
@@ -16,11 +17,10 @@ services:
       - REDIS_PORT=${REDIS_PORT}
       - QUESTION_SERVICE_URL=${QUESTION_SERVICE_URL}
       - COLLAB_SERVICE_URL=${COLLAB_SERVICE_URL}
-      - MATCHING_CORS_ORIGINS=${MATCHING_CORS_ORIGINS}
     command: uvicorn app.main:app --host 0.0.0.0 --port ${MATCHING_PORT}
-    depends_on:
-      redis-service:
-        condition: service_started
+    # depends_on:
+    #   redis-service:
+    #     condition: service_started
 
   # ----------------------------------------------------------------------
   # Development Matching Service (Profile: dev)
@@ -39,7 +39,6 @@ services:
       - REDIS_PORT=${REDIS_PORT}
       - QUESTION_SERVICE_URL=${QUESTION_SERVICE_URL}
       - COLLAB_SERVICE_URL=${COLLAB_SERVICE_URL}
-      - MATCHING_CORS_ORIGINS=${MATCHING_CORS_ORIGINS}
     volumes:
       - .:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port ${MATCHING_PORT} --reload

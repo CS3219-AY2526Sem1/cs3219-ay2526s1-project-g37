@@ -24,7 +24,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Code Execution Service")
+app = FastAPI(title="Code Execution Service", root_path="/exec")
 
 app.add_middleware(
     CORSMiddleware,

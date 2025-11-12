@@ -1,9 +1,18 @@
 import redis
 import json
 import time
-from app.config import REDIS_HOST, REDIS_PORT
+from app.config import REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_TLS
 
-r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=True)
+# Redis connection with support for AWS ElastiCache (with auth/TLS) and local Redis
+r = redis.Redis(
+    host=REDIS_HOST,
+    port=REDIS_PORT,
+    password=REDIS_PASSWORD,  # None for local, password for AWS ElastiCache
+    db=0,
+    decode_responses=True,
+    ssl=REDIS_TLS,  # True for ElastiCache with in-transit encryption
+    ssl_cert_reqs=None if REDIS_TLS else None  # Skip cert verification if TLS enabled
+)
 
 def _queue_key(difficulty: str, topic: str, language: str) -> str:
     return f"match_queue:{difficulty}:{topic}:{language}"

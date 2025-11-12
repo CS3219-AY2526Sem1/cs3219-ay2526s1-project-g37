@@ -1,0 +1,91 @@
+# Written in assistance with ai
+
+name: Deploy Services to ECS
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service to deploy (or all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - question
+          - user
+          - frontend
+          - ywebsocket
+          - collaboration
+          - matching
+          - middleware
+          - codeexec
+
+env:
+  AWS_REGION: ap-southeast-1
+  ECS_CLUSTER_NAME: peerprep-cluster
+
+jobs:
+  deploy-all:
+    name: Deploy All Services
+    runs-on: ubuntu-latest
+    if: github.event.inputs.service == 'all'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      
+      - name: Create .env.prod file
+        run: |
+          cat > .env.prod << 'EOF'
+          ${{ secrets.ENV_PROD_FILE }}
+          EOF
+      
+      - name: Run deploy-all-services script
+        run: |
+          chmod +x deploy-all-services.sh
+          ./deploy-all-services.sh
+  
+  deploy-single:
+    name: Deploy Single Service
+    runs-on: ubuntu-latest
+    if: github.event.inputs.service != 'all'
+    
+    strategy:
+      matrix:
+        service: ${{ fromJson(format('["{0}"]', github.event.inputs.service)) }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      
+      - name: Create .env.prod file
+        run: |
+          cat > .env.prod << 'EOF'
+          ${{ secrets.ENV_PROD_FILE }}
+          EOF
+      
+      - name: Run deploy-single-service script
+        run: |
+          chmod +x deploy-single-service.sh
+          ./deploy-single-service.sh ${{ matrix.service }}

@@ -484,10 +484,10 @@ def upload_image_and_get_url(file_bytes: bytes, filename: str, content_type: Opt
     if not filename:
         raise ValueError("filename is required")
 
-    bucket = os.getenv("S3_BUCKET_NAME")
-    cdn = os.getenv("CLOUDFRONT_DOMAIN")
+    bucket = os.getenv("QUESTION_S3_BUCKET_NAME")
+    cdn = os.getenv("QUESTION_CLOUDFRONT_DOMAIN")
     if not bucket or not cdn:
-        raise ValueError("Missing required env vars: S3_BUCKET_NAME and/or CLOUDFRONT_DOMAIN")
+        raise ValueError("Missing required env vars: QUESTION_S3_BUCKET_NAME and/or QUESTION_CLOUDFRONT_DOMAIN")
 
     prefix = uuid.uuid4().hex
     key = f"{prefix}/{filename}"
